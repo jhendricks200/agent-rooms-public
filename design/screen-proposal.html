@@ -1,0 +1,1635 @@
+<!-- @dsCard group="Screens" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms &middot; Proposal detail</title>
+<style>
+/* ============================================================
+   SCREEN · PROPOSAL DETAIL  (Signal Lab v2)
+
+   Layout, copy and treatment come from frame 1b of
+   "Signal Lab Screens v2.dc.html". Token values are the ones in
+   design/ds/tokens-v2.css, inlined here so the comp opens as a
+   single file. Nothing is invented at the token layer.
+
+   The v2 system in one line: panels carry no border, they
+   separate from the page by fill and shadow; body copy is
+   near-white and metadata is gray, only two ink levels; section
+   headings are deliberately quieter than the content under them;
+   line measure is capped in pixels, not ch.
+
+   Four things this file carries that the revision did not draw.
+   The rejected state, because the demo room contains a genuinely
+   rejected proposal and the maintainer's reasoning is the whole
+   point of it. The superseded state, for the same reason. A light
+   theme, derived from the v1 light ramp in ds/tokens.css with the
+   v2 roles mapped onto it, since the revision is dark-only. And
+   working diff disclosure: the revision draws collapsed chevrons
+   with nothing behind them, so the code is unreachable. The
+   collapsed default is kept, the chevrons now open.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- surfaces ---- */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --rail: #0d1119;
+  --panel: #171d2e;
+  --row: #141926;
+  --field: #1a2132;
+  --header-bg: rgba(16, 20, 29, 0.82);
+  --panel-sunken: rgba(20, 25, 38, 0.5);
+  --row-strong: rgba(20, 25, 38, 0.7);
+  --profile-bg: rgba(23, 29, 44, 0.72);
+
+  /* ---- lines: dividers and controls only ---- */
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --line-field: rgba(148, 168, 205, 0.17);
+
+  /* ---- ink: two levels do the work ---- */
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #8b9ab6;
+  --dot-ancestor: #5f6c85;
+
+  /* ---- signal colors ---- */
+  --signal: #4ade80;
+  --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e;
+  --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0;
+  --cyan-bright: #7ad3f5;
+  --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5;
+  --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f;
+  --rose-dim: rgba(247, 124, 143, 0.14);
+  --selection: rgba(83, 197, 240, 0.26);
+  --emblem-ink: #0b0e14;
+
+  /* ---- action fills ---- */
+  --grad-cyan: linear-gradient(160deg, #7ad3f5, #53c5f0);
+  --grad-cyan-ink: #04121a;
+  --grad-signal: linear-gradient(160deg, #5fe693, #4ade80);
+  --grad-signal-ink: #08110b;
+  --keycap-line: rgba(4, 18, 26, 0.28);
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+
+  /* ---- avatars ---- */
+  --avatar-ni: #8fd0a8;
+  --avatar-kw: #86bfe8;
+  --avatar-rd: #d3aef0;
+  --avatar-tr: #f0c489;
+  --avatar-ink: #0b0e14;
+
+  /* ---- elevation: three tiers, no panel borders ---- */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+  --shadow-2:
+    inset 0 1px 0 rgba(148, 168, 205, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(3, 6, 12, 0.36),
+    0 24px 52px rgba(3, 6, 12, 0.28);
+  --shadow-btn-cyan: 0 1px 0 rgba(0, 0, 0, 0.2), 0 4px 16px rgba(83, 197, 240, 0.22);
+  --shadow-btn-signal: 0 1px 0 rgba(0, 0, 0, 0.2), 0 4px 16px rgba(74, 222, 128, 0.22);
+  --shadow-inset-top: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+  --focus-border: rgba(83, 197, 240, 0.4);
+  --glow-live: 0 0 8px rgba(74, 222, 128, 0.7);
+
+  /* ---- radii ---- */
+  --radius-keycap: 4px;
+  --radius-mark: 7px;
+  --radius-tile: 8px;
+  --radius-select: 9px;
+  --radius-row: 10px;
+  --radius-field: 11px;
+  --radius: 12px;
+  --radius-panel: 16px;
+  --radius-pill: 999px;
+
+  /* ---- measure: pixel caps, not ch ---- */
+  --measure: 560px;
+
+  /* ---- layout ---- */
+  --rail-w: 216px;
+  --side-w: 316px;
+  --header-h: 54px;
+  --col-gap: 30px;
+  --page-pad: 30px;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  /* Derived from the v1 light ramp in design/ds/tokens.css, with the
+     v2 roles mapped onto it. Panels stay borderless: in light the
+     separation comes from a white fill on a warm gray page plus a
+     much shallower shadow, since a dark halo reads as dirt here. */
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+  --rail: #ecede8;
+  --panel: #ffffff;
+  --row: #f0f1ec;
+  --field: #edeee8;
+  --header-bg: rgba(250, 250, 247, 0.86);
+  --panel-sunken: rgba(236, 237, 232, 0.72);
+  --row-strong: rgba(236, 237, 232, 0.9);
+  --profile-bg: rgba(255, 255, 255, 0.9);
+
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --line-field: rgba(48, 62, 88, 0.16);
+
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #6b7690;
+  --dot-ancestor: #8b96ab;
+
+  --signal: #14934e;
+  --signal-dim: rgba(20, 147, 78, 0.12);
+  --amber: #b0700a;
+  --amber-dim: rgba(176, 112, 10, 0.11);
+  --cyan: #0f7fb0;
+  --cyan-bright: #0b6a93;
+  --cyan-dim: rgba(15, 127, 176, 0.1);
+  --violet: #7048c8;
+  --violet-dim: rgba(112, 72, 200, 0.1);
+  --rose: #c94b60;
+  --rose-dim: rgba(201, 75, 96, 0.1);
+  --selection: rgba(15, 127, 176, 0.2);
+  --emblem-ink: #ffffff;
+
+  --grad-cyan: linear-gradient(160deg, #1690c2, #0f7fb0);
+  --grad-cyan-ink: #ffffff;
+  --grad-signal: linear-gradient(160deg, #18a458, #14934e);
+  --grad-signal-ink: #ffffff;
+  --keycap-line: rgba(255, 255, 255, 0.32);
+  --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+
+  --avatar-ink: #12181f;
+
+  --shadow-1:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 4px 12px rgba(28, 36, 51, 0.05);
+  --shadow-2:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 8px 22px rgba(28, 36, 51, 0.07),
+    0 24px 52px rgba(28, 36, 51, 0.05);
+  --shadow-btn-cyan: 0 1px 0 rgba(28, 36, 51, 0.12), 0 4px 16px rgba(15, 127, 176, 0.22);
+  --shadow-btn-signal: 0 1px 0 rgba(28, 36, 51, 0.12), 0 4px 16px rgba(20, 147, 78, 0.2);
+  --shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --focus-border: rgba(15, 127, 176, 0.5);
+  --glow-live: 0 0 8px rgba(20, 147, 78, 0.4);
+
+  color-scheme: light;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: 0;
+}
+::selection { background: var(--selection); }
+button { font-family: inherit; color: inherit; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--cyan-bright); text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============ STATE VISIBILITY ============
+   One document, four states. Elements declare the states they
+   belong to; the body carries the active one. --when-display lets
+   a shown element pick its own display type. Comp-only machinery:
+   in the product a proposal is in exactly one state. */
+body [data-when] { display: none; }
+body[data-state="open"]       [data-when~="open"],
+body[data-state="adopted"]    [data-when~="adopted"],
+body[data-state="rejected"]   [data-when~="rejected"],
+body[data-state="superseded"] [data-when~="superseded"] {
+  display: var(--when-display, block);
+}
+
+/* ================= FRAME ================= */
+
+.shell {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+/* ---------------- left rail ---------------- */
+
+.rail {
+  background: var(--rail);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px 10px 12px;
+  transition: background 0.35s ease;
+}
+.rail-brand {
+  display: flex; align-items: center; gap: 9px;
+  padding: 2px 8px 16px;
+}
+.rail-brand .mark {
+  width: 24px; height: 24px;
+  border-radius: var(--radius-mark);
+  background: var(--brand-mark-fill);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--signal);
+  flex-shrink: 0;
+}
+.rail-brand .word { font-size: 13px; font-weight: 600; }
+
+.rail-scroll {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  margin: 0 -2px; padding: 0 2px;
+}
+.rail-group { font-size: 11.5px; color: var(--ink-2); padding: 8px 9px 6px; }
+.rail-group.spaced { padding-top: 18px; }
+.rail-group.recent { font-size: 12.5px; padding: 20px 10px 6px; }
+.rail-list { display: flex; flex-direction: column; gap: 1px; }
+.rail-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radius-row);
+  font-size: 14px;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.rail-item:hover { background: var(--row); color: var(--ink); text-decoration: none; }
+.rail-item.active, .rail-item[aria-current="page"] {
+  background: var(--row);
+  color: var(--ink);
+  font-weight: 600;
+}
+.rail-item .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-2);
+}
+.rail-item.more:hover { color: var(--ink-2); }
+
+.rail-profile {
+  display: flex; align-items: center; gap: 11px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--profile-bg);
+  box-shadow: var(--shadow-inset-top);
+  margin-top: 12px;
+  flex-shrink: 0;
+}
+.rail-profile .avatar {
+  width: 30px; height: 30px;
+  font-size: 10.5px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--avatar-tr) 18%, transparent);
+}
+.rail-profile .who { flex: 1; min-width: 0; line-height: 1.3; }
+.rail-profile .who .nm { display: block; font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rail-profile .who .rl { display: block; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-mark);
+  padding: 3px;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.icon-btn:hover { color: var(--ink); background: var(--row); }
+.icon-btn svg { width: 13px; height: 13px; display: block; }
+
+/* ---------------- avatars ---------------- */
+.avatar {
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 700;
+  color: var(--avatar-ink);
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  font-size: 8.5px;
+}
+.avatar.a-ni { background: var(--avatar-ni); }
+.avatar.a-kw { background: var(--avatar-kw); }
+.avatar.a-rd { background: var(--avatar-rd); }
+.avatar.a-tr { background: var(--avatar-tr); }
+
+/* ---------------- main column ---------------- */
+
+.col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.topbar {
+  height: var(--header-h);
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.back-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.back-link:hover { color: var(--ink); text-decoration: none; }
+.back-link svg { width: 13px; height: 13px; }
+.crumb {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.topbar .spacer { flex: 1; }
+.pr-tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
+
+/* Comp-only control. This file shows four states of one screen, so
+   it needs a way to see the other three. Not part of the product. */
+.state-switch { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
+.state-switch .sw-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.sw-group {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--row);
+}
+.sw-btn {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.sw-btn:hover { color: var(--ink); }
+.sw-btn[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+}
+.theme-toggle {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+/* ---------------- the two-column body ---------------- */
+
+.body-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--side-w);
+  gap: var(--col-gap);
+  padding: 14px var(--page-pad) 0;
+  overflow: hidden;
+}
+
+/* Only the reading column scrolls. The decision panel stays put,
+   which is the point of putting the action there. */
+.read {
+  min-width: 0; min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  /* Overlay scrollbars sit on top of content on macOS, so the thumb
+     was landing over the diff counts. Reserve the track, and pad in
+     case the platform draws an overlay bar anyway. */
+  scrollbar-gutter: stable;
+  padding-right: 22px;
+  padding-bottom: 30px;
+  scroll-behavior: smooth;
+}
+.side {
+  min-width: 0; min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  scrollbar-gutter: stable;
+  padding-bottom: 30px;
+}
+
+/* ================= 1 · THE CHANGE ================= */
+
+.head-row {
+  display: flex; align-items: center; gap: 11px;
+  margin-bottom: 9px;
+  flex-wrap: wrap;
+}
+h1 {
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: var(--radius-mark);
+  padding: 3.5px 9px;
+  flex-shrink: 0;
+  --when-display: inline-block;
+}
+.badge.open       { color: var(--amber);  background: var(--amber-dim);  border: 1px solid color-mix(in srgb, var(--amber) 25%, transparent); }
+.badge.adopted    { color: var(--signal); background: var(--signal-dim); border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent); }
+.badge.rejected   { color: var(--rose);   background: var(--rose-dim);   border: 1px solid color-mix(in srgb, var(--rose) 25%, transparent); }
+.badge.superseded { color: var(--ink-2);  background: var(--row);        border: 1px solid var(--line); }
+
+/* The state ribbon, ported from v1 and quieted down. The revision
+   draws a badge only, which is enough while a proposal is live. It
+   is not enough once a proposal is closed, so the ribbon appears
+   for the two terminal states and nowhere else. */
+.ribbon {
+  --when-display: flex;
+  align-items: center; gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.ribbon::after {
+  content: "";
+  height: 1px; flex: 1;
+  background: currentColor;
+  opacity: 0.28;
+}
+.ribbon .flare { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.ribbon .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.ribbon.r-rejected { color: var(--rose); }
+.ribbon.r-super    { color: var(--ink-2); }
+
+.meta-row {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 7px 16px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  margin-bottom: 16px;
+}
+.meta-row .who {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.meta-row .who .avatar { width: 20px; height: 20px; font-size: 8px; }
+.meta-row span { white-space: nowrap; }
+.meta-row .mono { font-family: var(--font-mono); font-size: 12.5px; }
+.meta-row .plus { color: var(--signal); }
+.meta-row .minus { color: var(--rose); }
+.meta-row .forks { color: var(--cyan); }
+.meta-row .built { display: inline-flex; align-items: center; gap: 8px; }
+
+.linkish {
+  font-family: inherit;
+  font-size: 13.5px;
+  letter-spacing: inherit;
+  color: var(--cyan);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-bottom: 1px solid color-mix(in srgb, var(--cyan) 35%, transparent);
+}
+.linkish:hover { border-bottom-color: var(--cyan); }
+
+.lede {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: var(--measure);
+  text-wrap: pretty;
+  margin-bottom: 14px;
+}
+
+/* collapsed lineage, opened from the "chain" link in the metadata row */
+.chain {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-field);
+  padding: 13px 15px;
+  background: color-mix(in srgb, var(--panel-sunken) 100%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.chain[hidden] { display: none; }
+.chain-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.chain-row .cdot { width: 7px; height: 7px; border-radius: 50%; background: var(--dot-ancestor); flex-shrink: 0; }
+.chain-row .cdot.remix { background: var(--violet); }
+.chain-row .cdot.here { background: var(--cyan); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 18%, transparent); }
+.chain-row .cdot.final { background: var(--signal); box-shadow: 0 0 8px color-mix(in srgb, var(--signal) 55%, transparent); }
+.chain-row .txt { min-width: 0; }
+.chain-row b { color: var(--ink); font-weight: 600; }
+.chain-row.is-here b { color: var(--cyan); }
+.chain-row .sha { font-size: 13px; color: var(--ink-2); font-family: var(--font-mono); flex-shrink: 0; }
+.chain-row .spacer { flex: 1; }
+/* Credit split, adopted only. It is a fact about the merge, so it
+   has nothing to say while a proposal is open, closed or replaced.
+   Kept to one line at the weight of the chain rows above it: a bar
+   would make a small ledger entry look like a scoreboard. */
+.chain-split {
+  --when-display: block;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.chain-split b { color: var(--ink); font-weight: 600; }
+
+/* ================= SECTION FURNITURE ================= */
+
+.sec-head {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 12px;
+}
+.sec-head h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+.sec-head .spacer { flex: 1; }
+.sec-head .aside { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+
+.panel {
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+}
+.code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--row);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+  color: var(--ink-2);
+}
+
+/* ---- edged note cards: remix note, maintainer verdict, room note ---- */
+.note {
+  border-left: 2px solid var(--violet);
+  padding: 16px 20px 17px;
+}
+.note.rose { border-left-color: var(--rose); }
+.note.quiet { border-left-color: var(--ink-3); }
+.note ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.note li, .note p {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.note p + p { margin-top: 10px; }
+.note b { font-weight: 600; }
+.note .note-by {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-bottom: 10px;
+}
+.note .note-foot {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+/* ---- successor card (superseded) ---- */
+.successor {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  padding: 14px 18px;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease;
+  background: var(--panel);
+}
+.successor:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--panel) 92%, var(--cyan)); text-decoration: none; }
+.successor .avatar { width: 26px; height: 26px; font-size: 9.5px; }
+.successor .s-main { flex: 1; min-width: 0; }
+.successor .s-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+.successor .s-sub { font-size: 13px; color: var(--ink-2); }
+.successor .arrow { color: var(--ink-2); display: grid; place-items: center; flex-shrink: 0; }
+.successor .arrow svg { width: 15px; height: 15px; display: block; }
+
+/* ================= DIFF ================= */
+
+.diff { overflow: hidden; }
+.dfile + .dfile .dfile-head { border-top: 1px solid var(--line); }
+.dfile-head {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--panel-sunken);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.dfile-head:hover { background: var(--row-strong); }
+.dfile-head[aria-expanded="true"] { background: var(--row-strong); }
+.dfile-head .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+}
+.dfile-head[aria-expanded="true"] .chev { transform: none; }
+.dfile-head .chev svg { width: 11px; height: 11px; display: block; }
+.dfile-head .mk { font-family: var(--font-mono); font-size: 11.5px; flex-shrink: 0; }
+.dfile-head .mk.add { color: var(--signal); }
+.dfile-head .mk.mod { color: var(--amber); }
+.dfile-head .path {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dfile-head[aria-expanded="true"] .path { color: var(--ink); }
+.dfile-head .spacer { flex: 1; }
+.dfile-head .n { font-family: var(--font-mono); font-size: 11px; flex-shrink: 0; }
+.dfile-head .n.plus { color: var(--signal); }
+.dfile-head .n.minus { color: var(--rose); }
+.dbar {
+  display: flex; gap: 1.5px;
+  width: 46px; height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.dbar i { display: block; height: 100%; }
+.dbar i.p { background: var(--signal); }
+.dbar i.m { background: var(--rose); }
+
+.dfile-body[hidden] { display: none; }
+.dfile-body { background: var(--row); }
+.dhunk {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  padding: 4px 14px 4px 52px;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dlines {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.62;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  counter-reset: dl var(--start, 0);
+  padding: 6px 0;
+}
+.dline {
+  display: flex;
+  white-space: pre;
+  min-width: max-content;
+  counter-increment: dl;
+}
+.dline .dnum {
+  width: 40px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 10px;
+  color: var(--ink-2);
+  opacity: 0.6;
+  user-select: none;
+  font-size: 10.5px;
+}
+.dline .dnum::before { content: counter(dl); }
+.dline .dsign { width: 12px; flex-shrink: 0; text-align: center; user-select: none; opacity: 0.85; }
+.dline .dtext { padding-right: 18px; }
+.dline.add    { background: color-mix(in srgb, var(--signal) 10%, transparent); color: var(--signal); }
+.dline.remove { background: color-mix(in srgb, var(--rose) 10%, transparent); color: var(--rose); }
+.dline.context { color: var(--ink-2); }
+.dline.add .dnum, .dline.remove .dnum { color: currentColor; opacity: 0.5; }
+
+/* ================= QUESTIONS ================= */
+
+.qa { padding: 16px 20px 4px; }
+.qa-item { display: flex; gap: 12px; }
+.qa-item .avatar { margin-top: 1px; }
+.qa-item .qa-main { min-width: 0; }
+.qa-q { font-size: 15px; line-height: 1.5; color: var(--ink); max-width: var(--measure); margin-bottom: 6px; }
+.qa-q b { font-weight: 600; }
+.qa-a { font-size: 14.5px; line-height: 1.5; color: var(--ink-2); max-width: var(--measure); }
+.qa-toggle {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px 0;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+  text-align: left;
+}
+.qa-toggle .lbl { font-size: 14px; color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qa-toggle:hover .lbl { color: var(--ink); }
+.qa-toggle .spacer { flex: 1; }
+.qa-toggle .tag { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.qa-toggle .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.qa-toggle[aria-expanded="true"] .chev { transform: none; }
+.qa-toggle .chev svg { width: 11px; height: 11px; display: block; }
+.qa-more { padding: 0 0 14px 34px; }
+.qa-more[hidden] { display: none; }
+
+/* ================= DECISION PANEL ================= */
+
+.decide {
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-2);
+  padding: 20px;
+}
+.rule { height: 1px; background: var(--line); }
+.rule.a { margin: 18px 0 14px; }
+.rule.b { margin: 16px 0 12px; }
+
+.btn-primary {
+  width: 100%;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--grad-cyan-ink);
+  background: var(--grad-cyan);
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  box-shadow: var(--shadow-btn-cyan);
+  transition: transform 0.15s ease, filter 0.18s ease;
+}
+.btn-primary:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.btn-primary:active { transform: none; }
+.btn-primary svg { width: 14px; height: 14px; flex-shrink: 0; }
+.btn-primary .keycap {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  border: 1px solid var(--keycap-line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+}
+.btn-primary.adopt {
+  color: var(--grad-signal-ink);
+  background: var(--grad-signal);
+  box-shadow: var(--shadow-btn-signal);
+}
+
+.btn-quiet {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  padding: 9px 12px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.btn-quiet:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.btn-quiet svg { width: 14px; height: 14px; flex-shrink: 0; }
+.btn-quiet.wide { width: 100%; flex: none; font-size: 13.5px; padding: 12px 14px; border-radius: var(--radius); }
+.btn-pair { display: flex; gap: 8px; margin-top: 12px; }
+.act-note {
+  margin-top: 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.act-note .mono { font-family: var(--font-mono); }
+
+.side-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.side-head .h { font-size: 14px; color: var(--ink-2); }
+.side-head .spacer { flex: 1; }
+.side-head .n { font-size: 13px; color: var(--ink-2); }
+
+.forks { display: flex; flex-direction: column; gap: 11px; }
+.fork-row { display: flex; align-items: flex-start; gap: 10px; }
+.fork-row .f-main { min-width: 0; flex: 1; }
+.fork-row .f-who { font-size: 14px; font-weight: 600; color: var(--ink); }
+.fork-row .f-what { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.fork-row .f-what .live { color: var(--cyan); }
+.fork-row .f-when { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); flex-shrink: 0; }
+
+.prov-toggle {
+  width: 100%;
+  display: flex; align-items: center; gap: 9px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+/* The 25px provenance variant of the app's solid emblem: opaque tone
+   fill, glyph punched out in --emblem-ink, no ring, no glow. */
+.seal {
+  width: 25px; height: 25px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--emblem-ink);
+  background: var(--signal);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(3, 6, 12, 0.45);
+  flex-shrink: 0;
+}
+.seal svg { width: 13px; height: 13px; }
+.prov-toggle .t { font-size: 14px; color: var(--ink); white-space: nowrap; }
+.prov-toggle .spacer { flex: 1; }
+.prov-toggle .tag { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.prov-toggle .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.prov-toggle[aria-expanded="true"] .chev { transform: none; }
+.prov-toggle .chev svg { width: 11px; height: 11px; display: block; }
+
+.ledger {
+  margin-top: 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.ledger[hidden] { display: none; }
+.lrow { display: flex; gap: 10px; --when-display: flex; }
+.lrow dt, .lrow .k { width: 66px; color: var(--ink-2); flex-shrink: 0; }
+.lrow dd, .lrow .v { color: var(--ink-2); min-width: 0; overflow-wrap: anywhere; }
+.lrow .v.ok { color: var(--signal); }
+.lrow .v.no { color: var(--rose); }
+
+/* ================= LOAD =================
+   The stagger belongs to arriving on the page, not to every later
+   change. Gated on .intro, which the script drops once it has
+   played, so switching state reveals its blocks instantly instead
+   of replaying the entrance. */
+body.intro .read > *, body.intro .side > * { animation: rise 0.5s ease both; }
+body.intro .read > :nth-child(2) { animation-delay: 0.06s; }
+body.intro .read > :nth-child(3) { animation-delay: 0.12s; }
+body.intro .read > :nth-child(4) { animation-delay: 0.18s; }
+body.intro .side > * { animation-delay: 0.08s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1180px) {
+  :root { --side-w: 292px; --col-gap: 22px; --page-pad: 22px; }
+  .topbar { padding: 0 20px; gap: 12px; }
+  .crumb { display: none; }
+}
+@media (max-width: 980px) {
+  /* Below this the two-column decision layout stops paying for
+     itself, so the page returns to ordinary document scrolling. */
+  html, body { height: auto; }
+  .shell { height: auto; grid-template-columns: minmax(0, 1fr); overflow: visible; }
+  .rail { display: none; }
+  .topbar { position: sticky; top: 0; z-index: 6; }
+  .body-grid { grid-template-columns: minmax(0, 1fr); overflow: visible; padding: 16px 22px 40px; }
+  .read, .side { overflow: visible; padding-bottom: 0; }
+}
+@media (max-width: 620px) {
+  :root { --page-pad: 16px; }
+  .topbar { padding: 0 16px; gap: 10px; height: auto; min-height: var(--header-h); flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
+  .pr-tag { display: none; }
+  .state-switch .sw-label { display: none; }
+  .sw-btn { font-size: 12px; padding: 4px 8px; }
+  .body-grid { padding: 14px 16px 36px; gap: 20px; }
+  h1 { font-size: 22px; }
+  .note { padding: 14px 16px 15px; }
+  .qa { padding: 14px 16px 2px; }
+  .decide { padding: 16px; }
+  .btn-pair { flex-wrap: wrap; }
+  .dfile-head { flex-wrap: wrap; gap: 8px; }
+  .dbar { display: none; }
+}
+
+/* ================= REDUCED MOTION ================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .read { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body class="intro" data-state="open">
+<div class="shell">
+
+  <!-- ================= LEFT RAIL ================= -->
+  <nav class="rail" aria-label="Rooms and this proposal">
+    <div class="rail-brand">
+      <span class="mark" aria-hidden="true">&#9630;&#9626;</span>
+      <span class="word">Agent Rooms</span>
+    </div>
+
+    <div class="rail-scroll">
+      <div class="rail-group" id="grpRooms">Rooms</div>
+      <div class="rail-list" role="group" aria-labelledby="grpRooms">
+        <a class="rail-item active" href="#" aria-current="page">night-market<span class="count">17</span></a>
+        <a class="rail-item" href="#">trail-notes</a>
+        <a class="rail-item" href="#">split-bill-bot</a>
+      </div>
+
+      <div class="rail-group spaced" id="grpThis">This proposal</div>
+      <div class="rail-list" role="group" aria-labelledby="grpThis">
+        <a class="rail-item active" href="#change">The change</a>
+        <a class="rail-item" href="#diff">Diff<span class="count">4</span></a>
+        <a class="rail-item" href="#questions">Questions<span class="count">2</span></a>
+      </div>
+
+      <div class="rail-group recent" id="grpRecent">Recent</div>
+      <div class="rail-list" role="group" aria-labelledby="grpRecent">
+        <a class="rail-item" href="#">Viewport stall fetching</a>
+        <a class="rail-item" href="#">Late-night filter chips</a>
+        <a class="rail-item" href="#">Stall detail sheet</a>
+        <a class="rail-item" href="#">Markets index seeds</a>
+        <button class="rail-item more" type="button">Show more</button>
+      </div>
+    </div>
+
+    <div class="rail-profile">
+      <span class="avatar a-tr" aria-hidden="true">TR</span>
+      <span class="who">
+        <span class="nm">Tomas Rivera</span>
+        <span class="rl">Maintainer</span>
+      </span>
+      <button class="icon-btn" type="button" aria-label="Settings">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="2.1"/><path d="M8 2.2v1.6M8 12.2v1.6M2.2 8h1.6M12.2 8h1.6M3.9 3.9l1.1 1.1M11 11l1.1 1.1M12.1 3.9L11 5M5 11l-1.1 1.1"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= MAIN COLUMN ================= -->
+  <div class="col">
+
+    <header class="topbar">
+      <a class="back-link" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>
+        Back to room
+      </a>
+      <span class="crumb">night-market / proposals / ni-offline-tiles</span>
+      <span class="spacer"></span>
+
+      <div class="state-switch">
+        <span class="sw-label">preview</span>
+        <div class="sw-group" id="swGroup" role="group" aria-label="Preview which proposal state">
+          <button class="sw-btn" type="button" data-set="open" aria-pressed="true">open</button>
+          <button class="sw-btn" type="button" data-set="adopted" aria-pressed="false">adopted</button>
+          <button class="sw-btn" type="button" data-set="rejected" aria-pressed="false">rejected</button>
+          <button class="sw-btn" type="button" data-set="superseded" aria-pressed="false">superseded</button>
+        </div>
+      </div>
+
+      <span class="pr-tag">PR #248</span>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light and dark" aria-label="Toggle color theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </header>
+
+    <div class="body-grid">
+
+      <!-- ---------------- reading column ---------------- -->
+      <main class="read" id="read">
+
+        <!-- 1 · the change -->
+        <section id="change" aria-labelledby="propTitle">
+
+          <div class="ribbon r-rejected" data-when="rejected">
+            <span class="flare"><span class="dot"></span>Not adopted &middot; pull request closed</span>
+          </div>
+          <div class="ribbon r-super" data-when="superseded">
+            <span class="flare"><span class="dot"></span>Superseded &middot; a later proposal absorbed this</span>
+          </div>
+
+          <div class="head-row">
+            <h1 id="propTitle">Offline stall map for dead-zone markets</h1>
+            <span class="badge open" data-when="open">open</span>
+            <span class="badge adopted" data-when="adopted">adopted</span>
+            <span class="badge rejected" data-when="rejected">rejected</span>
+            <span class="badge superseded" data-when="superseded">superseded</span>
+          </div>
+
+          <div class="meta-row">
+            <span class="who"><span class="avatar a-ni" aria-hidden="true">NI</span>Nova Ibarra</span>
+            <span>17h ago</span>
+            <span class="mono"><span class="plus">+218</span> <span class="minus">&minus;37</span></span>
+            <span>4 files</span>
+            <span class="forks">3 forks, 1 live</span>
+            <span>base <span class="mono">9b7e310</span></span>
+            <span class="built">built on Rosa, then Kai
+              <button class="linkish" type="button" id="chainToggle" aria-expanded="false" aria-controls="chain">chain</button>
+            </span>
+          </div>
+
+          <p class="lede">
+            Caches map tiles and the stall index on the device so the map keeps working where the signal
+            dies, says plainly when it is doing so, and revalidates the moment a connection returns.
+          </p>
+
+          <div class="chain" id="chain" hidden>
+            <div class="chain-row">
+              <span class="cdot" aria-hidden="true"></span>
+              <span class="txt"><b>Rosa Delgado</b> &middot; tile layer with stall pins</span>
+              <span class="spacer"></span>
+              <span class="sha">a3d91be</span>
+            </div>
+            <div class="chain-row">
+              <span class="cdot remix" aria-hidden="true"></span>
+              <span class="txt"><b>Kai Whitfield</b> &middot; viewport-based stall fetching</span>
+              <span class="spacer"></span>
+              <span class="sha">7c02f4d</span>
+            </div>
+            <div class="chain-row is-here">
+              <span class="cdot here" aria-hidden="true"></span>
+              <span class="txt"><b>Nova Ibarra</b> &middot; this proposal</span>
+              <span class="spacer"></span>
+              <span class="sha">4f1ca08</span>
+            </div>
+            <div class="chain-row" data-when="adopted" style="--when-display: flex">
+              <span class="cdot final" aria-hidden="true"></span>
+              <span class="txt"><b>Room</b> &middot; adopted to main by Tomas Rivera</span>
+              <span class="spacer"></span>
+              <span class="sha">e41f8c2</span>
+            </div>
+            <div class="chain-split" data-when="adopted">
+              Credit split &middot; <b>Nova 55</b> / <b>Kai 25</b> / <b>Rosa 20</b>
+            </div>
+          </div>
+        </section>
+
+        <!-- terminal-state reasoning, second thing a reader needs in those states -->
+        <section data-when="rejected" aria-labelledby="whyH">
+          <div class="sec-head">
+            <h2 id="whyH">Why this did not land</h2>
+            <span class="spacer"></span>
+            <span class="aside">closed 4h ago</span>
+          </div>
+          <div class="panel note rose">
+            <p class="note-by">Maintainer note &middot; Tomas Rivera</p>
+            <p>
+              The offline read is right and the room wants it. This implementation is not the one we can
+              carry, for one reason: it introduces a <b>second source of truth for the stall index</b>. The
+              cached index and <span class="code">marketsIndex.ts</span> can disagree for as long as a phone
+              stays offline, and nothing here reconciles them beyond an etag check on reconnect.
+            </p>
+            <p>
+              The tile cache half is good work and I would take it on its own. Kai is already carrying the
+              index question into a proposal that puts both behind one store, so the useful move here is to
+              fork this for the tile layer and let that one own the index.
+            </p>
+            <div class="note-foot">
+              <span>PR #248 closed without merging</span>
+              <span>&middot;</span>
+              <span>head 4f1ca08 never merged</span>
+              <span>&middot;</span>
+              <span>3 forks stay valid</span>
+            </div>
+          </div>
+        </section>
+
+        <section data-when="superseded" aria-labelledby="replacedH">
+          <div class="sec-head">
+            <h2 id="replacedH">What replaced it</h2>
+            <span class="spacer"></span>
+            <span class="aside">superseded 2d ago</span>
+          </div>
+          <div class="panel note quiet">
+            <p class="note-by">Room note</p>
+            <p>
+              Kai forked this proposal and rebuilt it around a single offline store, which resolved the index
+              question this version left open. The room adopted that one. <b>Everything below is still the
+              record of this change</b>, and forking it is still allowed, but it is no longer the current line
+              of work.
+            </p>
+          </div>
+          <a class="panel successor" href="#">
+            <span class="avatar a-kw" aria-hidden="true">KW</span>
+            <span class="s-main">
+              <span class="s-title">Offline-first stall index on one store</span>
+              <span class="s-sub">Kai Whitfield &middot; adopted &middot; PR #263 &middot; merged @ 5da0c71</span>
+            </span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg></span>
+          </a>
+        </section>
+
+        <!-- 2 · what changed -->
+        <section aria-labelledby="remixH">
+          <div class="sec-head">
+            <h2 id="remixH">What changed from Kai&rsquo;s version</h2>
+            <span class="spacer"></span>
+            <span class="aside">written by Nova</span>
+          </div>
+          <div class="panel note">
+            <ul>
+              <li><b>Kept</b> Kai&rsquo;s viewport-based stall fetching untouched. The intersection observer and request coalescing are his and still do the work online.</li>
+              <li><b>Added</b> a tile store on the Cache API keyed by <span class="code">z/x/y</span>, capped at 4096 tiles by LRU, roughly 90MB.</li>
+              <li><b>Changed</b> the loading state from a boolean to three values, so &ldquo;offline, showing what we have&rdquo; is renderable instead of a spinner that never resolves.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 3 · diff -->
+        <section id="diff" aria-labelledby="diffH">
+          <div class="sec-head">
+            <h2 id="diffH">Diff</h2>
+            <span class="spacer"></span>
+            <span class="aside">4 files &middot; +218 / &minus;37</span>
+          </div>
+
+          <div class="panel diff">
+
+            <div class="dfile">
+              <button class="dfile-head" type="button" aria-expanded="false" aria-controls="d1">
+                <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></span>
+                <span class="mk add" aria-hidden="true">+</span>
+                <span class="path">src/map/tileCache.ts</span>
+                <span class="spacer"></span>
+                <span class="n plus">+112</span>
+                <span class="dbar" aria-hidden="true"><i class="p" style="width:100%"></i></span>
+              </button>
+              <div class="dfile-body" id="d1" hidden>
+                <div class="dlines" style="--start: 0">
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">const TILE_STORE = 'nm-tiles-v1';</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">const MAX_TILES = 4096; // about 90MB at 22KB a tile</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext"> </span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">export type TileKey = `${number}/${number}/${number}`;</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext"> </span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">export async function getTile(key: TileKey): Promise&lt;Blob | null&gt; {</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  const store = await caches.open(TILE_STORE);</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  const hit = await store.match(tileUrl(key));</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  if (!hit) return null;</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  touch(key); // access stamp, never awaited on the read path</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  return hit.blob();</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">}</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext"> </span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">export function scheduleSweep(): void {</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  requestIdleCallback(async () =&gt; {</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    const keys = await stamps();</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    if (keys.length &lt;= MAX_TILES) return;</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    const stale = keys.sort(byOldest).slice(0, keys.length - MAX_TILES);</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    await Promise.all(stale.map(evict));</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  }, { timeout: 4000 });</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">}</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dfile">
+              <button class="dfile-head" type="button" aria-expanded="false" aria-controls="d2">
+                <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></span>
+                <span class="mk add" aria-hidden="true">+</span>
+                <span class="path">src/map/OfflineBanner.tsx</span>
+                <span class="spacer"></span>
+                <span class="n plus">+41</span>
+              </button>
+              <div class="dfile-body" id="d2" hidden>
+                <div class="dlines" style="--start: 0">
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">export function OfflineBanner({ cachedAt, count }: Props) {</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  return (</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    &lt;div className="offline-banner" role="status"&gt;</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      Showing {count} stalls saved {relativeTime(cachedAt)}.</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      Hours may have moved since then.</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    &lt;/div&gt;</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  );</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">}</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dfile">
+              <button class="dfile-head" type="button" aria-expanded="false" aria-controls="d3">
+                <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></span>
+                <span class="mk mod" aria-hidden="true">~</span>
+                <span class="path">src/map/StallMap.tsx</span>
+                <span class="spacer"></span>
+                <span class="n plus">+48</span>
+                <span class="n minus">&minus;19</span>
+                <span class="dbar" aria-hidden="true"><i class="p" style="width:70%"></i><i class="m" style="width:30%"></i></span>
+              </button>
+              <div class="dfile-body" id="d3" hidden>
+                <div class="dhunk">@@ -18,9 +18,16 @@ export function StallMap({ city }: Props)</div>
+                <div class="dlines" style="--start: 17">
+                  <div class="dline context"><span class="dnum"></span><span class="dsign"> </span><span class="dtext">  const [stalls, setStalls] = useState&lt;Stall[]&gt;([]);</span></div>
+                  <div class="dline remove"><span class="dnum"></span><span class="dsign">-</span><span class="dtext">  const [loading, setLoading] = useState(true);</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  const [mapState, setMapState] = useState&lt;MapState&gt;('loading');</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  const online = useOnlineStatus();</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  const cached = useRef&lt;CachedIndex | null&gt;(null);</span></div>
+                  <div class="dline context"><span class="dnum"></span><span class="dsign"> </span><span class="dtext"> </span></div>
+                  <div class="dline context"><span class="dnum"></span><span class="dsign"> </span><span class="dtext">  useEffect(() =&gt; {</span></div>
+                  <div class="dline remove"><span class="dnum"></span><span class="dsign">-</span><span class="dtext">    fetchStalls(city).then(setStalls).finally(() =&gt; setLoading(false));</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    if (!online) {</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      const local = readCachedIndex(city);</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      cached.current = local;</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      setStalls(local?.stalls ?? []);</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      setMapState(local ? 'offline-cached' : 'offline-empty');</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      return;</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    }</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    fetchStalls(city).then((next) =&gt; {</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      setStalls(next);</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      writeCachedIndex(city, next);</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">      setMapState('live');</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">    });</span></div>
+                  <div class="dline context"><span class="dnum"></span><span class="dsign"> </span><span class="dtext">  }, [city, online]);</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dfile">
+              <button class="dfile-head" type="button" aria-expanded="false" aria-controls="d4">
+                <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></span>
+                <span class="mk mod" aria-hidden="true">~</span>
+                <span class="path">src/lib/marketsIndex.ts</span>
+                <span class="spacer"></span>
+                <span class="n plus">+17</span>
+                <span class="n minus">&minus;18</span>
+                <span class="dbar" aria-hidden="true"><i class="p" style="width:50%"></i><i class="m" style="width:50%"></i></span>
+              </button>
+              <div class="dfile-body" id="d4" hidden>
+                <div class="dhunk">@@ -44,6 +44,9 @@ export async function fetchStalls(city: CityId)</div>
+                <div class="dlines" style="--start: 43">
+                  <div class="dline context"><span class="dnum"></span><span class="dsign"> </span><span class="dtext">  const res = await fetch(indexUrl(city), { headers });</span></div>
+                  <div class="dline remove"><span class="dnum"></span><span class="dsign">-</span><span class="dtext">  return (await res.json()) as Stall[];</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  const etag = res.headers.get('etag');</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  const stalls = (await res.json()) as Stall[];</span></div>
+                  <div class="dline add"><span class="dnum"></span><span class="dsign">+</span><span class="dtext">  return { stalls, etag, fetchedAt: Date.now() };</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- 4 · questions -->
+        <section id="questions" aria-labelledby="qH">
+          <div class="sec-head">
+            <h2 id="qH">Questions</h2>
+            <span class="spacer"></span>
+            <span class="aside">2 answered</span>
+          </div>
+          <div class="panel qa">
+            <div class="qa-item">
+              <span class="avatar a-rd" aria-hidden="true">RD</span>
+              <div class="qa-main">
+                <p class="qa-q"><b>Rosa</b> &middot; What evicts tiles? Last time a walk through Shilin pulled 300MB and the browser dropped the store.</p>
+                <p class="qa-a">LRU, capped at 4096 tiles. The 300MB case was unbounded, which is what MAX_TILES prevents.</p>
+              </div>
+            </div>
+
+            <button class="qa-toggle" type="button" id="qaToggle" aria-expanded="false" aria-controls="qaMore">
+              <span class="avatar a-kw" aria-hidden="true">KW</span>
+              <span class="lbl">Kai asked about staleness underground</span>
+              <span class="spacer"></span>
+              <span class="tag">answered</span>
+              <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></span>
+            </button>
+            <div class="qa-more" id="qaMore" hidden>
+              <p class="qa-q">How stale can the cached stall index get if someone is underground for an hour, and what happens the moment they surface?</p>
+              <p class="qa-a">As stale as the trip is long, and the banner says so with the timestamp. On reconnect the index revalidates against its etag and the map switches from cached to live without remounting, so the pins do not jump. What it does not do is reconcile a write made while offline, because nothing writes offline yet.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ---------------- decision panel ---------------- -->
+      <aside class="side" aria-label="Decide on this proposal">
+        <div class="decide">
+
+          <!-- open -->
+          <div data-when="open">
+            <button class="btn-primary" type="button" data-fork>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+              <span class="lbl">Fork into my workbench</span>
+              <span class="keycap" aria-hidden="true">F</span>
+            </button>
+            <p class="act-note">Branch pinned to <span class="mono">4f1ca08</span> with the remix note. Private until you promote.</p>
+            <div class="btn-pair">
+              <button class="btn-quiet" type="button">Ask</button>
+              <button class="btn-quiet" type="button">Open PR</button>
+            </div>
+          </div>
+
+          <!-- adopted -->
+          <div data-when="adopted">
+            <button class="btn-primary adopt" type="button">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>
+              <span class="lbl">View merge in repo</span>
+            </button>
+            <p class="act-note">Merged to <span class="mono">main</span> at <span class="mono">e41f8c2</span>. Credit recorded for Nova, Kai, Rosa.</p>
+            <div class="btn-pair">
+              <button class="btn-quiet" type="button">Build on this</button>
+              <button class="btn-quiet" type="button">Open PR</button>
+            </div>
+          </div>
+
+          <!-- rejected: still forkable, but nothing here celebrates -->
+          <div data-when="rejected">
+            <button class="btn-quiet wide" type="button" data-fork>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+              <span class="lbl">Fork anyway</span>
+            </button>
+            <p class="act-note">The pull request is closed and nothing merged. The head commit <span class="mono">4f1ca08</span> and the fork bundle still resolve.</p>
+            <div class="btn-pair">
+              <button class="btn-quiet" type="button">Read the note</button>
+              <button class="btn-quiet" type="button">Closed PR</button>
+            </div>
+          </div>
+
+          <!-- superseded -->
+          <div data-when="superseded">
+            <button class="btn-primary" type="button">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/></svg>
+              <span class="lbl">Go to PR #263</span>
+            </button>
+            <p class="act-note">Kai&rsquo;s <span class="mono">#263</span> absorbed this approach and was adopted. This record stays readable and forkable.</p>
+            <div class="btn-pair">
+              <button class="btn-quiet" type="button" data-fork>Fork this</button>
+              <button class="btn-quiet" type="button">Compare</button>
+            </div>
+          </div>
+
+          <div class="rule a"></div>
+
+          <div class="side-head">
+            <span class="h">Forks</span>
+            <span class="spacer"></span>
+            <span class="n">3</span>
+          </div>
+          <div class="forks">
+            <div class="fork-row">
+              <span class="avatar a-kw" aria-hidden="true">KW</span>
+              <div class="f-main">
+                <div class="f-who">Kai Whitfield</div>
+                <div class="f-what"><span class="live">working now</span> &middot; swapping Cache API for OPFS</div>
+              </div>
+              <span class="f-when">40m</span>
+            </div>
+            <div class="fork-row">
+              <span class="avatar a-rd" aria-hidden="true">RD</span>
+              <div class="f-main">
+                <div class="f-who">Rosa Delgado</div>
+                <div class="f-what">forked, no promote yet</div>
+              </div>
+              <span class="f-when">6h</span>
+            </div>
+            <div class="fork-row">
+              <span class="avatar a-tr" aria-hidden="true">TR</span>
+              <div class="f-main">
+                <div class="f-who">Tomas Rivera</div>
+                <div class="f-what">forked to read the eviction path</div>
+              </div>
+              <span class="f-when">9h</span>
+            </div>
+          </div>
+
+          <div class="rule b"></div>
+
+          <button class="prov-toggle" type="button" id="provToggle" aria-expanded="false" aria-controls="ledger">
+            <span class="seal" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.6 13.4 4v4.1c0 3-2.2 5.4-5.4 6.3-3.2-.9-5.4-3.3-5.4-6.3V4z"/><path d="M5.8 8.1 7.3 9.6l3-3.2"/></svg></span>
+            <span class="t">Provenance verified</span>
+            <span class="spacer"></span>
+            <span class="tag">ledger</span>
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></span>
+          </button>
+
+          <dl class="ledger" id="ledger" hidden>
+            <div class="lrow"><dt>base</dt><dd>9b7e310</dd></div>
+            <div class="lrow"><dt>head</dt><dd>4f1ca08e93b7d260ac5f1e88</dd></div>
+            <div class="lrow"><dt>content</dt><dd>8c1e5b0a9d27f4e63b90ca5f</dd></div>
+            <div class="lrow"><dt>parents</dt><dd>7c02f4d, a3d91be</dd></div>
+            <div class="lrow"><dt>published</dt><dd>2026-07-24 21:14Z</dd></div>
+            <div class="lrow" data-when="adopted"><dt>merge</dt><dd class="v ok">e41f8c2 by Tomas Rivera</dd></div>
+            <div class="lrow" data-when="rejected"><dt>closed</dt><dd class="v no">2026-07-25 13:47Z, unmerged</dd></div>
+            <div class="lrow" data-when="superseded"><dt>replaced</dt><dd>PR #263 @ 5da0c71</dd></div>
+          </dl>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* ---------- theme: OS scheme by default, remembered once toggled ---------- */
+  var stored = null;
+  try { stored = localStorage.getItem("signal-lab-theme"); } catch (e) {}
+  function systemTheme() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  }
+  function apply(theme) { root.setAttribute("data-theme", theme); }
+  apply(stored === "light" || stored === "dark" ? stored : systemTheme());
+
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+    apply(next);
+    try { localStorage.setItem("signal-lab-theme", next); } catch (e) {}
+  });
+
+  if (window.matchMedia) {
+    var mq = window.matchMedia("(prefers-color-scheme: light)");
+    var onChange = function (e) {
+      var saved = null;
+      try { saved = localStorage.getItem("signal-lab-theme"); } catch (err) {}
+      if (!saved) { apply(e.matches ? "light" : "dark"); }
+    };
+    if (mq.addEventListener) { mq.addEventListener("change", onChange); }
+    else if (mq.addListener) { mq.addListener(onChange); }
+  }
+
+  /* ---------- entrance plays once, then gets out of the way ---------- */
+  window.setTimeout(function () { document.body.classList.remove("intro"); }, 1200);
+
+  /* ---------- the four states of one proposal (comp only) ---------- */
+  var swGroup = document.getElementById("swGroup");
+  swGroup.addEventListener("click", function (e) {
+    var btn = e.target.closest(".sw-btn");
+    if (!btn) { return; }
+    document.body.setAttribute("data-state", btn.getAttribute("data-set"));
+    swGroup.querySelectorAll(".sw-btn").forEach(function (b) {
+      b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+    });
+  });
+
+  /* ---------- disclosures: one handler, three uses ----------
+     The revision draws collapsed chevrons on the diff rows with
+     nothing behind them. Collapsed stays the default, because a
+     calm page is the point; the chevrons now actually open. */
+  function wireDisclosure(btnId) {
+    var btn = document.getElementById(btnId);
+    if (!btn) { return; }
+    var target = document.getElementById(btn.getAttribute("aria-controls"));
+    btn.addEventListener("click", function () {
+      var open = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", open ? "false" : "true");
+      if (target) { target.hidden = open; }
+    });
+  }
+  wireDisclosure("chainToggle");
+  wireDisclosure("qaToggle");
+  wireDisclosure("provToggle");
+
+  document.querySelectorAll(".dfile-head").forEach(function (head) {
+    var body = document.getElementById(head.getAttribute("aria-controls"));
+    head.addEventListener("click", function () {
+      var open = head.getAttribute("aria-expanded") === "true";
+      head.setAttribute("aria-expanded", open ? "false" : "true");
+      if (body) { body.hidden = open; }
+    });
+  });
+
+  /* ---------- fork: brief confirm, the one moment worth a flourish ---------- */
+  document.querySelectorAll("[data-fork]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var label = btn.querySelector(".lbl");
+      if (!label || btn.dataset.busy === "1") { return; }
+      var was = label.textContent;
+      btn.dataset.busy = "1";
+      btn.style.minWidth = btn.offsetWidth + "px";
+      label.textContent = "Forked into your workbench";
+      setTimeout(function () {
+        label.textContent = was;
+        btn.style.minWidth = "";
+        btn.dataset.busy = "";
+      }, 2000);
+    });
+  });
+})();
+</script>
+</body>
+</html>

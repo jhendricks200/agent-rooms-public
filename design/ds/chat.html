@@ -1,0 +1,341 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signal Lab - Chat</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  background: #05070a;
+  color: #cbd2e0;
+  padding: 28px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+h1.doc-title { font-size: 19px; font-weight: 700; color: #f2f4f9; margin-bottom: 4px; }
+p.doc-sub { font-size: 12.5px; color: #7d879c; margin-bottom: 24px; max-width: 78ch; }
+h2.doc-h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7d879c; margin: 30px 0 12px; }
+h2.doc-h2:first-of-type { margin-top: 0; }
+.compare-wrap { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.panel-tag { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7d879c; margin-bottom: 8px; }
+
+.panel-dark, .panel-light {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+.panel-dark {
+  --bg: #0b0e14; --panel: #10141d; --panel-2: #141926; --card: #131826; --card-hover: #171d2e;
+  --line: rgba(148,168,205,0.13); --line-strong: rgba(148,168,205,0.22);
+  --hairline: rgba(148,168,205,0.09);
+  --ink: #e6ebf5; --ink-2: #9aa7bf; --ink-3: #5f6c85;
+  --signal: #4ade80; --signal-dim: rgba(74,222,128,0.14);
+  --amber: #fbbf5e; --amber-dim: rgba(251,191,94,0.13);
+  --cyan: #53c5f0; --cyan-dim: rgba(83,197,240,0.13);
+  --violet: #b18cf5; --violet-dim: rgba(177,140,245,0.14);
+  --shadow-card: 0 1px 1px rgba(0,0,0,0.22), 0 6px 16px rgba(3,6,12,0.30), 0 18px 40px rgba(3,6,12,0.22);
+  --radius: 12px;
+}
+.panel-light {
+  --bg: #f3f4f0; --panel: #fafaf7; --panel-2: #f0f1ec; --card: #ffffff; --card-hover: #fdfdfb;
+  --line: rgba(48,62,88,0.13); --line-strong: rgba(48,62,88,0.24);
+  --hairline: rgba(48,62,88,0.09);
+  --ink: #1c2433; --ink-2: #55617a; --ink-3: #8b96ab;
+  --signal: #14934e; --signal-dim: rgba(20,147,78,0.1);
+  --amber: #b0700a; --amber-dim: rgba(176,112,10,0.1);
+  --cyan: #0f7fb0; --cyan-dim: rgba(15,127,176,0.09);
+  --violet: #7048c8; --violet-dim: rgba(112,72,200,0.09);
+  --shadow-card: 0 1px 1px rgba(28,36,51,0.05), 0 5px 14px rgba(28,36,51,0.06), 0 16px 36px rgba(28,36,51,0.05);
+  --radius: 12px;
+}
+
+/* ===== group chat: timeline spine with chat-msg + card interleaved,
+   copied verbatim from direction-c2.html ===== */
+.feed-frame { width: 460px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line-strong); padding: 20px 22px; }
+.feed-stream { position: relative; display: flex; flex-direction: column; gap: 16px; padding-left: 22px; }
+.feed-stream::before {
+  content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--line-strong) 8%, var(--line-strong) 92%, transparent);
+}
+.node { position: absolute; left: -22px; top: 22px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2px solid var(--ink-3); z-index: 2; }
+.card { position: relative; }
+.card.state-proposed .node { border-color: var(--amber); }
+.card.state-adopted .node { border-color: var(--signal); background: var(--signal); box-shadow: 0 0 10px color-mix(in srgb, var(--signal) 50%, transparent); }
+
+.card-body { background: var(--card); border: 1px solid var(--hairline); border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 16px 18px 14px; }
+.card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.card-head .avatar { width: 22px; height: 22px; margin-left: 0; border-width: 0; font-size: 9px; }
+.byline { font-size: 12.5px; color: var(--ink-2); }
+.byline b { color: var(--ink); font-weight: 600; }
+.card-head .spacer { flex: 1; }
+.timestamp { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+.state-chip {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2.5px 8px; border-radius: 5px; border: 1px solid transparent;
+}
+.state-chip.proposed { color: var(--amber); background: var(--amber-dim); border-color: color-mix(in srgb, var(--amber) 25%, transparent); }
+.state-chip.adopted { color: var(--signal); background: var(--signal-dim); border-color: color-mix(in srgb, var(--signal) 30%, transparent); }
+.intent { font-size: 15px; font-weight: 600; letter-spacing: 0.005em; margin-bottom: 5px; }
+.summary { font-size: 13px; color: var(--ink-2); margin-bottom: 12px; max-width: 60ch; }
+.card-meta { display: flex; align-items: center; gap: 14px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.meta-item { display: inline-flex; align-items: center; gap: 5px; }
+.card-meta .spacer { flex: 1; }
+.mini-btn {
+  font-family: var(--font-ui); font-size: 11.5px; font-weight: 600; color: var(--ink-2);
+  background: transparent; border: 1px solid var(--line); border-radius: 7px; padding: 4px 11px; cursor: pointer;
+}
+.mini-btn.primary { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 30%, transparent); }
+.hash {
+  font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 5px; padding: 1.5px 6px;
+}
+
+/* chat bubbles: no spine node, the spine is events-only. Others align
+   left with avatar + name once per consecutive run; the current user's
+   messages align right in a neutral inverted bubble with no header, so
+   "mine" reads by position and surface depth, never by color. Green
+   stays reserved for adoption and build-passing. */
+.panel-dark {
+  --shadow-chat: 0 1px 1px rgba(0,0,0,0.18), 0 4px 12px rgba(3,6,12,0.22);
+  --bubble-own-bg: #1d2437; --bubble-own-border: rgba(148,168,205,0.2); --bubble-own-ink: #eef2fa;
+}
+.panel-light {
+  --shadow-chat: 0 1px 1px rgba(28,36,51,0.04), 0 3px 10px rgba(28,36,51,0.06);
+  --bubble-own-bg: #1c2433; --bubble-own-border: #1c2433; --bubble-own-ink: #f6f7f4;
+}
+.chat-msg { position: relative; display: flex; align-items: flex-end; gap: 10px; max-width: min(78%, 58ch); }
+.chat-msg.own { align-self: flex-end; }
+.chat-msg.grouped { margin-top: -9px; }
+.chat-gutter { width: 24px; flex-shrink: 0; display: flex; align-items: flex-end; }
+.chat-gutter .avatar { width: 24px; height: 24px; margin-left: 0; border-width: 0; font-size: 9px; }
+.chat-stack { display: flex; flex-direction: column; min-width: 0; }
+.chat-head { display: flex; align-items: baseline; gap: 8px; margin: 0 0 4px 4px; }
+.chat-head .who { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.chat-bubble {
+  background: var(--card); border: 1px solid var(--hairline);
+  border-radius: 14px; border-bottom-left-radius: 5px;
+  padding: 8px 13px 9px; box-shadow: var(--shadow-chat); width: fit-content;
+}
+.chat-msg.own .chat-bubble {
+  background: var(--bubble-own-bg); border-color: var(--bubble-own-border);
+  border-radius: 14px; border-bottom-right-radius: 5px; margin-left: auto;
+}
+.chat-msg.own .chat-text { color: var(--bubble-own-ink); }
+.chat-text { font-size: 13px; line-height: 1.5; color: var(--ink); overflow-wrap: break-word; }
+.chat-text .mention { color: var(--cyan); }
+
+.avatar {
+  width: 22px; height: 22px; border-radius: 50%; border-width: 0;
+  display: grid; place-items: center; font-size: 9px; font-weight: 700; letter-spacing: 0.02em; color: #0b0e14;
+}
+.avatar.a-priya { background: #8fd0a8; }
+.avatar.a-dele  { background: #86bfe8; }
+.avatar.a-tomas { background: #f0c489; }
+
+/* ===== agent sidebar chat: private conversation with worked-for row ===== */
+.agent-frame { width: 372px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--panel) 88%, transparent); overflow: hidden; }
+.agent-head { padding: 14px 18px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+.agent-glyph {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(140deg, color-mix(in srgb, var(--cyan) 22%, var(--panel-2)), var(--panel-2));
+  border: 1px solid color-mix(in srgb, var(--cyan) 28%, var(--line)); display: grid; place-items: center; color: var(--cyan); flex-shrink: 0;
+}
+.agent-glyph svg { width: 14px; height: 14px; }
+.agent-id { flex: 1; min-width: 0; }
+.agent-id .name { font-size: 13px; font-weight: 600; }
+.agent-id .scope { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+.private-chip {
+  font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-3); border: 1px solid var(--line); border-radius: 5px; padding: 2.5px 7px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.private-chip svg { width: 9px; height: 9px; }
+
+.agent-chat { padding: 18px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+.msg { max-width: 92%; }
+.msg.user {
+  align-self: flex-end; background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 12px 12px 4px 12px; padding: 9px 13px; font-size: 13px;
+}
+.msg.agent { align-self: flex-start; font-size: 13px; color: var(--ink); }
+.msg.agent p { margin-bottom: 8px; }
+.msg.agent p:last-child { margin-bottom: 0; }
+.msg .worked {
+  font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.msg .worked::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.code-inline {
+  font-family: var(--font-mono); font-size: 11.5px; background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 4px; padding: 1px 5px; color: var(--ink-2);
+}
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">Components - Chat</h1>
+<p class="doc-sub">Two conversation surfaces: the group chat timeline, where the spine is events-only (proposal objects, <code>.card</code>, keep their nodes) and plain talk (<code>.chat-msg</code>) floats in the column as bubbles, own messages right in a neutral inverted bubble, others left with avatar and name once per consecutive run (<code>.grouped</code>); and the private agent sidebar conversation, where a <code>.msg.agent</code> reply opens with a <code>.worked</code> row before any prose.</p>
+
+<h2 class="doc-h2">Group chat: messages interleaved with cards</h2>
+<div class="compare-wrap">
+  <div>
+    <div class="panel-tag">● dark</div>
+    <div class="feed-frame panel-dark">
+      <div class="feed-stream">
+        <div class="chat-msg">
+          <span class="chat-gutter"><span class="avatar a-dele">DO</span></span>
+          <div class="chat-stack">
+            <div class="chat-head"><span class="who">Dele Okafor</span><span class="timestamp">2m</span></div>
+            <div class="chat-bubble"><p class="chat-text">watching Tomás fork the geo flow live, the neighborhood picker fallback is the right call</p></div>
+          </div>
+        </div>
+        <div class="chat-msg grouped">
+          <span class="chat-gutter"></span>
+          <div class="chat-stack">
+            <div class="chat-bubble"><p class="chat-text">the picker also fixes the offline case</p></div>
+          </div>
+        </div>
+        <article class="card state-proposed">
+          <span class="node"></span>
+          <div class="card-body">
+            <div class="card-head">
+              <div class="avatar a-priya">PR</div>
+              <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+              <div class="spacer"></div>
+              <span class="state-chip proposed">proposed</span>
+              <span class="timestamp">1h</span>
+            </div>
+            <h3 class="intent">Open-hours model for vendors</h3>
+            <p class="summary">A schedule schema that handles the messy reality of night markets: seasonal openings, weather closures, vendors who set up at 6pm "ish".</p>
+            <div class="card-meta">
+              <span class="meta-item">2 forks</span>
+              <span class="hash">pr/open-hours</span>
+              <div class="spacer"></div>
+              <button class="mini-btn primary">Fork</button>
+              <button class="mini-btn">Remix</button>
+            </div>
+          </div>
+        </article>
+        <div class="chat-msg">
+          <span class="chat-gutter"><span class="avatar a-priya">PR</span></span>
+          <div class="chat-stack">
+            <div class="chat-head"><span class="who">Priya Raman</span><span class="timestamp">15m</span></div>
+            <div class="chat-bubble"><p class="chat-text">3.1s to 0.9s on Taipei is wild. <span class="mention">@Mara</span> I am wiring my open-hours model into your cluster tooltips right now</p></div>
+          </div>
+        </div>
+        <div class="chat-msg own">
+          <div class="chat-stack">
+            <div class="chat-bubble"><p class="chat-text">shipping the tooltip join tonight, fork it once it lands</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="panel-tag">● light</div>
+    <div class="feed-frame panel-light">
+      <div class="feed-stream">
+        <div class="chat-msg">
+          <span class="chat-gutter"><span class="avatar a-dele">DO</span></span>
+          <div class="chat-stack">
+            <div class="chat-head"><span class="who">Dele Okafor</span><span class="timestamp">2m</span></div>
+            <div class="chat-bubble"><p class="chat-text">watching Tomás fork the geo flow live, the neighborhood picker fallback is the right call</p></div>
+          </div>
+        </div>
+        <div class="chat-msg grouped">
+          <span class="chat-gutter"></span>
+          <div class="chat-stack">
+            <div class="chat-bubble"><p class="chat-text">the picker also fixes the offline case</p></div>
+          </div>
+        </div>
+        <article class="card state-proposed">
+          <span class="node"></span>
+          <div class="card-body">
+            <div class="card-head">
+              <div class="avatar a-priya">PR</div>
+              <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+              <div class="spacer"></div>
+              <span class="state-chip proposed">proposed</span>
+              <span class="timestamp">1h</span>
+            </div>
+            <h3 class="intent">Open-hours model for vendors</h3>
+            <p class="summary">A schedule schema that handles the messy reality of night markets: seasonal openings, weather closures, vendors who set up at 6pm "ish".</p>
+            <div class="card-meta">
+              <span class="meta-item">2 forks</span>
+              <span class="hash">pr/open-hours</span>
+              <div class="spacer"></div>
+              <button class="mini-btn primary">Fork</button>
+              <button class="mini-btn">Remix</button>
+            </div>
+          </div>
+        </article>
+        <div class="chat-msg">
+          <span class="chat-gutter"><span class="avatar a-priya">PR</span></span>
+          <div class="chat-stack">
+            <div class="chat-head"><span class="who">Priya Raman</span><span class="timestamp">15m</span></div>
+            <div class="chat-bubble"><p class="chat-text">3.1s to 0.9s on Taipei is wild. <span class="mention">@Mara</span> I am wiring my open-hours model into your cluster tooltips right now</p></div>
+          </div>
+        </div>
+        <div class="chat-msg own">
+          <div class="chat-stack">
+            <div class="chat-bubble"><p class="chat-text">shipping the tooltip join tonight, fork it once it lands</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="doc-h2">Agent sidebar: private chat + worked-for row</h2>
+<div class="compare-wrap">
+  <div>
+    <div class="panel-tag">● dark</div>
+    <div class="agent-frame panel-dark">
+      <div class="agent-head">
+        <div class="agent-glyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M8 10h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"/><circle cx="9.5" cy="15" r="0.5" fill="currentColor"/><circle cx="14.5" cy="15" r="0.5" fill="currentColor"/></svg>
+        </div>
+        <div class="agent-id"><div class="name">Your agent</div><div class="scope">priya · workbench 03</div></div>
+        <span class="private-chip">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+          private
+        </span>
+      </div>
+      <div class="agent-chat">
+        <div class="msg user">Mara's clustering just got adopted. Can my open-hours model feed the cluster tooltips?</div>
+        <div class="msg agent">
+          <div class="worked">worked 41s · read 6 files</div>
+          <p>Yes, and it is a clean join. Her cluster index already carries stall ids, so I computed an <span class="code-inline">openNow</span> count per cluster and exposed it as a tooltip aggregate.</p>
+          <p>One catch: clusters recompute on every zoom change, so I memoized the lookup per 5-minute window.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="panel-tag">● light</div>
+    <div class="agent-frame panel-light">
+      <div class="agent-head">
+        <div class="agent-glyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M8 10h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"/><circle cx="9.5" cy="15" r="0.5" fill="currentColor"/><circle cx="14.5" cy="15" r="0.5" fill="currentColor"/></svg>
+        </div>
+        <div class="agent-id"><div class="name">Your agent</div><div class="scope">priya · workbench 03</div></div>
+        <span class="private-chip">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+          private
+        </span>
+      </div>
+      <div class="agent-chat">
+        <div class="msg user">Mara's clustering just got adopted. Can my open-hours model feed the cluster tooltips?</div>
+        <div class="msg agent">
+          <div class="worked">worked 41s · read 6 files</div>
+          <p>Yes, and it is a clean join. Her cluster index already carries stall ids, so I computed an <span class="code-inline">openNow</span> count per cluster and exposed it as a tooltip aggregate.</p>
+          <p>One catch: clusters recompute on every zoom change, so I memoized the lookup per 5-minute window.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

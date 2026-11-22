@@ -1,0 +1,242 @@
+/* ============================================================
+   Agent Rooms · Signal Lab v2 - design tokens
+   Measured from the inline styles of
+   "Signal Lab Screens v2.dc.html" (screens 1a-1d), not from the
+   handoff README, which disagrees with its own markup in several
+   places. See SIGNAL-LAB-V2.md for the list.
+
+   Dark only. No light theme was designed for this revision, so
+   there is no [data-theme="light"] block here; the v1 light theme
+   in tokens.css does not survive the border-to-shadow change and
+   would have to be redrawn.
+
+   This file REPLACES tokens.css rather than layering on it. Load
+   one or the other, not both: the shared names (--bg, --ink,
+   --panel, --radius) carry different values in each.
+
+   Counts in comments are literal occurrences in the source
+   markup. Where a conceptual token has more than one literal
+   value, the dominant one is defined and the variants are listed.
+   ============================================================ */
+
+:root {
+  /* ---------- Type families ----------
+     UI stack is decided: -apple-system leads, Manrope is the
+     cross-platform fallback. This supersedes Satoshi from v1.
+     Do not reorder - leading with Manrope makes Apple machines
+     render SF anyway and hides type adjustments. */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---------- Global text settings (applied at the root) ---------- */
+  --text-rendering: optimizeLegibility;
+  --font-smoothing: antialiased;            /* -webkit-font-smoothing */
+  --font-smoothing-moz: grayscale;          /* -moz-osx-font-smoothing */
+  --numeric: tabular-nums;                  /* load-bearing: diff counts, SHAs, tallies align */
+  --tracking-root: -0.006em;                /* set once on the page container */
+
+  /* ---------- Surfaces ---------- */
+  --bg: #0b0e14;                            /* page + frame, 6 uses */
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --rail: #0d1119;                          /* left nav, 3 uses */
+  --panel: #171d2e;                         /* cards, modals, sidebars, 20 uses */
+  --row: #141926;                           /* nav row active/hover, small buttons, 24 uses */
+  --field: #1a2132;                         /* text inputs, selects, code fields, 5 uses */
+  --header-bg: rgba(16, 20, 29, 0.82);      /* top bars, 3 uses */
+  --sidebar-bg: rgba(16, 20, 29, 0.88);     /* agent column, 1 use */
+  --panel-sunken: rgba(20, 25, 38, 0.5);    /* nested rows inside a panel.
+                                               Variants: 0.45 (3), 0.5 (3), 0.55 (1),
+                                               0.6 (1), 0.7 (1) - alpha is tuned per
+                                               nesting depth, not a single value. */
+  --composer-bg: rgba(23, 29, 44, 0.7);     /* agent composer. Variants: 0.72 (2), 0.5 (2) */
+
+  /* ---------- Lines ----------
+     Only three line values survive, and panels no longer use them.
+     See the elevation note at the bottom. */
+  --line: rgba(148, 168, 205, 0.13);        /* dividers, quiet button borders, 17 uses */
+  --line-strong: rgba(148, 168, 205, 0.22); /* emphasized + hover border, 5 uses */
+  --line-field: rgba(148, 168, 205, 0.17);  /* selects and the join input, 4 uses */
+
+  /* ---------- Ink ----------
+     Two levels do the work. #9aa7bf (162 uses) and #e6ebf5 (70)
+     cover everything; #8b9ab6 appears 3 times, on field labels
+     only. v1's --ink-3 (#5f6c85) is never used as a text color in
+     this revision - it survives only as a lineage dot fill. */
+  --ink: #e6ebf5;                           /* body copy AND headings - bright is primary */
+  --ink-2: #9aa7bf;                         /* metadata, captions, chrome */
+  --ink-3: #8b9ab6;                         /* field labels only */
+  --dot-ancestor: #5f6c85;                  /* lineage ancestor dot / dashed future dot */
+
+  /* ---------- Signal colors ---------- */
+  --signal: #4ade80;                        /* live, passing, additions, adopted */
+  --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e;                          /* proposed, pending invite, modified file */
+  --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0;                           /* links, fork state, primary action */
+  --cyan-bright: #7ad3f5;                    /* link hover, gradient start */
+  --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5;                         /* credit chain, remix notes */
+  --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f;                           /* deletion counts only, 6 uses */
+  --selection: rgba(83, 197, 240, 0.26);
+
+  /* ---------- Inverted + gradient action fills ---------- */
+  --invert-fill: #f6f9ff;
+  --invert-ink: #05070a;
+  --keycap-ink: rgba(5, 7, 10, 0.62);        /* tested at 4.6:1 - do not lower */
+  --keycap-line: rgba(5, 7, 10, 0.24);
+  --grad-cyan: linear-gradient(160deg, #7ad3f5, #53c5f0);
+  --grad-cyan-ink: #04121a;
+  --grad-signal: linear-gradient(160deg, #5fe693, #4ade80);
+  --grad-signal-ink: #08110b;
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+
+  /* ---------- Avatar fills (flat pastels, --bg initials) ---------- */
+  --avatar-ni: #8fd0a8;
+  --avatar-tr: #f0c489;
+  --avatar-rd: #d3aef0;   /* MJ shares this fill */
+  --avatar-kw: #86bfe8;
+  --avatar-sq: #f0a3b1;
+
+  /* ---------- Elevation: three tiers, no panel borders ---------- */
+
+  /* Tier 1, resting panel. Unanimous: 5 of 5 uses carry this exact value. */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+
+  /* Tier 2, raised panel. Dominant (2 uses: proposal sidebar, create-room card).
+     Variant, 1 use on the sign-in aside, softer at both blur stops:
+       inset 0 1px 0 rgba(148,168,205,0.07),
+       0 1px 2px rgba(0,0,0,0.3),
+       0 10px 26px rgba(3,6,12,0.34),
+       0 28px 60px rgba(3,6,12,0.26) */
+  --shadow-2:
+    inset 0 1px 0 rgba(148, 168, 205, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(3, 6, 12, 0.36),
+    0 24px 52px rgba(3, 6, 12, 0.28);
+
+  /* Tier 3, floating. 1 use (fork modal).
+     Variant, 1 use on the sign-in card - this is v1's --shadow-float
+     carried over unchanged:
+       0 1px 0 rgba(148,168,205,0.07) inset,
+       0 2px 4px rgba(0,0,0,0.28),
+       0 14px 34px rgba(2,4,9,0.5),
+       0 32px 72px rgba(2,4,9,0.36) */
+  --shadow-3:
+    0 1px 0 rgba(148, 168, 205, 0.07) inset,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 20px 48px rgba(2, 4, 9, 0.55),
+    0 44px 96px rgba(2, 4, 9, 0.42);
+
+  /* Fields */
+  --shadow-field: inset 0 1px 3px rgba(0, 0, 0, 0.26);
+  --focus-ring:
+    inset 0 1px 3px rgba(0, 0, 0, 0.26),
+    0 0 0 3px rgba(83, 197, 240, 0.16);
+  --focus-border: rgba(83, 197, 240, 0.4);
+
+  /* Buttons. Inverted dominant is 22px/0.55 (2 uses); the sign-in auth
+     button is heavier at 0 8px 24px rgba(11,14,20,0.6) (1 use). */
+  --shadow-invert: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 22px rgba(11, 14, 20, 0.55);
+  --shadow-btn-cyan: 0 1px 0 rgba(0, 0, 0, 0.2), 0 4px 16px rgba(83, 197, 240, 0.22);
+  --shadow-btn-signal: 0 1px 0 rgba(0, 0, 0, 0.2), 0 4px 16px rgba(74, 222, 128, 0.22);
+  --shadow-inset-top: inset 0 1px 0 rgba(148, 168, 205, 0.06);  /* profile row only */
+
+  /* Documentation frame around each screen. Not an app surface. */
+  --shadow-frame: 0 40px 100px rgba(0, 0, 0, 0.55);
+
+  /* Live dot halo */
+  --glow-live: 0 0 8px rgba(74, 222, 128, 0.7);
+
+  /* ---------- Emblem recipe ----------
+     Circular icon badge, background rgba(C, bg-alpha), inset 1px ring
+     rgba(C, ring-alpha), outer glow of blur-radius at glow-alpha, icon in
+     the full token color. There are FIVE literal recipes in the markup,
+     not one. Variant A is the dominant and the one to build against. */
+
+  /* A - 26px status emblem: green, cyan, violet (3 uses). Canonical. */
+  --emblem-size: 26px;
+  --emblem-bg-alpha: 0.22;
+  --emblem-ring-alpha: 0.45;
+  --emblem-glow: 0 0 16px;
+  --emblem-glow-alpha: 0.24;
+  /* B - 26px amber (room identity, 1 use): bg 0.2, ring 0.42, glow 0 0 14px @ 0.2
+     C - 26px neutral rgba(230,235,245) (repo row, no state, 1 use):
+         bg 0.16, ring 0.34, glow 0 0 14px @ 0.12
+     D - 25px provenance (1 use): bg 0.18, ring 0.34, glow 0 0 12px @ 0.14
+     E - 24px disclosure header (2 uses): bg 0.18, ring 0.34, NO outer glow */
+
+  /* ---------- Radii ----------
+     Rule that holds across the file: 14-20px on surfaces, 10-12px on rows. */
+  --radius-keycap: 4px;      /* also inline code chips */
+  --radius-badge: 5px;       /* small mono badges */
+  --radius-mark: 7px;        /* brand mark, state badges, small buttons (10 uses) */
+  --radius-tile: 8px;        /* icon tiles, copy button (5) */
+  --radius-select: 9px;      /* selects, join input, modal icon tile (5) */
+  --radius-row: 10px;        /* nav rows, list rows (14) */
+  --radius-field: 11px;      /* inset code field, alert bars, quiet buttons (8) */
+  --radius: 12px;            /* primary input, cyan action button, profile row (5) */
+  --radius-disclosure: 14px; /* disclosure containers (2) */
+  --radius-panel: 16px;      /* standard panel (13) */
+  --radius-panel-lg: 18px;   /* fork modal, create-room card, sign-in aside (3) */
+  --radius-panel-xl: 20px;   /* sign-in card, agent composer (2) */
+  --radius-pill: 999px;      /* pill buttons (4) */
+  --radius-round: 50%;       /* avatars, dots, emblems, close button (38) */
+  /* Also present, one-offs: 3px (diff proportion bar),
+     0 12px 12px 0 (left-edged no-note card) */
+
+  /* ---------- Type scale (literal sizes in the markup, with counts) ----------
+     28px/600/-0.022em/1.16   page H1 (2)
+     25px/600/-0.022em/1.2    proposal title (1)
+     17.5px/600/-0.018em      modal title (1)
+     16px/400 mono            primary text input (1)
+     15px/400/1.5             BODY COPY - summary, list items, Q&A (14)
+     14.5px/400-500/1.58      secondary paragraphs, room status rows (8)
+     14px/400-500-600/1.45    nav rows, list rows, section headings (44, dominant)
+     13.5px/400-600/1.5       primary button label, metadata row (17)
+     13px/400-600/1.55        captions, sub-labels (33)
+     12.5px/400-600/1.55      quiet buttons, fine print, credit-chain rows (25)
+     12px/400/1.55            field labels, legal fine print (21)
+     11.5px/400-600-700       section labels, copy button, mono counts (20)
+     11px/400-700/0.06em      mono paths, nav counts (18)
+     10.5px                   keycaps (6)
+     10px/700/0.08em          state badges, uppercase (14)
+     9.5px/0.1em              private badge (1)
+     9px, 8.5px, 8px          avatar initials and micro-glyphs (3 / 11 / 1)
+     Weights in use: 400 (6), 500 (15), 600 (50), 700 (21). No 800+.
+     Line-heights in use: 1.5 (10), 1.55 (8), 1.45 (6), 1.16 (2),
+     1.58 (2), 1.3 (2, profile-row two-line label), 1.6 (2), 1.2 (1). */
+
+  /* ---------- Line measure ----------
+     Pixel caps, not ch. Three residual ch values remain in the markup
+     (40ch and 46ch on the sign-in card, 26ch in the agent sidebar);
+     convert them to 340px / 390px / 215px. */
+  --measure: 560px;          /* proposal summary, list items, Q&A body (6 uses) */
+  --measure-sub: 470px;      /* empty-state and sign-in secondary paragraphs (2) */
+  --measure-card: 500px;     /* card body in the blurred background layer (2) */
+  /* Also literal: 472px (sign-in card), 716px / 760px (content columns) */
+
+  /* ---------- Layout ---------- */
+  --rail-w: 216px;
+  --agent-w: 316px;
+  --header-h: 54px;
+  --aside-w: 540px;          /* sign-in right column */
+  --modal-w: 484px;          /* fork sheet */
+}
+
+/* Elevation, stated plainly:
+     page    var(--bg) + var(--bg-glow), no shadow, no border
+     tier 1  --shadow-1, resting panels: diff table, note card, Q&A card, join card
+     tier 2  --shadow-2, raised panels: proposal sidebar, create-room card, sign-in aside
+     tier 3  --shadow-3, floating: fork modal, sign-in card
+     field   --shadow-field, plus --focus-ring and --focus-border when focused
+
+   Panels carry NO border. A panel separates from the page by fill and
+   shadow, and from a sibling panel by whitespace. Hairlines survive only
+   on true dividers: nav right edge, header bottom edge, in-card row
+   separators, sidebar left edge, and on inputs, badges, and quiet buttons.
+   Verified by sweep of the markup: 28 explicit `border: none` declarations,
+   and every remaining 1px border sits on a divider or a control. */

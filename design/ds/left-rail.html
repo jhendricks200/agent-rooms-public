@@ -1,0 +1,291 @@
+<!-- @dsCard group="Layout" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signal Lab - Left Nav Rail</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  background: #05070a;
+  color: #cbd2e0;
+  padding: 28px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+h1.doc-title { font-size: 19px; font-weight: 700; color: #f2f4f9; margin-bottom: 4px; }
+p.doc-sub { font-size: 12.5px; color: #7d879c; margin-bottom: 24px; max-width: 78ch; }
+.compare-wrap { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.panel-tag { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7d879c; margin-bottom: 8px; }
+
+.panel-dark, .panel-light {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+.panel-dark {
+  --rail: #0d1119; --panel: #10141d; --panel-2: #141926;
+  --line: rgba(148,168,205,0.13); --line-strong: rgba(148,168,205,0.22);
+  --ink: #e6ebf5; --ink-2: #9aa7bf; --ink-3: #5f6c85;
+  --signal: #4ade80; --cyan: #53c5f0;
+}
+.panel-light {
+  --rail: #ecede8; --panel: #fafaf7; --panel-2: #f0f1ec;
+  --line: rgba(48,62,88,0.13); --line-strong: rgba(48,62,88,0.24);
+  --ink: #1c2433; --ink-2: #55617a; --ink-3: #8b96ab;
+  --signal: #14934e; --cyan: #0f7fb0;
+}
+
+/* ===== .rail, copied verbatim from direction-c2.html ===== */
+.rail-frame {
+  width: 236px;
+  height: 600px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.rail {
+  background: var(--rail);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  padding: 14px 10px 12px;
+}
+.rail-brand { display: flex; align-items: center; gap: 9px; padding: 2px 8px 12px; }
+.rail-brand .mark {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: linear-gradient(140deg, #1d2b3f, #101724);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: 11px; color: var(--signal); flex-shrink: 0;
+}
+.panel-light .rail-brand .mark { background: linear-gradient(140deg, #e8ecf2, #f6f7f4); }
+.rail-brand .word { font-size: 13.5px; font-weight: 600; letter-spacing: 0.01em; }
+.rail-brand .spacer { flex: 1; }
+.rail-search-btn {
+  width: 26px; height: 26px; border-radius: 7px; border: none; background: transparent;
+  color: var(--ink-3); cursor: pointer; display: grid; place-items: center;
+}
+.rail-search-btn:hover { color: var(--ink); background: var(--panel-2); }
+.rail-search-btn svg { width: 14px; height: 14px; }
+
+.rail-item {
+  display: flex; align-items: center; gap: 9px; padding: 6.5px 9px; border-radius: 8px;
+  font-size: 13px; color: var(--ink-2); cursor: pointer; user-select: none; position: relative;
+}
+.rail-item:hover { background: var(--panel-2); color: var(--ink); }
+.rail-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.75; }
+.rail-item.active { background: var(--panel-2); color: var(--ink); font-weight: 600; }
+.rail-item.active::before {
+  content: ""; position: absolute; left: -10px; top: 7px; bottom: 7px; width: 2px; border-radius: 2px;
+  background: var(--signal);
+}
+.rail-item .count {
+  margin-left: auto; font-family: var(--font-mono); font-size: 10px; color: var(--ink-3);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 0.5px 5.5px;
+}
+.rail-item.active .count { color: var(--ink-2); }
+.rail-item .unread { margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); }
+
+.rail-new { margin: 2px 0 4px; border: 1px dashed var(--line-strong); color: var(--ink-2); }
+.rail-new:hover { border-color: color-mix(in srgb, var(--signal) 40%, var(--line-strong)); color: var(--ink); }
+
+.rail-section {
+  font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--ink-3); padding: 14px 9px 5px;
+}
+
+.rail-scroll { flex: 1; overflow-y: auto; min-height: 0; margin: 0 -2px; padding: 0 2px; }
+
+.rail-foot { border-top: 1px solid var(--line); padding-top: 9px; margin-top: 9px; }
+.rail-profile { display: flex; align-items: center; gap: 9px; padding: 6px 9px; border-radius: 8px; cursor: pointer; }
+.rail-profile:hover { background: var(--panel-2); }
+.rail-profile .avatar { margin-left: 0; border-width: 0; width: 24px; height: 24px; font-size: 9px; }
+.rail-profile .who { flex: 1; min-width: 0; }
+.rail-profile .who .nm { font-size: 12.5px; font-weight: 600; line-height: 1.25; }
+.rail-profile .who .plan { font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-3); }
+
+.avatar {
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--panel);
+  display: grid; place-items: center; font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+  color: #0b0e14;
+}
+.avatar.a-priya { background: #8fd0a8; }
+
+.theme-toggle {
+  width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2);
+  color: var(--ink-2); cursor: pointer; display: grid; place-items: center; flex-shrink: 0;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+.panel-light .theme-toggle .icon-moon { display: none; }
+.panel-light .theme-toggle .icon-sun { display: block; }
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">Layout - Left nav rail</h1>
+<p class="doc-sub">The <code>.rail</code> component at native 236px width, full height: app mark and search, New room affordance, room list with unread dots and an active-state accent bar, the current room's section (Proposals / Canonical build / Timeline / Members), and the footer profile row with theme toggle.</p>
+
+<div class="compare-wrap">
+  <div>
+    <div class="panel-tag">● dark</div>
+    <div class="rail-frame panel-dark">
+      <nav class="rail">
+        <div class="rail-brand">
+          <span class="mark">▞▚</span>
+          <span class="word">Agent Rooms</span>
+          <span class="spacer"></span>
+          <button class="rail-search-btn" title="Search" aria-label="Search">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="rail-item rail-new">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M8 2v12" stroke-linecap="round"/></svg>
+          New room
+        </div>
+        <div class="rail-scroll">
+          <div class="rail-section">Rooms</div>
+          <div class="rail-item active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+            night-market
+            <span class="count">17</span>
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+            trail-notes
+            <span class="unread"></span>
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+            split-bill-bot
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+            drift-journal
+            <span class="unread"></span>
+          </div>
+          <div class="rail-section">This room</div>
+          <div class="rail-item active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 6h5M5.5 9h3.5"/></svg>
+            Proposals
+            <span class="count">6</span>
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+            Canonical build
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3" stroke-linecap="round"/></svg>
+            Timeline
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="5.5" cy="6" r="2.2"/><circle cx="10.5" cy="6" r="2.2"/><path d="M2 13c0-1.9 1.6-3.2 3.5-3.2S9 11.1 9 13M9.5 9.9c1.8.1 3.5 1.3 3.5 3.1"/></svg>
+            Members
+            <span class="count">5</span>
+          </div>
+        </div>
+        <div class="rail-foot">
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v2M8 12.2v2M1.8 8h2M12.2 8h2M3.6 3.6l1.4 1.4M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4"/></svg>
+            Settings
+          </div>
+          <div class="rail-profile">
+            <span class="avatar a-priya">PR</span>
+            <span class="who">
+              <span class="nm">Priya Raman</span><br>
+              <span class="plan">workbench 03</span>
+            </span>
+            <button class="theme-toggle" title="Toggle light and dark" aria-label="Toggle color theme">
+              <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel-tag">● light</div>
+    <div class="rail-frame panel-light">
+      <nav class="rail">
+        <div class="rail-brand">
+          <span class="mark">▞▚</span>
+          <span class="word">Agent Rooms</span>
+          <span class="spacer"></span>
+          <button class="rail-search-btn" title="Search" aria-label="Search">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="rail-item rail-new">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M8 2v12" stroke-linecap="round"/></svg>
+          New room
+        </div>
+        <div class="rail-scroll">
+          <div class="rail-section">Rooms</div>
+          <div class="rail-item active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+            night-market
+            <span class="count">17</span>
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+            trail-notes
+            <span class="unread"></span>
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+            split-bill-bot
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+            drift-journal
+            <span class="unread"></span>
+          </div>
+          <div class="rail-section">This room</div>
+          <div class="rail-item active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 6h5M5.5 9h3.5"/></svg>
+            Proposals
+            <span class="count">6</span>
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+            Canonical build
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3" stroke-linecap="round"/></svg>
+            Timeline
+          </div>
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="5.5" cy="6" r="2.2"/><circle cx="10.5" cy="6" r="2.2"/><path d="M2 13c0-1.9 1.6-3.2 3.5-3.2S9 11.1 9 13M9.5 9.9c1.8.1 3.5 1.3 3.5 3.1"/></svg>
+            Members
+            <span class="count">5</span>
+          </div>
+        </div>
+        <div class="rail-foot">
+          <div class="rail-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v2M8 12.2v2M1.8 8h2M12.2 8h2M3.6 3.6l1.4 1.4M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4"/></svg>
+            Settings
+          </div>
+          <div class="rail-profile">
+            <span class="avatar a-priya">PR</span>
+            <span class="who">
+              <span class="nm">Priya Raman</span><br>
+              <span class="plan">workbench 03</span>
+            </span>
+            <button class="theme-toggle" title="Toggle light and dark" aria-label="Toggle color theme">
+              <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1043 @@
+<!-- @dsCard group="Screens" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms &middot; Sign in</title>
+<style>
+/* ============================================================
+   SCREEN · SIGN IN  (Signal Lab v2)
+
+   Layout, copy and treatment come from frame 1a of
+   "Signal Lab Screens v2.dc.html". Token values are the ones in
+   design/ds/tokens-v2.css, inlined here so the comp opens as a
+   single file. Nothing is invented at the token layer.
+
+   The v2 system in one line: panels carry no border, they
+   separate from the page by fill and shadow; body copy is
+   near-white and metadata is gray, only two ink levels; line
+   measure is capped in pixels, not ch.
+
+   Two things this file adds that the revision did not draw.
+   The access-denied state, because the deployed instance gates
+   sign-in on a participant allowlist and a person who is turned
+   away needs the two identifiers the allowlist accepts. And a
+   light theme, derived from the v1 light ramp in ds/tokens.css
+   with the v2 roles mapped onto it, since the revision is
+   dark-only and the toggle predates it.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- surfaces ---- */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --panel: #171d2e;
+  --row: #141926;
+  --panel-sunken: rgba(20, 25, 38, 0.5);
+  --avatar-ring: #10141d;
+
+  /* ---- lines: dividers and controls only ---- */
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --line-field: rgba(148, 168, 205, 0.17);
+
+  /* ---- ink: two levels do the work ---- */
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #8b9ab6;
+
+  /* ---- signal colors ---- */
+  --signal: #4ade80;
+  --amber: #fbbf5e;
+  --cyan: #53c5f0;
+  --cyan-bright: #7ad3f5;
+  --violet: #b18cf5;
+  --selection: rgba(83, 197, 240, 0.26);
+  --neutral-emblem: #e6ebf5;
+  --emblem-ink: #0b0e14;
+
+  /* ---- inverted action fill ---- */
+  --invert-fill: #f6f9ff;
+  --invert-ink: #05070a;
+  --keycap-ink: rgba(5, 7, 10, 0.62);
+  --keycap-line: rgba(5, 7, 10, 0.24);
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+
+  /* ---- avatars ---- */
+  --avatar-mj: #d3aef0;
+  --avatar-tr: #f0c489;
+  --avatar-do: #86bfe8;
+  --avatar-sq: #f0a3b1;
+  --avatar-ink: #0b0e14;
+
+  /* ---- elevation: three tiers, no panel borders ---- */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+  /* tier 2, the sign-in aside variant: softer at both blur stops */
+  --shadow-aside:
+    inset 0 1px 0 rgba(148, 168, 205, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 10px 26px rgba(3, 6, 12, 0.34),
+    0 28px 60px rgba(3, 6, 12, 0.26);
+  /* the sign-in card was never migrated to tier 3; it still carries this */
+  --shadow-card:
+    0 1px 0 rgba(148, 168, 205, 0.07) inset,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 14px 34px rgba(2, 4, 9, 0.5),
+    0 32px 72px rgba(2, 4, 9, 0.36);
+  --shadow-invert: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(11, 14, 20, 0.6);
+  --shadow-invert-hi: 0 2px 4px rgba(0, 0, 0, 0.28), 0 14px 34px rgba(11, 14, 20, 0.62);
+  --focus-border: rgba(83, 197, 240, 0.4);
+  --focus-ring: 0 0 0 3px rgba(83, 197, 240, 0.24);
+  --glow-live: 0 0 8px rgba(74, 222, 128, 0.7);
+
+  /* ---- radii ---- */
+  --radius-keycap: 4px;
+  --radius-mark: 7px;
+  --radius-tile: 8px;
+  --radius-field: 11px;
+  --radius-panel: 16px;
+  --radius-panel-lg: 18px;
+  --radius-panel-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ---- measure: pixel caps, not ch ---- */
+  --measure-sub: 340px;   /* the demoted sub-line, was 40ch */
+  --measure-fine: 390px;  /* scope fine print, was 46ch */
+
+  /* ---- layout ---- */
+  --aside-w: 540px;
+  --card-w: 472px;
+  --gutter: 62px;
+}
+
+:root[data-theme="light"] {
+  /* Derived from the v1 light ramp in design/ds/tokens.css, with the
+     v2 roles mapped onto it. Panels stay borderless: in light the
+     separation comes from a white fill on a warm gray page plus a
+     much shallower shadow, since a dark halo reads as dirt here. */
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+  --panel: #ffffff;
+  --row: #f0f1ec;
+  --panel-sunken: rgba(236, 237, 232, 0.72);
+  --avatar-ring: #ffffff;
+
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --line-field: rgba(48, 62, 88, 0.16);
+
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #6b7690;
+
+  --signal: #14934e;
+  --amber: #b0700a;
+  --cyan: #0f7fb0;
+  --cyan-bright: #0b6a93;
+  --violet: #7048c8;
+  --selection: rgba(15, 127, 176, 0.2);
+  --neutral-emblem: #55617a;
+  --emblem-ink: #ffffff;
+
+  --invert-fill: #141b28;
+  --invert-ink: #ffffff;
+  --keycap-ink: rgba(255, 255, 255, 0.72);
+  --keycap-line: rgba(255, 255, 255, 0.3);
+  --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+
+  --avatar-ink: #12181f;
+
+  --shadow-1:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 4px 12px rgba(28, 36, 51, 0.05);
+  --shadow-aside:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 8px 22px rgba(28, 36, 51, 0.07),
+    0 24px 52px rgba(28, 36, 51, 0.05);
+  --shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px rgba(28, 36, 51, 0.06),
+    0 12px 30px rgba(28, 36, 51, 0.10),
+    0 30px 64px rgba(28, 36, 51, 0.07);
+  --shadow-invert: 0 1px 2px rgba(28, 36, 51, 0.16), 0 8px 24px rgba(28, 36, 51, 0.18);
+  --shadow-invert-hi: 0 2px 4px rgba(28, 36, 51, 0.18), 0 14px 34px rgba(28, 36, 51, 0.2);
+  --focus-border: rgba(15, 127, 176, 0.5);
+  --focus-ring: 0 0 0 3px rgba(15, 127, 176, 0.2);
+  --glow-live: 0 0 8px rgba(20, 147, 78, 0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { min-height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: 0;
+}
+::selection { background: var(--selection); }
+button { font-family: inherit; color: inherit; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--cyan-bright); text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ================= FRAME ================= */
+
+.shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--aside-w);
+}
+
+/* ---------------- left column ---------------- */
+
+.door {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 26px 0 0;
+}
+
+.door-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: var(--gutter);
+  padding-right: 20px;
+}
+.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.brand .mark {
+  width: 26px; height: 26px;
+  border-radius: var(--radius-tile);
+  background: var(--brand-mark-fill);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--signal);
+  flex-shrink: 0;
+}
+.brand .word { font-size: 13.5px; font-weight: 600; letter-spacing: 0.01em; }
+.door-top .spacer { flex: 1; }
+
+/* Comp-only control. This file shows two states of one screen, so it
+   needs a way to see the second one. Not part of the product. */
+.state-switch { display: flex; align-items: center; gap: 9px; }
+.state-switch .sw-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.sw-group {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--row);
+}
+.sw-btn {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4.5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.sw-btn:hover { color: var(--ink); }
+.sw-btn[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+}
+
+.theme-toggle {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+.door-body {
+  flex: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 0 56px 48px var(--gutter);
+}
+
+/* ---------------- the sign-in card ---------------- */
+
+.card {
+  width: 100%;
+  max-width: var(--card-w);
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  box-shadow: var(--shadow-card);
+  padding: 36px 36px 28px;
+}
+.card[hidden] { display: none; }
+
+.eyebrow {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 28px;
+  line-height: 1.16;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  margin-bottom: 11px;
+  text-wrap: balance;
+}
+
+.subline {
+  font-size: 14.5px;
+  line-height: 1.58;
+  color: var(--ink-2);
+  max-width: var(--measure-sub);
+  text-wrap: pretty;
+  margin-bottom: 28px;
+}
+
+.auth-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: var(--invert-ink);
+  background: var(--invert-fill);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 14px 22px;
+  cursor: pointer;
+  box-shadow: var(--shadow-invert);
+  transition: transform 0.15s ease, filter 0.16s ease, box-shadow 0.2s ease;
+}
+.auth-btn:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: var(--shadow-invert-hi); }
+.auth-btn:active { transform: translateY(0); }
+.auth-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.keycap {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--keycap-ink);
+  border: 1px solid var(--keycap-line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+  margin-left: 2px;
+}
+.auth-btn[data-pending="true"] {
+  cursor: default;
+  filter: none;
+  transform: none;
+}
+.auth-btn[data-pending="true"] .keycap,
+.auth-btn[data-pending="true"] .gh-glyph { display: none; }
+.pending-dot {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 2px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse-soft 1.2s ease-in-out infinite;
+}
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+  55% { box-shadow: 0 0 0 5px transparent; }
+}
+
+.fineprint {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: var(--measure-fine);
+}
+
+.card-rule {
+  height: 1px;
+  background: var(--line);
+  margin: 22px 0 14px;
+}
+.card-foot { font-size: 12px; color: var(--ink-2); }
+.linkish {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--cyan);
+  cursor: pointer;
+}
+.linkish:hover { color: var(--cyan-bright); text-decoration: underline; }
+
+/* ---------------- access denied ---------------- */
+
+.who-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+  box-shadow: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+  margin-bottom: 20px;
+}
+:root[data-theme="light"] .who-row { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.who-row .avatar { width: 26px; height: 26px; font-size: 9px; }
+.who-txt { min-width: 0; line-height: 1.3; }
+.who-txt .nm { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
+.who-txt .hd { display: block; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); }
+.verified {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px;
+  color: var(--signal);
+  white-space: nowrap;
+}
+.verified svg { width: 12px; height: 12px; }
+
+.hand-off {
+  margin-top: 18px;
+  padding: 13px 14px 12px;
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+  box-shadow: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+}
+:root[data-theme="light"] .hand-off { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.hand-off h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+}
+.copy-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.copy-row + .copy-row { border-top: 1px solid var(--line); }
+.copy-row .cr-key {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  width: 92px;
+  flex-shrink: 0;
+}
+.copy-row .cr-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.copy-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.copy-btn:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.copy-btn.done { color: var(--signal); border-color: color-mix(in srgb, var(--signal) 40%, transparent); }
+.hand-off .hint {
+  margin-top: 9px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.deny-actions {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 22px;
+}
+.auth-btn.compact { width: auto; padding: 11px 20px; font-size: 13.5px; }
+.btn-quiet {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.btn-quiet:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+
+/* ---------------- right column: room status ---------------- */
+
+.aside {
+  margin: 22px 22px 22px 0;
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-aside);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding: 24px 24px 22px;
+}
+
+.aside-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 2px;
+  margin-bottom: 14px;
+}
+.aside-head .h { font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+.aside-head .spacer { flex: 1; }
+.live {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--signal);
+  white-space: nowrap;
+}
+.live .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: var(--glow-live);
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+.status-list { display: flex; flex-direction: column; }
+.status-row {
+  display: flex; align-items: center; gap: 13px;
+  padding: 7px 2px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  min-width: 0;
+}
+.status-row .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-row .val {
+  margin-left: auto;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--ink-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-row .val.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.status-row .val.on { color: var(--signal); font-weight: 500; }
+.status-row .val.fork { color: var(--cyan); font-weight: 500; }
+
+/* Solid emblem, with the amber and neutral variants the markup
+   actually uses rather than the single recipe the handoff states.
+   Opaque tone fill, glyph punched out in --emblem-ink, no ring,
+   no glow. */
+.emblem {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: var(--emblem-ink);
+  background: var(--tone);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(3, 6, 12, 0.45);
+}
+.emblem svg { width: 13px; height: 13px; }
+.emblem.e-room {
+  --tone: var(--amber);
+}
+.emblem.e-room svg { width: 14px; height: 14px; }
+.emblem.e-repo {
+  --tone: var(--neutral-emblem);
+}
+.emblem.e-repo svg { width: 14px; height: 14px; }
+.emblem.e-build { --tone: var(--signal); }
+.emblem.e-fork  { --tone: var(--cyan); }
+.emblem.e-adopt { --tone: var(--violet); }
+
+.since { margin-top: 34px; }
+.since h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-2);
+  margin-bottom: 15px;
+  padding: 0 2px;
+}
+.feed { display: flex; flex-direction: column; gap: 14px; }
+.feed-row { display: flex; align-items: flex-start; gap: 11px; }
+.feed-row .body { flex: 1; min-width: 0; }
+.feed-row .what {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.45;
+}
+.feed-row .what b { font-weight: 600; }
+.feed-row .sub { font-size: 13px; color: var(--ink-2); }
+.feed-row .when { font-size: 11.5px; color: var(--ink-2); flex-shrink: 0; }
+
+.avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--avatar-ink);
+  flex-shrink: 0;
+}
+.avatar.a-mj { background: var(--avatar-mj); }
+.avatar.a-tr { background: var(--avatar-tr); }
+.avatar.a-do { background: var(--avatar-do); }
+.avatar.a-sq { background: var(--avatar-sq); }
+
+.aside-fill { flex: 1; min-height: 24px; }
+
+.vote-row {
+  display: flex; align-items: center; gap: 13px;
+  margin-top: 30px;
+  padding: 0 2px;
+}
+.vote-row .pip {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+}
+.vote-row .txt { font-size: 14px; color: var(--ink); min-width: 0; }
+.vote-row .spacer { flex: 1; }
+.stack { display: flex; flex-shrink: 0; }
+.stack .avatar { border: 2px solid var(--avatar-ring); width: 22px; height: 22px; }
+.stack .avatar + .avatar { margin-left: -7px; }
+
+/* ---------------- the aside when the door says no ---------------- */
+
+/* The panel, the rows, the emblems and their colors are the member
+   panel unchanged. Only what the rows carry changes, because a person
+   who is not in the room should not learn who is in it or what they
+   are working on. The two sets of content live side by side in the
+   markup and the state picks one. */
+.aside:not([data-state="denied"]) .denied-only { display: none; }
+.aside[data-state="denied"] .member-only { display: none; }
+
+/* The slot is filled, not empty and not pending. Same right edge the
+   real value would sit on, mono because every literal here is mono,
+   in the metadata ink so it never reads as an error. */
+.withheld {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  color: var(--ink-2);
+  background: var(--panel-sunken);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  white-space: nowrap;
+}
+.feed-row .body .withheld { margin-left: 0; }
+.vote-row .withheld { margin-left: 0; }
+
+/* the avatar slot is kept so the rhythm holds, with nobody in it */
+.avatar.a-anon {
+  background: color-mix(in srgb, var(--ink-3) 22%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink-3) 30%, transparent);
+  color: var(--ink-2);
+  font-size: 10px;
+}
+
+.aside-note {
+  margin-top: 16px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  padding: 0 2px;
+}
+
+/* ================= LOAD ================= */
+.card, .aside { animation: rise 0.55s ease both; }
+.aside { animation-delay: 0.08s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1180px) {
+  :root { --gutter: 32px; }
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .door { padding-top: 22px; }
+  .door-body { justify-items: start; padding: 32px 32px 28px var(--gutter); }
+  .aside { margin: 0 32px 32px; }
+}
+@media (max-width: 620px) {
+  :root { --gutter: 18px; }
+  .door-body { padding: 26px 18px 24px; }
+  .card { padding: 26px 22px 22px; border-radius: var(--radius-panel); }
+  h1 { font-size: 24px; }
+  .aside { margin: 0 18px 22px; padding: 20px 18px 18px; }
+  .state-switch .sw-label { display: none; }
+  .sw-btn { font-size: 12px; padding: 4px 9px; }
+  .door-top { gap: 8px; padding-right: 18px; }
+  .copy-row { flex-wrap: wrap; }
+  .copy-row .cr-key { width: auto; }
+  .deny-actions .auth-btn.compact, .deny-actions .btn-quiet { flex: 1 1 auto; justify-content: center; }
+}
+
+/* ================= REDUCED MOTION ================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ================= LEFT: THE DOOR ================= -->
+  <div class="door">
+
+    <div class="door-top">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">&#9630;&#9626;</span>
+        <span class="word">Agent Rooms</span>
+      </div>
+      <span class="spacer"></span>
+      <div class="state-switch">
+        <span class="sw-label">preview</span>
+        <div class="sw-group" role="group" aria-label="Preview which sign-in state">
+          <button class="sw-btn" id="swSignin" aria-pressed="true">Sign in</button>
+          <button class="sw-btn" id="swDenied" aria-pressed="false">Access denied</button>
+        </div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light and dark" aria-label="Toggle color theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </div>
+
+    <main class="door-body">
+
+      <!-- ---------- STATE A: sign in ---------- -->
+      <section class="card" id="cardSignin" aria-labelledby="signinH1">
+        <p class="eyebrow">Closed test &middot; invited accounts only</p>
+        <h1 id="signinH1">Sign in to Agent Rooms</h1>
+        <p class="subline">Your agent works in private. The room ships the result.</p>
+
+        <button class="auth-btn" id="ghBtn">
+          <svg class="gh-glyph" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span class="lbl">Continue with GitHub</span>
+          <span class="keycap" aria-hidden="true">&#9166;</span>
+        </button>
+
+        <p class="fineprint">
+          Reads your public profile and account id. Pull requests are opened by the app on
+          the room&rsquo;s repo, never from your account.
+        </p>
+
+        <div class="card-rule"></div>
+        <p class="card-foot">Invite only while jam B runs &middot; ends aug 3</p>
+      </section>
+
+      <!-- ---------- STATE B: access denied ---------- -->
+      <section class="card" id="cardDenied" hidden aria-labelledby="deniedH1">
+        <p class="eyebrow">Access &middot; not on the invite list</p>
+        <h1 id="deniedH1">You are signed in, but not invited</h1>
+
+        <div class="who-row">
+          <span class="avatar a-sq" aria-hidden="true">WM</span>
+          <span class="who-txt">
+            <span class="nm">Wren Mercer</span>
+            <span class="hd">github.com/wren-mercer</span>
+          </span>
+          <span class="verified">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 8.4l3 3 7.4-8"/></svg>
+            GitHub verified
+          </span>
+        </div>
+
+        <p class="subline" style="max-width:none">
+          Jam B is a closed test, so every promote and adopt can be watched closely. Your account
+          is not on that list. Nothing is wrong with it, and nothing was recorded against it.
+        </p>
+
+        <div class="hand-off">
+          <h2>Send this to whoever invited you</h2>
+          <div class="copy-row">
+            <span class="cr-key">Handle</span>
+            <span class="cr-val" id="valHandle">wren-mercer</span>
+            <button class="copy-btn" data-copy="wren-mercer" aria-label="Copy handle">Copy</button>
+          </div>
+          <div class="copy-row">
+            <span class="cr-key">Account id</span>
+            <span class="cr-val" id="valId">41982265</span>
+            <button class="copy-btn" data-copy="41982265" aria-label="Copy account id">Copy</button>
+          </div>
+          <p class="hint">Either line works. The numeric id is the durable one, since handles can change and ids cannot.</p>
+        </div>
+
+        <div class="deny-actions">
+          <button class="auth-btn compact" id="ghBtnAlt">
+            <svg class="gh-glyph" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            <span class="lbl">Try a different account</span>
+          </button>
+          <button class="btn-quiet" id="toSignin">Back to sign in</button>
+        </div>
+
+        <div class="card-rule"></div>
+        <p class="card-foot">Invite only while jam B runs &middot; ends aug 3</p>
+      </section>
+    </main>
+  </div>
+
+  <!-- ================= RIGHT: ROOM STATUS ================= -->
+  <aside class="aside" aria-label="Status of the room you are returning to">
+    <div class="aside-head">
+      <span class="h">Room</span>
+      <span class="spacer"></span>
+      <span class="live"><span class="dot"></span>live</span>
+    </div>
+
+    <div class="status-list">
+      <div class="status-row">
+        <span class="emblem e-room" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="3.2" width="11.2" height="9.6" rx="2"/><path d="M2.4 6.5h11.2"/></svg>
+        </span>
+        <span class="label">night-market</span>
+        <span class="val member-only">5 builders</span>
+        <span class="withheld denied-only">withheld</span>
+      </div>
+      <div class="status-row">
+        <span class="emblem e-repo" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        </span>
+        <span class="label">nightmarket/app</span>
+        <span class="val mono member-only">e41f8c2</span>
+        <span class="withheld denied-only">withheld</span>
+      </div>
+      <div class="status-row">
+        <span class="emblem e-build" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3 3 7-7.6"/></svg>
+        </span>
+        <span class="label">Build</span>
+        <span class="val on member-only">passing</span>
+        <span class="withheld denied-only">withheld</span>
+      </div>
+      <div class="status-row">
+        <span class="emblem e-fork" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+        </span>
+        <span class="label">Forks in flight</span>
+        <span class="val fork member-only">2</span>
+        <span class="withheld denied-only">withheld</span>
+      </div>
+      <div class="status-row">
+        <span class="emblem e-adopt" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.9l1.85 3.9 4.05.55-2.95 2.95.75 4.1L8 11.35 4.3 13.4l.75-4.1L2.1 6.35l4.05-.55z"/></svg>
+        </span>
+        <span class="label">Last adopted</span>
+        <span class="val member-only">18m ago</span>
+        <span class="withheld denied-only">withheld</span>
+      </div>
+    </div>
+
+    <section class="since">
+      <h2 class="member-only">Since you were here</h2>
+      <h2 class="denied-only">What the room has been doing</h2>
+      <div class="feed">
+        <div class="feed-row">
+          <span class="avatar a-mj member-only" aria-hidden="true">MJ</span>
+          <span class="avatar a-anon denied-only" aria-hidden="true">&middot;</span>
+          <div class="body member-only">
+            <div class="what"><b>Mara&rsquo;s</b> cluster tooltips were adopted</div>
+            <div class="sub">merged to main</div>
+          </div>
+          <div class="body denied-only"><span class="withheld">withheld</span></div>
+          <span class="when member-only">18m</span>
+        </div>
+        <div class="feed-row">
+          <span class="avatar a-tr member-only" aria-hidden="true">TR</span>
+          <span class="avatar a-anon denied-only" aria-hidden="true">&middot;</span>
+          <div class="body member-only">
+            <div class="what"><b>Tom&aacute;s</b> is forking the geo flow</div>
+            <div class="sub">working now</div>
+          </div>
+          <div class="body denied-only"><span class="withheld">withheld</span></div>
+          <span class="when member-only">now</span>
+        </div>
+        <div class="feed-row">
+          <span class="avatar a-do member-only" aria-hidden="true">DO</span>
+          <span class="avatar a-anon denied-only" aria-hidden="true">&middot;</span>
+          <div class="body member-only">
+            <div class="what"><b>Dele</b> promoted a stall detail sheet</div>
+            <div class="sub">2 of 3 adopt votes</div>
+          </div>
+          <div class="body denied-only"><span class="withheld">withheld</span></div>
+          <span class="when member-only">3h</span>
+        </div>
+      </div>
+      <p class="aside-note denied-only">
+        Nothing here failed to load. The room fills these in once it adds you.
+      </p>
+    </section>
+
+    <div class="aside-fill"></div>
+
+    <div class="vote-row">
+      <span class="pip" aria-hidden="true"></span>
+      <span class="txt member-only">2 proposals need your vote</span>
+      <span class="txt denied-only">Proposals are waiting on adopt votes</span>
+      <span class="spacer"></span>
+      <span class="stack member-only" aria-hidden="true">
+        <span class="avatar a-do">DO</span>
+        <span class="avatar a-sq">SQ</span>
+      </span>
+      <span class="withheld denied-only">withheld</span>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* ---------- theme: follow the OS until the person decides ---------- */
+  var media = window.matchMedia('(prefers-color-scheme: light)');
+  var manual = false;
+
+  function applyTheme(light) {
+    root.setAttribute('data-theme', light ? 'light' : 'dark');
+  }
+  applyTheme(media.matches);
+
+  function onSystemChange(e) { if (!manual) { applyTheme(e.matches); } }
+  if (media.addEventListener) { media.addEventListener('change', onSystemChange); }
+  else if (media.addListener) { media.addListener(onSystemChange); }
+
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    manual = true;
+    applyTheme(root.getAttribute('data-theme') !== 'light');
+  });
+
+  /* ---------- the two states of the door (comp only) ---------- */
+  var cardSignin = document.getElementById('cardSignin');
+  var cardDenied = document.getElementById('cardDenied');
+  var swSignin = document.getElementById('swSignin');
+  var swDenied = document.getElementById('swDenied');
+  var aside = document.querySelector('.aside');
+
+  function showState(which) {
+    var denied = which === 'denied';
+    cardSignin.hidden = denied;
+    cardDenied.hidden = !denied;
+    /* the aside keeps its shape and loses its contents */
+    aside.setAttribute('data-state', denied ? 'denied' : 'member');
+    swSignin.setAttribute('aria-pressed', denied ? 'false' : 'true');
+    swDenied.setAttribute('aria-pressed', denied ? 'true' : 'false');
+  }
+
+  swSignin.addEventListener('click', function () { showState('signin'); });
+  swDenied.addEventListener('click', function () { showState('denied'); });
+  document.getElementById('toSignin').addEventListener('click', function () { showState('signin'); });
+
+  /* ---------- the button's pending state, honestly shown ---------- */
+  function wirePending(btn) {
+    if (!btn) { return; }
+    btn.addEventListener('click', function () {
+      if (btn.getAttribute('data-pending') === 'true') { return; }
+      var label = btn.querySelector('.lbl');
+      var was = label.textContent;
+      btn.setAttribute('data-pending', 'true');
+      label.innerHTML = 'opening github.com <span class="pending-dot"></span>';
+      setTimeout(function () {
+        btn.removeAttribute('data-pending');
+        label.textContent = was;
+      }, 1700);
+    });
+  }
+  wirePending(document.getElementById('ghBtn'));
+  wirePending(document.getElementById('ghBtnAlt'));
+
+  /* ---------- copy the two lines the allowlist actually accepts ---------- */
+  [].slice.call(document.querySelectorAll('.copy-btn')).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      var done = function () {
+        btn.classList.add('done');
+        btn.textContent = 'Copied';
+        setTimeout(function () {
+          btn.classList.remove('done');
+          btn.textContent = 'Copy';
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, done);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (err) { /* nothing to do */ }
+        document.body.removeChild(ta);
+        done();
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "forks_version_contributor_idx" ON "forks" USING btree ("proposal_id","proposal_version_id","by_contributor_id");

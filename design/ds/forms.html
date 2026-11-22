@@ -1,0 +1,205 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signal Lab - Form surfaces</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  background: #05070a;
+  color: #cbd2e0;
+  padding: 28px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+h1.doc-title { font-size: 19px; font-weight: 700; color: #f2f4f9; margin-bottom: 4px; }
+p.doc-sub { font-size: 12.5px; color: #7d879c; margin-bottom: 24px; max-width: 78ch; }
+h2.doc-h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7d879c; margin: 30px 0 12px; }
+h2.doc-h2:first-of-type { margin-top: 0; }
+.compare-wrap { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.panel-tag { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7d879c; margin-bottom: 8px; }
+
+.panel-dark, .panel-light {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+.panel-dark {
+  --bg: #0b0e14; --panel: #10141d; --panel-2: #141926; --card: #131826;
+  --line: rgba(148,168,205,0.13); --line-strong: rgba(148,168,205,0.22);
+  --hairline: rgba(148,168,205,0.09);
+  --ink: #e6ebf5; --ink-2: #9aa7bf; --ink-3: #5f6c85;
+  --signal: #4ade80; --cyan: #53c5f0;
+  --shadow-card: 0 1px 1px rgba(0,0,0,0.22), 0 6px 16px rgba(3,6,12,0.30), 0 18px 40px rgba(3,6,12,0.22);
+  --shadow-float: 0 1px 0 rgba(148,168,205,0.07) inset, 0 2px 4px rgba(0,0,0,0.28), 0 14px 34px rgba(2,4,9,0.5), 0 32px 72px rgba(2,4,9,0.36);
+  --shadow-input: inset 0 1px 3px rgba(0,0,0,0.26), inset 0 0 0 1px rgba(148,168,205,0.07), 0 1px 0 rgba(148,168,205,0.05);
+  --focus-ring: 0 0 0 3px rgba(83,197,240,0.24), 0 0 20px rgba(83,197,240,0.2);
+  --send-fill: #e6ebf5; --send-ink: #0b0e14;
+  --scrim: rgba(0,0,0,0.62); --modal-bg: #0e121c; --input-bg: #1a2132;
+  --field-border: rgba(148,168,205,0.17); --panel-raised: #1c2436; --label-ink: #8b9ab6;
+  --btn-punch-fill: #f6f9ff; --btn-punch-ink: #05070a;
+}
+.panel-light {
+  --bg: #f3f4f0; --panel: #fafaf7; --panel-2: #f0f1ec; --card: #ffffff;
+  --line: rgba(48,62,88,0.13); --line-strong: rgba(48,62,88,0.24);
+  --hairline: rgba(48,62,88,0.09);
+  --ink: #1c2433; --ink-2: #55617a; --ink-3: #8b96ab;
+  --signal: #14934e; --cyan: #0f7fb0;
+  --shadow-card: 0 1px 1px rgba(28,36,51,0.05), 0 5px 14px rgba(28,36,51,0.06), 0 16px 36px rgba(28,36,51,0.05);
+  --shadow-float: 0 1px 0 rgba(255,255,255,0.65) inset, 0 2px 4px rgba(28,36,51,0.07), 0 12px 30px rgba(28,36,51,0.12), 0 30px 64px rgba(28,36,51,0.08);
+  --shadow-input: inset 0 1px 3px rgba(28,36,51,0.08), inset 0 0 0 1px rgba(48,62,88,0.05), 0 1px 0 rgba(255,255,255,0.6);
+  --focus-ring: 0 0 0 3px rgba(15,127,176,0.2), 0 0 18px rgba(15,127,176,0.14);
+  --send-fill: #1c2433; --send-ink: #f6f7f4;
+  --scrim: rgba(12,16,24,0.55); --modal-bg: #f6f7f2; --input-bg: #edeee8;
+  --field-border: rgba(48,62,88,0.16); --panel-raised: #ffffff; --label-ink: #6b7690;
+  --btn-punch-fill: #141b28; --btn-punch-ink: #ffffff;
+}
+
+/* ===== Codex-style form surfaces, three tiers ===== */
+.frame { width: 440px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line-strong); padding: 22px; }
+
+.modal-box {
+  background: var(--modal-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent), var(--shadow-float);
+  padding: 22px 24px 24px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.modal-head { display: flex; align-items: center; gap: 10px; }
+.modal-head h3 { font-size: 16px; font-weight: 700; flex: 1; color: var(--ink); }
+.modal-close {
+  width: 26px; height: 26px; border-radius: 8px;
+  border: 1px solid var(--hairline);
+  background: linear-gradient(to bottom, var(--panel-2), var(--panel));
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--bg) 50%, transparent);
+  color: var(--ink-2); cursor: pointer; display: grid; place-items: center;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--label-ink);
+}
+.surface-input,
+.field input, .field textarea {
+  background: var(--input-bg);
+  border: 1px solid var(--field-border);
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  box-shadow: var(--shadow-input);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  font-family: var(--font-ui);
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--ink-3); }
+.field input.mono { font-family: var(--font-mono); font-size: 12px; }
+.field textarea { resize: vertical; min-height: 70px; }
+.surface-input.focused,
+.field .focused {
+  border-color: color-mix(in srgb, var(--cyan) 30%, var(--hairline));
+  box-shadow: var(--shadow-input), var(--focus-ring);
+}
+
+.surface-panel {
+  background: var(--panel-raised);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 14px 16px;
+}
+.surface-panel h4 {
+  font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--label-ink); margin-bottom: 8px;
+}
+.surface-panel p { font-size: 12.5px; color: var(--ink-2); }
+.scan-clean { color: var(--signal); font-size: 12.5px; }
+
+.modal-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+.btn-secondary {
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+  background: transparent; border: 1px solid var(--hairline); border-radius: 999px;
+  padding: 8px 16px; cursor: pointer;
+}
+.btn-primary {
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--btn-punch-ink);
+  background: var(--btn-punch-fill);
+  border: none; border-radius: 999px; padding: 9px 18px; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25), 0 4px 12px color-mix(in srgb, var(--bg) 45%, transparent);
+}
+.row2 { display: flex; gap: 12px; }
+.row2 .field { flex: 1; }
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">Components - Form surfaces</h1>
+<p class="doc-sub">Three reusable surface tiers, tokens only, nothing flat-outlined: <code>.surface-input</code> (fields and textareas: gently inset layered shadow, 14px radius, calm placeholder, luminous cyan focus ring instead of a hard border change), <code>.surface-panel</code> (publish preview, remix-note editor, fork bundle parts: a card layer floating above the modal background), and <code>.modal-box</code> (deepest tier, floating on a blurred scrim via <code>backdrop-filter</code> on the overlay). Buttons speak the composer cluster language: hairline secondary pill, confident filled primary pill on the send inversion.</p>
+
+<h2 class="doc-h2">Modal with all three tiers (focus state forced on intent)</h2>
+<div class="compare-wrap">
+  <div>
+    <div class="panel-tag">● dark</div>
+    <div class="frame panel-dark">
+      <div class="modal-box">
+        <div class="modal-head"><h3>Promote to room</h3><button class="modal-close">×</button></div>
+        <div class="field">
+          <label>Intent summary</label>
+          <input class="focused" value="Open-hours model for vendors">
+        </div>
+        <div class="field">
+          <label>Diff</label>
+          <textarea placeholder="Paste the diff to publish"></textarea>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Base commit</label><input class="mono" placeholder="a3d91be"></div>
+          <div class="field"><label>Head commit</label><input class="mono" placeholder="7c02f4d"></div>
+        </div>
+        <div class="surface-panel">
+          <h4>Publish preview</h4>
+          <p>Open-hours model for vendors</p>
+          <span class="scan-clean">Secret scan clean</span>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary">Cancel</button>
+          <button class="btn-primary">Publish to room</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="panel-tag">● light</div>
+    <div class="frame panel-light">
+      <div class="modal-box">
+        <div class="modal-head"><h3>Promote to room</h3><button class="modal-close">×</button></div>
+        <div class="field">
+          <label>Intent summary</label>
+          <input class="focused" value="Open-hours model for vendors">
+        </div>
+        <div class="field">
+          <label>Diff</label>
+          <textarea placeholder="Paste the diff to publish"></textarea>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Base commit</label><input class="mono" placeholder="a3d91be"></div>
+          <div class="field"><label>Head commit</label><input class="mono" placeholder="7c02f4d"></div>
+        </div>
+        <div class="surface-panel">
+          <h4>Publish preview</h4>
+          <p>Open-hours model for vendors</p>
+          <span class="scan-clean">Secret scan clean</span>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary">Cancel</button>
+          <button class="btn-primary">Publish to room</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

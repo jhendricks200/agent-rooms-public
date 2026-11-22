@@ -1,0 +1,1220 @@
+<!-- @dsCard group="Explorations" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms &middot; Denied-state aside, four options</title>
+<style>
+/* ============================================================
+   EXPLORATION · WHAT THE ASIDE SHOWS IN THE DENIED STATE
+
+   A review artifact, not a screen. Four options for one open
+   question: in the access-denied state of screen-signin.html,
+   the right-hand 540px room-status aside is showing a private
+   room's internals to someone who is explicitly not a member.
+
+   Tokens, aside markup and aside classes are lifted verbatim
+   from design/screen-signin.html so the options are judged on
+   their content decision, not on drift in the system. Only two
+   additions exist below, both scoped to option B: .withheld and
+   .redact-bar, which are how "the row exists, the value does
+   not" is drawn in this vocabulary.
+
+   The frame around the options is deliberately plain.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- surfaces ---- */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --panel: #171d2e;
+  --row: #141926;
+  --panel-sunken: rgba(20, 25, 38, 0.5);
+  --avatar-ring: #10141d;
+
+  /* ---- lines: dividers and controls only ---- */
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --line-field: rgba(148, 168, 205, 0.17);
+
+  /* ---- ink: two levels do the work ---- */
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #8b9ab6;
+
+  /* ---- signal colors ---- */
+  --signal: #4ade80;
+  --amber: #fbbf5e;
+  --cyan: #53c5f0;
+  --cyan-bright: #7ad3f5;
+  --violet: #b18cf5;
+  --selection: rgba(83, 197, 240, 0.26);
+  --neutral-emblem: #e6ebf5;
+  --emblem-ink: #0b0e14;
+
+  /* ---- inverted action fill ---- */
+  --invert-fill: #f6f9ff;
+  --invert-ink: #05070a;
+  --keycap-ink: rgba(5, 7, 10, 0.62);
+  --keycap-line: rgba(5, 7, 10, 0.24);
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+
+  /* ---- avatars ---- */
+  --avatar-mj: #d3aef0;
+  --avatar-tr: #f0c489;
+  --avatar-do: #86bfe8;
+  --avatar-sq: #f0a3b1;
+  --avatar-ink: #0b0e14;
+
+  /* ---- elevation: three tiers, no panel borders ---- */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+  --shadow-aside:
+    inset 0 1px 0 rgba(148, 168, 205, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 10px 26px rgba(3, 6, 12, 0.34),
+    0 28px 60px rgba(3, 6, 12, 0.26);
+  --shadow-card:
+    0 1px 0 rgba(148, 168, 205, 0.07) inset,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 14px 34px rgba(2, 4, 9, 0.5),
+    0 32px 72px rgba(2, 4, 9, 0.36);
+  --shadow-invert: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(11, 14, 20, 0.6);
+  --shadow-invert-hi: 0 2px 4px rgba(0, 0, 0, 0.28), 0 14px 34px rgba(11, 14, 20, 0.62);
+  --focus-border: rgba(83, 197, 240, 0.4);
+  --focus-ring: 0 0 0 3px rgba(83, 197, 240, 0.24);
+  --glow-live: 0 0 8px rgba(74, 222, 128, 0.7);
+
+  /* ---- redaction hatch, option B only ---- */
+  --hatch: rgba(148, 168, 205, 0.20);
+
+  /* ---- radii ---- */
+  --radius-keycap: 4px;
+  --radius-mark: 7px;
+  --radius-tile: 8px;
+  --radius-field: 11px;
+  --radius-panel: 16px;
+  --radius-panel-lg: 18px;
+  --radius-panel-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ---- measure: pixel caps, not ch ---- */
+  --measure-sub: 340px;
+  --measure-fine: 390px;
+
+  /* ---- layout ---- */
+  --aside-w: 540px;
+  --card-w: 472px;
+  --gutter: 62px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+  --panel: #ffffff;
+  --row: #f0f1ec;
+  --panel-sunken: rgba(236, 237, 232, 0.72);
+  --avatar-ring: #ffffff;
+
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --line-field: rgba(48, 62, 88, 0.16);
+
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #6b7690;
+
+  --signal: #14934e;
+  --amber: #b0700a;
+  --cyan: #0f7fb0;
+  --cyan-bright: #0b6a93;
+  --violet: #7048c8;
+  --selection: rgba(15, 127, 176, 0.2);
+  --neutral-emblem: #55617a;
+  --emblem-ink: #ffffff;
+
+  --invert-fill: #141b28;
+  --invert-ink: #ffffff;
+  --keycap-ink: rgba(255, 255, 255, 0.72);
+  --keycap-line: rgba(255, 255, 255, 0.3);
+  --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+
+  --avatar-ink: #12181f;
+
+  --hatch: rgba(48, 62, 88, 0.18);
+
+  --shadow-1:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 4px 12px rgba(28, 36, 51, 0.05);
+  --shadow-aside:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 8px 22px rgba(28, 36, 51, 0.07),
+    0 24px 52px rgba(28, 36, 51, 0.05);
+  --shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px rgba(28, 36, 51, 0.06),
+    0 12px 30px rgba(28, 36, 51, 0.10),
+    0 30px 64px rgba(28, 36, 51, 0.07);
+  --shadow-invert: 0 1px 2px rgba(28, 36, 51, 0.16), 0 8px 24px rgba(28, 36, 51, 0.18);
+  --shadow-invert-hi: 0 2px 4px rgba(28, 36, 51, 0.18), 0 14px 34px rgba(28, 36, 51, 0.2);
+  --focus-border: rgba(15, 127, 176, 0.5);
+  --focus-ring: 0 0 0 3px rgba(15, 127, 176, 0.2);
+  --glow-live: 0 0 8px rgba(20, 147, 78, 0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { min-height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: 0;
+}
+::selection { background: var(--selection); }
+button { font-family: inherit; color: inherit; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--cyan-bright); text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ================= REVIEW FRAME (plain on purpose) ================= */
+
+.sheet {
+  position: relative;
+  z-index: 1;
+  padding: 26px 26px 64px;
+}
+
+.sheet-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.brand .mark {
+  width: 26px; height: 26px;
+  border-radius: var(--radius-tile);
+  background: var(--brand-mark-fill);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--signal);
+  flex-shrink: 0;
+}
+.brand .word { font-size: 13.5px; font-weight: 600; letter-spacing: 0.01em; }
+.sheet-top .spacer { flex: 1; }
+
+.sheet-title { margin-top: 2px; }
+.sheet-title h1 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.25;
+}
+.sheet-title p {
+  margin-top: 5px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 720px;
+  text-wrap: pretty;
+}
+
+.theme-toggle {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+/* three options at their true width; the strip scrolls rather than
+   scaling, because 540px is the thing being judged */
+.strip-wrap { position: relative; }
+.strip {
+  display: flex;
+  gap: 26px;
+  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 14px;
+  scrollbar-width: thin;
+}
+/* three 540px panels do not fit 1440. The row scrolls rather than
+   scaling, because the width is the thing being judged. */
+.strip-edge {
+  position: absolute;
+  top: 0; right: 0; bottom: 14px;
+  width: 56px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--bg));
+  transition: opacity 0.2s ease;
+}
+.strip-hint {
+  margin: 8px 2px 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.opt {
+  flex: 0 0 var(--aside-w);
+  width: var(--aside-w);
+  display: flex;
+  flex-direction: column;
+}
+.opt.wide { flex: 0 0 auto; width: auto; }
+/* all three panels take the height of the tallest, so the row is a
+   comparison and not a ragged edge */
+.strip .aside { flex: 1 0 auto; }
+
+.cap {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-bottom: 11px;
+  padding: 0 2px;
+}
+.cap .letter {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 6px;
+  flex-shrink: 0;
+}
+.cap .name { font-size: 14.5px; font-weight: 600; }
+
+.tradeoff {
+  margin-top: 12px;
+  padding: 0 2px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.sheet-rule {
+  height: 1px;
+  background: var(--line);
+  margin: 40px 0 30px;
+}
+
+/* the reduced-scale full frame for option D */
+.thumb-clip {
+  position: relative;
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--line);
+  background: var(--bg);
+}
+.thumb-scale {
+  transform-origin: top left;
+  transform: scale(0.62);
+}
+.frame {
+  width: 1440px;
+  height: 860px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+}
+
+/* ================= SIGN-IN SCREEN PARTS (from screen-signin.html) ================= */
+
+.shell {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.door {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 26px 0 0;
+}
+.door-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: var(--gutter);
+  padding-right: 24px;
+}
+.door-body {
+  flex: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 0 var(--gutter) 48px;
+}
+
+.card {
+  width: 100%;
+  max-width: var(--card-w);
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  box-shadow: var(--shadow-card);
+  padding: 36px 36px 28px;
+}
+
+.eyebrow { font-size: 12.5px; color: var(--ink-2); margin-bottom: 20px; }
+.card h1 {
+  font-size: 28px;
+  line-height: 1.16;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  margin-bottom: 11px;
+  text-wrap: balance;
+}
+.subline {
+  font-size: 14.5px;
+  line-height: 1.58;
+  color: var(--ink-2);
+  max-width: var(--measure-sub);
+  text-wrap: pretty;
+  margin-bottom: 28px;
+}
+.auth-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: var(--invert-ink);
+  background: var(--invert-fill);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 14px 22px;
+  cursor: pointer;
+  box-shadow: var(--shadow-invert);
+}
+.auth-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.auth-btn.compact { width: auto; padding: 11px 20px; font-size: 13.5px; }
+.btn-quiet {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  cursor: pointer;
+}
+.card-rule { height: 1px; background: var(--line); margin: 22px 0 14px; }
+.card-foot { font-size: 12px; color: var(--ink-2); }
+
+.who-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+  box-shadow: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+  margin-bottom: 20px;
+}
+:root[data-theme="light"] .who-row { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.who-row .avatar { width: 26px; height: 26px; font-size: 9px; }
+.who-txt { min-width: 0; line-height: 1.3; }
+.who-txt .nm { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
+.who-txt .hd { display: block; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); }
+.verified {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px;
+  color: var(--signal);
+  white-space: nowrap;
+}
+.verified svg { width: 12px; height: 12px; }
+
+.hand-off {
+  margin-top: 18px;
+  padding: 13px 14px 12px;
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+  box-shadow: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+}
+:root[data-theme="light"] .hand-off { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.hand-off h2 { font-size: 14px; font-weight: 400; color: var(--ink-2); margin-bottom: 8px; }
+.copy-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.copy-row + .copy-row { border-top: 1px solid var(--line); }
+.copy-row .cr-key { font-size: 12.5px; color: var(--ink-2); width: 92px; flex-shrink: 0; }
+.copy-row .cr-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.copy-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.hand-off .hint { margin-top: 9px; font-size: 12px; line-height: 1.55; color: var(--ink-2); }
+.deny-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+
+/* ---------------- the aside itself ---------------- */
+
+.aside {
+  width: var(--aside-w);
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-aside);
+  display: flex;
+  flex-direction: column;
+  min-height: 560px;
+  min-width: 0;
+  padding: 24px 24px 22px;
+}
+
+.aside-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 2px;
+  margin-bottom: 14px;
+}
+.aside-head .h { font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+.aside-head .spacer { flex: 1; }
+.live {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--signal);
+  white-space: nowrap;
+}
+.live .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: var(--glow-live);
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+  55% { box-shadow: 0 0 0 5px transparent; }
+}
+
+/* the head's locked variant, option B: same slot, no live signal */
+.locked {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.locked svg { width: 12px; height: 12px; }
+
+.status-list { display: flex; flex-direction: column; }
+.status-row {
+  display: flex; align-items: center; gap: 13px;
+  padding: 7px 2px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  min-width: 0;
+}
+.status-row .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-row .val {
+  margin-left: auto;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--ink-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-row .val.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.status-row .val.on { color: var(--signal); font-weight: 500; }
+.status-row .val.fork { color: var(--cyan); font-weight: 500; }
+
+.emblem {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: var(--emblem-ink);
+  background: var(--tone);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(3, 6, 12, 0.45);
+}
+.emblem svg { width: 13px; height: 13px; }
+.emblem.e-room {
+  --tone: var(--amber);
+}
+.emblem.e-room svg { width: 14px; height: 14px; }
+.emblem.e-repo {
+  --tone: var(--neutral-emblem);
+}
+.emblem.e-repo svg { width: 14px; height: 14px; }
+.emblem.e-build { --tone: var(--signal); }
+.emblem.e-fork  { --tone: var(--cyan); }
+.emblem.e-adopt { --tone: var(--violet); }
+/* the drained variant, option B: the emblem slot keeps its shape and
+   loses its meaning-carrying hue. Solid fill, same as every other
+   state, just toned down to ink-3 instead of an accent. */
+.emblem.e-muted {
+  --tone: var(--ink-3);
+}
+
+.since { margin-top: 34px; }
+.since h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-2);
+  margin-bottom: 15px;
+  padding: 0 2px;
+}
+.feed { display: flex; flex-direction: column; gap: 14px; }
+.feed-row { display: flex; align-items: flex-start; gap: 11px; }
+.feed-row .body { flex: 1; min-width: 0; }
+.feed-row .what { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.45; }
+.feed-row .what b { font-weight: 600; }
+.feed-row .sub { font-size: 13px; color: var(--ink-2); }
+.feed-row .when { font-size: 11.5px; color: var(--ink-2); flex-shrink: 0; }
+
+.avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--avatar-ink);
+  flex-shrink: 0;
+}
+.avatar.a-mj { background: var(--avatar-mj); }
+.avatar.a-tr { background: var(--avatar-tr); }
+.avatar.a-do { background: var(--avatar-do); }
+.avatar.a-sq { background: var(--avatar-sq); }
+.avatar.a-anon {
+  background: color-mix(in srgb, var(--ink-3) 22%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink-3) 30%, transparent);
+  color: var(--ink-2);
+  font-size: 10px;
+}
+
+.aside-fill { flex: 1; min-height: 24px; }
+
+.vote-row {
+  display: flex; align-items: center; gap: 13px;
+  margin-top: 30px;
+  padding: 0 2px;
+}
+.vote-row .pip { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+.vote-row .txt { font-size: 14px; color: var(--ink); min-width: 0; }
+.vote-row .spacer { flex: 1; }
+.stack { display: flex; flex-shrink: 0; }
+.stack .avatar { border: 2px solid var(--avatar-ring); width: 22px; height: 22px; }
+.stack .avatar + .avatar { margin-left: -7px; }
+
+/* ================= OPTION B ONLY: WITHHELD ================= */
+
+/* The value is not missing and not loading. It is a filled slot that
+   states its own rule, in the metadata ink, at the same right edge the
+   real value would occupy. Mono because every literal in this system
+   is mono. */
+.withheld {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: lowercase;
+  color: var(--ink-2);
+  background: var(--panel-sunken);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  white-space: nowrap;
+}
+/* a hatched bar stands in for a line of prose. 45-degree rule at the
+   line color, so it reads as a drawn placeholder rather than a skeleton
+   waiting on the network */
+.redact-bar {
+  height: 9px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--hatch) 0 1px,
+    transparent 1px 5px
+  );
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.redact-bar + .redact-bar { margin-top: 7px; }
+.rb-1 { width: 78%; }
+.rb-2 { width: 48%; }
+.rb-3 { width: 66%; }
+.rb-4 { width: 38%; }
+.rb-5 { width: 71%; }
+.rb-6 { width: 44%; }
+
+.aside-note {
+  margin-top: 14px;
+  padding: 11px 12px;
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+  box-shadow: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+:root[data-theme="light"] .aside-note { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+
+/* ================= OPTION C ONLY: NEUTRAL ================= */
+
+.neutral-top { padding: 2px 2px 0; }
+.neutral-mark {
+  width: 34px; height: 34px;
+  border-radius: var(--radius-mark);
+  background: var(--brand-mark-fill);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--signal);
+  margin-bottom: 18px;
+}
+.neutral-top h2 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.25;
+  margin-bottom: 9px;
+}
+.neutral-top p {
+  font-size: 14px;
+  line-height: 1.58;
+  color: var(--ink-2);
+  max-width: 400px;
+  text-wrap: pretty;
+}
+.steps { margin-top: 26px; display: flex; flex-direction: column; gap: 16px; }
+.step { display: flex; align-items: flex-start; gap: 13px; padding: 0 2px; }
+.step .n {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  padding-top: 3px;
+  flex-shrink: 0;
+  width: 16px;
+}
+.step .t { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.45; }
+.step .d { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+
+.neutral-foot {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* ================= REDUCED MOTION ================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="sheet-top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">&#9630;&#9626;</span>
+      <span class="word">Agent Rooms</span>
+    </div>
+    <div class="sheet-title">
+      <h1>Denied state &middot; what the room-status aside should show</h1>
+      <p>
+        In the access-denied state of the sign-in screen, the 540px aside currently renders
+        the same room internals it renders for a member: room name, repo and head SHA, build,
+        forks, last adopted, and a feed naming people. Four options, at the true width they ship at.
+      </p>
+    </div>
+    <span class="spacer"></span>
+    <button class="theme-toggle" id="themeToggle" title="Toggle light and dark" aria-label="Toggle color theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </div>
+
+  <div class="strip-wrap">
+  <div class="strip" id="strip">
+
+    <!-- ================= A ================= -->
+    <div class="opt">
+      <div class="cap">
+        <span class="letter">A</span>
+        <span class="name">Keep it as is</span>
+      </div>
+
+      <aside class="aside" aria-label="Option A, the aside unchanged">
+        <div class="aside-head">
+          <span class="h">Room</span>
+          <span class="spacer"></span>
+          <span class="live"><span class="dot"></span>live</span>
+        </div>
+
+        <div class="status-list">
+          <div class="status-row">
+            <span class="emblem e-room" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="3.2" width="11.2" height="9.6" rx="2"/><path d="M2.4 6.5h11.2"/></svg>
+            </span>
+            <span class="label">night-market</span>
+            <span class="val">5 builders</span>
+          </div>
+          <div class="status-row">
+            <span class="emblem e-repo" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </span>
+            <span class="label">nightmarket/app</span>
+            <span class="val mono">e41f8c2</span>
+          </div>
+          <div class="status-row">
+            <span class="emblem e-build" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3 3 7-7.6"/></svg>
+            </span>
+            <span class="label">Build</span>
+            <span class="val on">passing</span>
+          </div>
+          <div class="status-row">
+            <span class="emblem e-fork" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+            </span>
+            <span class="label">Forks in flight</span>
+            <span class="val fork">2</span>
+          </div>
+          <div class="status-row">
+            <span class="emblem e-adopt" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.9l1.85 3.9 4.05.55-2.95 2.95.75 4.1L8 11.35 4.3 13.4l.75-4.1L2.1 6.35l4.05-.55z"/></svg>
+            </span>
+            <span class="label">Last adopted</span>
+            <span class="val">18m ago</span>
+          </div>
+        </div>
+
+        <section class="since">
+          <h2>Since you were here</h2>
+          <div class="feed">
+            <div class="feed-row">
+              <span class="avatar a-mj" aria-hidden="true">MJ</span>
+              <div class="body">
+                <div class="what"><b>Mara&rsquo;s</b> cluster tooltips were adopted</div>
+                <div class="sub">merged to main</div>
+              </div>
+              <span class="when">18m</span>
+            </div>
+            <div class="feed-row">
+              <span class="avatar a-tr" aria-hidden="true">TR</span>
+              <div class="body">
+                <div class="what"><b>Tom&aacute;s</b> is forking the geo flow</div>
+                <div class="sub">working now</div>
+              </div>
+              <span class="when">now</span>
+            </div>
+            <div class="feed-row">
+              <span class="avatar a-do" aria-hidden="true">DO</span>
+              <div class="body">
+                <div class="what"><b>Dele</b> promoted a stall detail sheet</div>
+                <div class="sub">2 of 3 adopt votes</div>
+              </div>
+              <span class="when">3h</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="aside-fill"></div>
+
+        <div class="vote-row">
+          <span class="pip" aria-hidden="true"></span>
+          <span class="txt">2 proposals need your vote</span>
+          <span class="spacer"></span>
+          <span class="stack" aria-hidden="true">
+            <span class="avatar a-do">DO</span>
+            <span class="avatar a-sq">SQ</span>
+          </span>
+        </div>
+      </aside>
+
+      <p class="tradeoff">
+        The screen stays whole and the room looks alive, and a person who is not a member reads
+        the repo name, its head SHA, five builders&rsquo; activity and three of their names.
+      </p>
+    </div>
+
+    <!-- ================= B ================= -->
+    <div class="opt">
+      <div class="cap">
+        <span class="letter">B</span>
+        <span class="name">Redacted</span>
+      </div>
+
+      <aside class="aside" aria-label="Option B, the same rows with values withheld">
+        <div class="aside-head">
+          <span class="h">Room</span>
+          <span class="spacer"></span>
+          <span class="locked">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/></svg>
+            members only
+          </span>
+        </div>
+
+        <div class="status-list">
+          <div class="status-row">
+            <span class="emblem e-muted" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="3.2" width="11.2" height="9.6" rx="2"/><path d="M2.4 6.5h11.2"/></svg>
+            </span>
+            <span class="label">Room</span>
+            <span class="withheld">withheld</span>
+          </div>
+          <div class="status-row">
+            <span class="emblem e-muted" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </span>
+            <span class="label">Repo</span>
+            <span class="withheld">withheld</span>
+          </div>
+          <div class="status-row">
+            <span class="emblem e-muted" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3 3 7-7.6"/></svg>
+            </span>
+            <span class="label">Build</span>
+            <span class="withheld">withheld</span>
+          </div>
+          <div class="status-row">
+            <span class="emblem e-muted" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+            </span>
+            <span class="label">Forks in flight</span>
+            <span class="withheld">withheld</span>
+          </div>
+          <div class="status-row">
+            <span class="emblem e-muted" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.9l1.85 3.9 4.05.55-2.95 2.95.75 4.1L8 11.35 4.3 13.4l.75-4.1L2.1 6.35l4.05-.55z"/></svg>
+            </span>
+            <span class="label">Last adopted</span>
+            <span class="withheld">withheld</span>
+          </div>
+        </div>
+
+        <section class="since">
+          <h2>Since you were here</h2>
+          <div class="feed">
+            <div class="feed-row">
+              <span class="avatar a-anon" aria-hidden="true">&middot;</span>
+              <div class="body">
+                <div class="redact-bar rb-1"></div>
+                <div class="redact-bar rb-2"></div>
+              </div>
+              <span class="when">&mdash;</span>
+            </div>
+            <div class="feed-row">
+              <span class="avatar a-anon" aria-hidden="true">&middot;</span>
+              <div class="body">
+                <div class="redact-bar rb-3"></div>
+                <div class="redact-bar rb-4"></div>
+              </div>
+              <span class="when">&mdash;</span>
+            </div>
+            <div class="feed-row">
+              <span class="avatar a-anon" aria-hidden="true">&middot;</span>
+              <div class="body">
+                <div class="redact-bar rb-5"></div>
+                <div class="redact-bar rb-6"></div>
+              </div>
+              <span class="when">&mdash;</span>
+            </div>
+          </div>
+        </section>
+
+        <p class="aside-note">
+          Held back because your account is not on the room&rsquo;s list. Nothing here has failed
+          to load. It fills in the moment you are added.
+        </p>
+
+        <div class="aside-fill"></div>
+
+        <div class="vote-row">
+          <span class="pip" aria-hidden="true" style="background: var(--ink-3)"></span>
+          <span class="txt" style="color: var(--ink-2)">Proposals awaiting votes</span>
+          <span class="spacer"></span>
+          <span class="withheld" style="margin-left:0">withheld</span>
+        </div>
+      </aside>
+
+      <p class="tradeoff">
+        The rows, their count and their order stay legible, which tells an outsider exactly which
+        facts the room tracks, while every value and every name is held back.
+      </p>
+    </div>
+
+    <!-- ================= C ================= -->
+    <div class="opt">
+      <div class="cap">
+        <span class="letter">C</span>
+        <span class="name">Neutral replacement</span>
+      </div>
+
+      <aside class="aside" aria-label="Option C, the panel carrying no room data">
+        <div class="neutral-top">
+          <div class="neutral-mark" aria-hidden="true">&#9630;&#9626;</div>
+          <h2>Rooms where builders ship together</h2>
+          <p>
+            Every person in a room works with their own agent in private. The room only sees what
+            someone chooses to promote.
+          </p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <span class="n">01</span>
+            <div>
+              <div class="t">Promote</div>
+              <div class="d">Publish your agent&rsquo;s output as a proposal. It opens a real pull request.</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="n">02</span>
+            <div>
+              <div class="t">Fork</div>
+              <div class="d">Take someone else&rsquo;s proposal into your own workspace and remix it.</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="n">03</span>
+            <div>
+              <div class="t">Adopt</div>
+              <div class="d">The room merges the winner, pinned to a SHA, with credit recorded.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="aside-fill"></div>
+
+        <p class="neutral-foot">
+          Agent Rooms is in a closed test while jam B runs, and ends aug 3. Rooms and their
+          activity are visible to members only.
+        </p>
+      </aside>
+
+      <p class="tradeoff">
+        Nothing about any room crosses the boundary, and the panel now explains the product to
+        someone who was already told they cannot use it.
+      </p>
+    </div>
+  </div>
+  <div class="strip-edge" id="stripEdge" aria-hidden="true"></div>
+  </div>
+  <p class="strip-hint" id="stripHint">A, B and C are drawn at the shipping width of 540px. Scroll the row sideways to reach C.</p>
+
+  <div class="sheet-rule"></div>
+
+  <!-- ================= D ================= -->
+  <div class="opt wide">
+    <div class="cap">
+      <span class="letter">D</span>
+      <span class="name">No aside</span>
+      <span style="font-size:12px;color:var(--ink-2)">full frame, 1440 &times; 860, shown at 62%</span>
+    </div>
+
+    <div class="thumb-clip" id="thumbClip">
+      <div class="thumb-scale" id="thumbScale">
+        <div class="frame">
+          <div class="shell">
+            <div class="door">
+              <div class="door-top">
+                <div class="brand">
+                  <span class="mark" aria-hidden="true">&#9630;&#9626;</span>
+                  <span class="word">Agent Rooms</span>
+                </div>
+                <span class="spacer" style="flex:1"></span>
+                <button class="theme-toggle" tabindex="-1" aria-hidden="true">
+                  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                </button>
+              </div>
+
+              <main class="door-body">
+                <section class="card" aria-label="Option D, the denied card alone">
+                  <p class="eyebrow">Access &middot; not on the invite list</p>
+                  <h1>You are signed in, but not invited</h1>
+
+                  <div class="who-row">
+                    <span class="avatar a-sq" aria-hidden="true">WM</span>
+                    <span class="who-txt">
+                      <span class="nm">Wren Mercer</span>
+                      <span class="hd">github.com/wren-mercer</span>
+                    </span>
+                    <span class="verified">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 8.4l3 3 7.4-8"/></svg>
+                      GitHub verified
+                    </span>
+                  </div>
+
+                  <p class="subline" style="max-width:none">
+                    Jam B is a closed test, so every promote and adopt can be watched closely. Your account
+                    is not on that list. Nothing is wrong with it, and nothing was recorded against it.
+                  </p>
+
+                  <div class="hand-off">
+                    <h2>Send this to whoever invited you</h2>
+                    <div class="copy-row">
+                      <span class="cr-key">Handle</span>
+                      <span class="cr-val">wren-mercer</span>
+                      <button class="copy-btn" tabindex="-1">Copy</button>
+                    </div>
+                    <div class="copy-row">
+                      <span class="cr-key">Account id</span>
+                      <span class="cr-val">41982265</span>
+                      <button class="copy-btn" tabindex="-1">Copy</button>
+                    </div>
+                    <p class="hint">Either line works. The numeric id is the durable one, since handles can change and ids cannot.</p>
+                  </div>
+
+                  <div class="deny-actions">
+                    <button class="auth-btn compact" tabindex="-1">
+                      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+                      <span class="lbl">Try a different account</span>
+                    </button>
+                    <button class="btn-quiet" tabindex="-1">Back to sign in</button>
+                  </div>
+
+                  <div class="card-rule"></div>
+                  <p class="card-foot">Invite only while jam B runs &middot; ends aug 3</p>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="tradeoff" style="max-width:900px">
+      No room data exists on the screen at all, and the 472px card sits alone on a 1440px page,
+      so the denied state no longer shares the two-column composition of the state it came from.
+    </p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* ---------- theme: follow the OS until the person decides ---------- */
+  var media = window.matchMedia('(prefers-color-scheme: light)');
+  var manual = false;
+
+  function applyTheme(light) {
+    root.setAttribute('data-theme', light ? 'light' : 'dark');
+  }
+  applyTheme(media.matches);
+
+  function onSystemChange(e) { if (!manual) { applyTheme(e.matches); } }
+  if (media.addEventListener) { media.addEventListener('change', onSystemChange); }
+  else if (media.addListener) { media.addListener(onSystemChange); }
+
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    manual = true;
+    applyTheme(root.getAttribute('data-theme') !== 'light');
+  });
+
+  /* ---------- option D is a scaled frame; reserve its real footprint ---------- */
+  var clip = document.getElementById('thumbClip');
+  var scale = document.getElementById('thumbScale');
+
+  function sizeThumb() {
+    var s = 0.62;
+    var avail = clip.parentNode.clientWidth;
+    if (avail && avail < 1440 * s) { s = avail / 1440; }
+    scale.style.transform = 'scale(' + s + ')';
+    clip.style.width = Math.round(1440 * s) + 'px';
+    clip.style.height = Math.round(860 * s) + 'px';
+  }
+  sizeThumb();
+  window.addEventListener('resize', sizeThumb);
+
+  /* ---------- the row only advertises scrolling when it scrolls ---------- */
+  var strip = document.getElementById('strip');
+  var edge = document.getElementById('stripEdge');
+  var hint = document.getElementById('stripHint');
+
+  function syncStrip() {
+    var over = strip.scrollWidth - strip.clientWidth;
+    var fits = over < 2;
+    hint.style.display = fits ? 'none' : '';
+    edge.style.display = fits ? 'none' : '';
+    if (!fits) {
+      edge.style.opacity = strip.scrollLeft >= over - 2 ? '0' : '1';
+    }
+  }
+  syncStrip();
+  strip.addEventListener('scroll', syncStrip);
+  window.addEventListener('resize', syncStrip);
+})();
+</script>
+</body>
+</html>

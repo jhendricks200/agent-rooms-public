@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.dev.vars
+.wrangler/
+.DS_Store
+design/reference/
+# Local Claude Code launch config: holds absolute paths on one machine.
+.claude/launch.json

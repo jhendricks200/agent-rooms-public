@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "contributors_linked_github_id_idx" ON "contributors" USING btree ("linked_github_id");

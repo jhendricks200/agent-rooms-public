@@ -1,0 +1,286 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signal Lab - Composer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  background: #05070a;
+  color: #cbd2e0;
+  padding: 28px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+h1.doc-title { font-size: 19px; font-weight: 700; color: #f2f4f9; margin-bottom: 4px; }
+p.doc-sub { font-size: 12.5px; color: #7d879c; margin-bottom: 24px; max-width: 78ch; }
+h2.doc-h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7d879c; margin: 30px 0 12px; }
+h2.doc-h2:first-of-type { margin-top: 0; }
+.compare-wrap { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.panel-tag { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7d879c; margin-bottom: 8px; }
+.state-label { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); margin: 14px 0 6px; }
+.state-label:first-child { margin-top: 0; }
+
+.stage {
+  width: 480px; padding: 40px 24px; border-radius: 14px; background: var(--bg); position: relative; overflow: hidden;
+}
+.stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--bg-glow); }
+
+.panel-dark, .panel-light {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+.panel-dark {
+  --bg: #0b0e14; --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(84,118,168,0.07), transparent 68%);
+  --panel-2: #141926;
+  --hairline: rgba(148,168,205,0.09); --line: rgba(148,168,205,0.13);
+  --ink: #e6ebf5; --ink-2: #9aa7bf; --ink-3: #5f6c85;
+  --signal: #4ade80; --cyan: #53c5f0;
+  --shadow-float: 0 1px 0 rgba(148,168,205,0.07) inset, 0 2px 4px rgba(0,0,0,0.28), 0 14px 34px rgba(2,4,9,0.5), 0 32px 72px rgba(2,4,9,0.36);
+  --composer-bg: rgba(23,29,44,0.82); --send-fill: #e6ebf5; --send-ink: #0b0e14;
+}
+.panel-light {
+  --bg: #f3f4f0; --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(70,96,138,0.05), transparent 68%);
+  --panel-2: #f0f1ec;
+  --hairline: rgba(48,62,88,0.09); --line: rgba(48,62,88,0.13);
+  --ink: #1c2433; --ink-2: #55617a; --ink-3: #8b96ab;
+  --signal: #14934e; --cyan: #0f7fb0;
+  --shadow-float: 0 1px 0 rgba(255,255,255,0.65) inset, 0 2px 4px rgba(28,36,51,0.07), 0 12px 30px rgba(28,36,51,0.12), 0 30px 64px rgba(28,36,51,0.08);
+  --composer-bg: rgba(255,255,255,0.86); --send-fill: #1c2433; --send-ink: #f6f7f4;
+}
+
+/* ===== room-composer (group chat input), copied from direction-c2.html ===== */
+.rc-box {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--composer-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--hairline); border-radius: 24px; padding: 12px 12px 12px 14px;
+  box-shadow: var(--shadow-float);
+}
+.rc-box.focused { border-color: color-mix(in srgb, var(--signal) 30%, var(--hairline)); }
+.rc-box input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: var(--font-ui); font-size: 14.5px; color: var(--ink); min-width: 0;
+}
+.rc-box input::placeholder { color: var(--ink-3); font-weight: 400; }
+.rc-icon-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--panel-2) 60%, transparent); color: var(--ink-2);
+  cursor: pointer; display: grid; place-items: center; flex-shrink: 0;
+}
+.rc-icon-btn svg { width: 15px; height: 15px; }
+.rc-cluster { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.rc-chip {
+  font-family: var(--font-ui); font-size: 11.5px; font-weight: 500; color: var(--ink-2);
+  background: transparent; border: 1px solid var(--hairline); border-radius: 999px; padding: 5px 11px;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.rc-chip svg { width: 11px; height: 11px; opacity: 0.8; }
+.rc-mic {
+  width: 32px; height: 32px; border-radius: 50%; border: none; background: transparent; color: var(--ink-3);
+  cursor: pointer; display: grid; place-items: center; flex-shrink: 0;
+}
+.rc-mic svg { width: 15px; height: 15px; }
+.rc-send {
+  width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--send-fill); color: var(--send-ink);
+  cursor: pointer; display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+.rc-send svg { width: 14px; height: 14px; }
+
+/* ===== agent composer (private input), copied from direction-c2.html ===== */
+.composer-box {
+  position: relative; z-index: 1;
+  background: var(--composer-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--hairline); border-radius: 20px; padding: 13px 12px 10px 15px; box-shadow: var(--shadow-float);
+}
+.composer-box.focused { border-color: color-mix(in srgb, var(--cyan) 32%, var(--hairline)); }
+.composer-box textarea {
+  width: 100%; background: transparent; border: none; outline: none; resize: none;
+  font-family: var(--font-ui); font-size: 13.5px; color: var(--ink); height: 40px;
+}
+.composer-box textarea::placeholder { color: var(--ink-3); font-weight: 400; }
+.composer-row { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+.composer-row .plus {
+  width: 27px; height: 27px; border-radius: 50%; border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--panel-2) 60%, transparent); color: var(--ink-2);
+  cursor: pointer; display: grid; place-items: center; flex-shrink: 0;
+}
+.composer-row .plus svg { width: 13px; height: 13px; }
+.composer-row .model { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+.composer-row .spacer { flex: 1; }
+.send-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--send-fill); color: var(--send-ink);
+  display: grid; place-items: center; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+.send-btn svg { width: 12px; height: 12px; }
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">Components - Composer</h1>
+<p class="doc-sub">Two floating input surfaces from <code>direction-c2.html</code>, at rest and in the focus-within state. Focus is triggered by <code>:focus-within</code> on the real component; it is forced here with a <code>.focused</code> class since the surface can't hold real keyboard focus in a static preview.</p>
+
+<h2 class="doc-h2">Room composer (group chat)</h2>
+<div class="compare-wrap">
+  <div>
+    <div class="panel-tag">● dark</div>
+    <div class="stage panel-dark">
+      <div class="state-label">rest</div>
+      <div class="rc-box">
+        <button class="rc-icon-btn" aria-label="Add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <input type="text" placeholder="Message #night-market">
+        <div class="rc-cluster">
+          <button class="rc-chip">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+            Attach proposal
+          </button>
+          <button class="rc-mic" aria-label="Voice message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>
+          </button>
+          <button class="rc-send" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="state-label">focus (border tints toward --signal)</div>
+      <div class="rc-box focused">
+        <button class="rc-icon-btn" aria-label="Add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <input type="text" placeholder="Message #night-market" value="going for it, the cluster index already carr">
+        <div class="rc-cluster">
+          <button class="rc-chip">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+            Attach proposal
+          </button>
+          <button class="rc-mic" aria-label="Voice message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>
+          </button>
+          <button class="rc-send" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="panel-tag">● light</div>
+    <div class="stage panel-light">
+      <div class="state-label">rest</div>
+      <div class="rc-box">
+        <button class="rc-icon-btn" aria-label="Add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <input type="text" placeholder="Message #night-market">
+        <div class="rc-cluster">
+          <button class="rc-chip">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+            Attach proposal
+          </button>
+          <button class="rc-mic" aria-label="Voice message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>
+          </button>
+          <button class="rc-send" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="state-label">focus (border tints toward --signal)</div>
+      <div class="rc-box focused">
+        <button class="rc-icon-btn" aria-label="Add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <input type="text" placeholder="Message #night-market" value="going for it, the cluster index already carr">
+        <div class="rc-cluster">
+          <button class="rc-chip">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+            Attach proposal
+          </button>
+          <button class="rc-mic" aria-label="Voice message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>
+          </button>
+          <button class="rc-send" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="doc-h2">Agent composer (private input)</h2>
+<div class="compare-wrap">
+  <div>
+    <div class="panel-tag">● dark</div>
+    <div class="stage panel-dark">
+      <div class="state-label">rest</div>
+      <div class="composer-box">
+        <textarea placeholder="Ask your agent, only you see this"></textarea>
+        <div class="composer-row">
+          <button class="plus" aria-label="Add context">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <span class="model">forge-2 · fast</span>
+          <div class="spacer"></div>
+          <button class="send-btn" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="state-label">focus (border tints toward --cyan)</div>
+      <div class="composer-box focused">
+        <textarea placeholder="Ask your agent, only you see this">Package it up, I want the room to see it</textarea>
+        <div class="composer-row">
+          <button class="plus" aria-label="Add context">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <span class="model">forge-2 · fast</span>
+          <div class="spacer"></div>
+          <button class="send-btn" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="panel-tag">● light</div>
+    <div class="stage panel-light">
+      <div class="state-label">rest</div>
+      <div class="composer-box">
+        <textarea placeholder="Ask your agent, only you see this"></textarea>
+        <div class="composer-row">
+          <button class="plus" aria-label="Add context">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <span class="model">forge-2 · fast</span>
+          <div class="spacer"></div>
+          <button class="send-btn" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="state-label">focus (border tints toward --cyan)</div>
+      <div class="composer-box focused">
+        <textarea placeholder="Ask your agent, only you see this">Package it up, I want the room to see it</textarea>
+        <div class="composer-row">
+          <button class="plus" aria-label="Add context">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <span class="model">forge-2 · fast</span>
+          <div class="spacer"></div>
+          <button class="send-btn" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

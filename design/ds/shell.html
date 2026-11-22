@@ -1,0 +1,210 @@
+<!-- @dsCard group="Layout" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signal Lab - Room Shell</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  background: #05070a;
+  color: #cbd2e0;
+  padding: 28px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+h1.doc-title { font-size: 19px; font-weight: 700; color: #f2f4f9; margin-bottom: 4px; }
+p.doc-sub { font-size: 12.5px; color: #7d879c; margin-bottom: 24px; max-width: 78ch; }
+.compare-wrap { display: flex; flex-wrap: wrap; gap: 24px; }
+.panel-tag { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7d879c; margin-bottom: 8px; }
+
+.panel-dark, .panel-light {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+  --radius: 12px;
+}
+.panel-dark {
+  --bg: #0b0e14; --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(84,118,168,0.07), transparent 68%);
+  --rail: #0d1119; --panel: #10141d; --panel-2: #141926; --card: #131826; --card-hover: #171d2e;
+  --line: rgba(148,168,205,0.13); --line-strong: rgba(148,168,205,0.22);
+  --ink: #e6ebf5; --ink-2: #9aa7bf; --ink-3: #5f6c85;
+  --signal: #4ade80; --signal-dim: rgba(74,222,128,0.14);
+  --amber: #fbbf5e; --amber-dim: rgba(251,191,94,0.13);
+  --cyan: #53c5f0; --cyan-dim: rgba(83,197,240,0.13);
+  --violet: #b18cf5; --violet-dim: rgba(177,140,245,0.14);
+  --hairline: rgba(148,168,205,0.09);
+  --shadow-card: 0 1px 1px rgba(0,0,0,0.22), 0 6px 16px rgba(3,6,12,0.30), 0 18px 40px rgba(3,6,12,0.22);
+}
+.panel-light {
+  --bg: #f3f4f0; --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(70,96,138,0.05), transparent 68%);
+  --rail: #ecede8; --panel: #fafaf7; --panel-2: #f0f1ec; --card: #ffffff; --card-hover: #fdfdfb;
+  --line: rgba(48,62,88,0.13); --line-strong: rgba(48,62,88,0.24);
+  --ink: #1c2433; --ink-2: #55617a; --ink-3: #8b96ab;
+  --signal: #14934e; --signal-dim: rgba(20,147,78,0.1);
+  --amber: #b0700a; --amber-dim: rgba(176,112,10,0.1);
+  --cyan: #0f7fb0; --cyan-dim: rgba(15,127,176,0.09);
+  --violet: #7048c8; --violet-dim: rgba(112,72,200,0.09);
+  --hairline: rgba(48,62,88,0.09);
+  --shadow-card: 0 1px 1px rgba(28,36,51,0.05), 0 5px 14px rgba(28,36,51,0.06), 0 16px 36px rgba(28,36,51,0.05);
+}
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 45%, transparent); }
+  55% { box-shadow: 0 0 0 5px transparent; }
+}
+
+/* ===== four-zone shell at reduced scale: rail / header / feed / agent ===== */
+.shell {
+  width: 620px; height: 400px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  display: grid;
+  grid-template-rows: 38px 1fr;
+  grid-template-columns: 108px 1fr 130px;
+  grid-template-areas: "rail header header" "rail feed agent";
+}
+.shell::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: var(--bg-glow);
+}
+
+.shell-rail {
+  grid-area: rail; position: relative; z-index: 1;
+  background: var(--rail); border-right: 1px solid var(--line);
+  padding: 8px 6px; display: flex; flex-direction: column; gap: 2px;
+}
+.shell-rail .sr-mark { width: 14px; height: 14px; border-radius: 4px; background: linear-gradient(140deg, #1d2b3f, #101724); border: 1px solid var(--line-strong); display: grid; place-items: center; font-size: 6px; color: var(--signal); margin-bottom: 8px; }
+.panel-light .shell-rail .sr-mark { background: linear-gradient(140deg, #e8ecf2, #f6f7f4); }
+.sr-item { font-size: 8px; color: var(--ink-2); padding: 3px 5px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr-item.active { background: var(--panel-2); color: var(--ink); font-weight: 600; position: relative; }
+.sr-item.active::before { content: ""; position: absolute; left: -6px; top: 3px; bottom: 3px; width: 1.5px; background: var(--signal); }
+.sr-section { font-family: var(--font-mono); font-size: 6px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); padding: 6px 5px 2px; }
+
+.shell-header {
+  grid-area: header; position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 8px; padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+}
+.shell-title { font-size: 10.5px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.shell-build { font-family: var(--font-mono); font-size: 8px; color: var(--signal); background: var(--signal-dim); border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent); padding: 1.5px 6px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
+.shell-build .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--signal); animation: pulse-soft 2.6s ease-in-out infinite; }
+
+.shell-feed {
+  grid-area: feed; position: relative; z-index: 1; overflow: hidden;
+  padding: 14px 16px;
+}
+.shell-feed-label { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-2); margin-bottom: 10px; }
+
+.shell-stream { position: relative; padding-left: 14px; display: flex; flex-direction: column; gap: 10px; }
+.shell-stream::before {
+  content: ""; position: absolute; left: 3px; top: 4px; bottom: 4px; width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--line-strong) 8%, var(--line-strong) 92%, transparent);
+}
+.shell-node { position: absolute; left: -14px; top: 10px; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--ink-3); }
+.shell-node.amber { border-color: var(--amber); }
+.shell-node.violet { border-color: var(--violet); }
+.shell-node.cyan { border-color: var(--cyan); }
+.shell-node.signal { border-color: var(--signal); background: var(--signal); }
+.shell-card { position: relative; background: var(--card); border: 1px solid var(--hairline); border-radius: 7px; box-shadow: var(--shadow-card); padding: 8px 10px; font-size: 9.5px; color: var(--ink-2); }
+.shell-card b { color: var(--ink); font-size: 10px; display: block; margin-bottom: 2px; }
+
+.shell-agent { grid-area: agent; position: relative; z-index: 1; border-left: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 88%, transparent); padding: 10px 8px; display: flex; flex-direction: column; gap: 7px; }
+.shell-agent-label { font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); }
+.shell-msg { font-size: 8px; color: var(--ink-2); background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; }
+.shell-promote { margin-top: auto; font-size: 8.5px; font-weight: 600; text-align: center; color: #08110b; background: linear-gradient(160deg, #5fe693, var(--signal)); border-radius: 6px; padding: 6px; }
+.panel-light .shell-promote { color: #fff; }
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">Layout - Four-zone room shell</h1>
+<p class="doc-sub">Reduced-scale reproduction of the <code>.app</code> grid from <code>direction-c2.html</code>: left nav rail, group chat feed with timeline spine, and private agent panel. The blueprint grid texture from the earlier direction is retired here; the only page-level texture is the faint <code>--bg-glow</code> radial gradient.</p>
+
+<div class="compare-wrap">
+  <div>
+    <div class="panel-tag">● dark</div>
+    <div class="shell panel-dark">
+      <div class="shell-rail">
+        <div class="sr-mark">▞▚</div>
+        <div class="sr-item">+ New room</div>
+        <div class="sr-section">Rooms</div>
+        <div class="sr-item active">night-market</div>
+        <div class="sr-item">trail-notes</div>
+        <div class="sr-section">This room</div>
+        <div class="sr-item active">Proposals</div>
+        <div class="sr-item">Timeline</div>
+      </div>
+      <div class="shell-header">
+        <div class="shell-title">Night Market <span style="color:var(--ink-3);font-weight:500">· 5 builders</span></div>
+        <div class="shell-build"><span class="dot"></span>passing</div>
+      </div>
+      <div class="shell-feed">
+        <div class="shell-feed-label">#night-market</div>
+        <div class="shell-stream">
+          <div style="position:relative"><span class="shell-node cyan"></span>
+            <div class="shell-card"><b>Geolocation onboarding</b>fork live · sq/geo-onboard</div>
+          </div>
+          <div style="position:relative"><span class="shell-node signal"></span>
+            <div class="shell-card"><b>Stall map clustering</b>adopted · e41f8c2</div>
+          </div>
+          <div style="position:relative"><span class="shell-node amber"></span>
+            <div class="shell-card"><b>Open-hours model</b>proposed · pr/open-hours</div>
+          </div>
+        </div>
+      </div>
+      <div class="shell-agent">
+        <div class="shell-agent-label">Your agent</div>
+        <div class="shell-msg">Package it up for the room.</div>
+        <div class="shell-promote">Promote to room</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel-tag">● light</div>
+    <div class="shell panel-light">
+      <div class="shell-rail">
+        <div class="sr-mark">▞▚</div>
+        <div class="sr-item">+ New room</div>
+        <div class="sr-section">Rooms</div>
+        <div class="sr-item active">night-market</div>
+        <div class="sr-item">trail-notes</div>
+        <div class="sr-section">This room</div>
+        <div class="sr-item active">Proposals</div>
+        <div class="sr-item">Timeline</div>
+      </div>
+      <div class="shell-header">
+        <div class="shell-title">Night Market <span style="color:var(--ink-3);font-weight:500">· 5 builders</span></div>
+        <div class="shell-build"><span class="dot"></span>passing</div>
+      </div>
+      <div class="shell-feed">
+        <div class="shell-feed-label">#night-market</div>
+        <div class="shell-stream">
+          <div style="position:relative"><span class="shell-node cyan"></span>
+            <div class="shell-card"><b>Geolocation onboarding</b>fork live · sq/geo-onboard</div>
+          </div>
+          <div style="position:relative"><span class="shell-node signal"></span>
+            <div class="shell-card"><b>Stall map clustering</b>adopted · e41f8c2</div>
+          </div>
+          <div style="position:relative"><span class="shell-node amber"></span>
+            <div class="shell-card"><b>Open-hours model</b>proposed · pr/open-hours</div>
+          </div>
+        </div>
+      </div>
+      <div class="shell-agent">
+        <div class="shell-agent-label">Your agent</div>
+        <div class="shell-msg">Package it up for the room.</div>
+        <div class="shell-promote">Promote to room</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="font-size:11.5px;color:#7d879c;margin-top:20px;max-width:78ch;">Grid columns at native scale: <code>236px 1fr 372px</code> for rail / feed / agent, with a 58px header row (<code>grid-template-areas: "rail header header" "rail feed agent"</code>). This preview compresses those proportionally; see <code>left-rail.html</code> for the rail at closer-to-native scale.</p>
+
+</body>
+</html>

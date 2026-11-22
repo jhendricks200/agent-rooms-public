@@ -1,0 +1,1234 @@
+<!-- @dsCard group="Screens" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms &middot; Empty state</title>
+<style>
+/* ============================================================
+   SCREEN · EMPTY STATE  (Signal Lab v2)
+
+   Layout, copy and treatment come from frame 1d of
+   "Signal Lab Screens v2.dc.html". Token values are the ones in
+   design/ds/tokens-v2.css, inlined here so the comp opens as a
+   single file. Nothing is invented at the token layer.
+
+   The v2 system in one line: panels carry no border, they
+   separate from the page by fill and shadow; body copy is
+   near-white and metadata is gray, only two ink levels; line
+   measure is capped in pixels, not ch.
+
+   Five things this file adds that the revision did not draw.
+
+   1. A first-run rail. The revision hardcodes "One on the way",
+      so a person with no pending invite had no designed state.
+      The same switch that hides the amber invite bar swaps the
+      rail copy.
+   2. An empty, unfocused room-name field as the default, since
+      the prefilled focused field in the revision is the filled
+      state, not the empty one. The prefilled version survives
+      as a comp-only variant.
+   3. The empty-submit validation state, carried over from v1.
+   4. A light theme, derived from the v1 light ramp in
+      ds/tokens.css with the v2 roles mapped onto it.
+   5. :focus-visible, reduced motion, and the v1 breakpoints.
+
+   One correction to the revision: its Options chevron pointed
+   down while collapsed. The system rule is -90deg collapsed,
+   0deg open, and that is what is built here.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- surfaces ---- */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --rail: #0d1119;
+  --panel: #171d2e;
+  --row: #141926;
+  --field: #1a2132;
+  --header-bg: rgba(16, 20, 29, 0.82);
+  --sidebar-bg: rgba(16, 20, 29, 0.88);
+  --panel-sunken: rgba(20, 25, 38, 0.5);
+  --composer-bg: rgba(23, 29, 44, 0.7);
+  --profile-bg: rgba(23, 29, 44, 0.72);
+  --inset-top: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+
+  /* ---- lines: dividers and controls only ---- */
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --line-field: rgba(148, 168, 205, 0.17);
+
+  /* ---- ink: two levels do the work, plus field labels ---- */
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #8b9ab6;
+
+  /* ---- signal colors ---- */
+  --signal: #4ade80;
+  --amber: #fbbf5e;
+  --amber-dim: rgba(251, 191, 94, 0.13);
+  --amber-bar-bg: rgba(251, 191, 94, 0.08);
+  --amber-bar-line: rgba(251, 191, 94, 0.25);
+  --amber-btn-line: rgba(251, 191, 94, 0.3);
+  --cyan: #53c5f0;
+  --cyan-bright: #7ad3f5;
+  --cyan-dim: rgba(83, 197, 240, 0.13);
+  --cyan-underline: rgba(83, 197, 240, 0.35);
+  --agent-tile-fill: linear-gradient(140deg, rgba(83, 197, 240, 0.14), #141926);
+  --agent-tile-line: rgba(83, 197, 240, 0.2);
+  --selection: rgba(83, 197, 240, 0.26);
+
+  /* ---- inverted action fill ---- */
+  --invert-fill: #f6f9ff;
+  --invert-ink: #05070a;
+  --keycap-ink: rgba(5, 7, 10, 0.62);
+  --keycap-line: rgba(5, 7, 10, 0.24);
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+
+  /* ---- avatars ---- */
+  --avatar-ni: #8fd0a8;
+  --avatar-kw: #86bfe8;
+  --avatar-ink: #0b0e14;
+  --avatar-ring-ni: rgba(143, 208, 168, 0.18);
+
+  /* ---- elevation: three tiers, no panel borders ---- */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+  --shadow-2:
+    inset 0 1px 0 rgba(148, 168, 205, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(3, 6, 12, 0.36),
+    0 24px 52px rgba(3, 6, 12, 0.28);
+  --shadow-invert: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 22px rgba(11, 14, 20, 0.55);
+  --shadow-invert-hi: 0 2px 4px rgba(0, 0, 0, 0.28), 0 12px 30px rgba(11, 14, 20, 0.6);
+
+  /* ---- fields ---- */
+  --shadow-field: inset 0 1px 3px rgba(0, 0, 0, 0.26);
+  --focus-ring:
+    inset 0 1px 3px rgba(0, 0, 0, 0.26),
+    0 0 0 3px rgba(83, 197, 240, 0.16);
+  --focus-border: rgba(83, 197, 240, 0.4);
+  --invalid-ring:
+    inset 0 1px 3px rgba(0, 0, 0, 0.26),
+    0 0 0 3px rgba(251, 191, 94, 0.18);
+  --invalid-border: rgba(251, 191, 94, 0.5);
+
+  /* ---- radii ---- */
+  --radius-keycap: 4px;
+  --radius-badge: 5px;
+  --radius-mark: 7px;
+  --radius-tile: 8px;
+  --radius-select: 9px;
+  --radius-row: 10px;
+  --radius-field: 11px;
+  --radius: 12px;
+  --radius-panel: 16px;
+  --radius-panel-lg: 18px;
+  --radius-panel-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ---- measure: pixel caps, not ch ---- */
+  --measure-sub: 470px;
+  --measure-agent: 215px;   /* was 26ch in the agent sidebar */
+
+  /* ---- layout ---- */
+  --rail-w: 216px;
+  --agent-w: 316px;
+  --header-h: 54px;
+  --main-w: 716px;
+}
+
+:root[data-theme="light"] {
+  /* Derived from the v1 light ramp in design/ds/tokens.css, with the
+     v2 roles mapped onto it. Panels stay borderless: in light the
+     separation comes from a white fill on a warm gray page plus a
+     much shallower shadow, since a dark halo reads as dirt here. */
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+  --rail: #ecede8;
+  --panel: #ffffff;
+  --row: #f0f1ec;
+  --field: #edeee8;
+  --header-bg: rgba(250, 250, 247, 0.86);
+  --sidebar-bg: rgba(248, 249, 245, 0.9);
+  --panel-sunken: rgba(236, 237, 232, 0.72);
+  --composer-bg: rgba(240, 241, 236, 0.8);
+  --profile-bg: rgba(240, 241, 236, 0.85);
+  --inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --line-field: rgba(48, 62, 88, 0.16);
+
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #6b7690;
+
+  --signal: #14934e;
+  --amber: #9a6106;
+  --amber-dim: rgba(154, 97, 6, 0.1);
+  --amber-bar-bg: rgba(176, 112, 10, 0.07);
+  --amber-bar-line: rgba(154, 97, 6, 0.26);
+  --amber-btn-line: rgba(154, 97, 6, 0.32);
+  --cyan: #0f7fb0;
+  --cyan-bright: #0b6a93;
+  --cyan-dim: rgba(15, 127, 176, 0.09);
+  --cyan-underline: rgba(15, 127, 176, 0.4);
+  --agent-tile-fill: linear-gradient(140deg, rgba(15, 127, 176, 0.1), #f0f1ec);
+  --agent-tile-line: rgba(15, 127, 176, 0.22);
+  --selection: rgba(15, 127, 176, 0.2);
+
+  --invert-fill: #141b28;
+  --invert-ink: #ffffff;
+  --keycap-ink: rgba(255, 255, 255, 0.72);
+  --keycap-line: rgba(255, 255, 255, 0.3);
+  --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+
+  --avatar-ink: #12181f;
+  --avatar-ring-ni: rgba(20, 147, 78, 0.16);
+
+  --shadow-1:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 4px 12px rgba(28, 36, 51, 0.05);
+  --shadow-2:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 8px 20px rgba(28, 36, 51, 0.07),
+    0 22px 48px rgba(28, 36, 51, 0.05);
+  --shadow-invert: 0 1px 2px rgba(28, 36, 51, 0.16), 0 8px 22px rgba(28, 36, 51, 0.18);
+  --shadow-invert-hi: 0 2px 4px rgba(28, 36, 51, 0.18), 0 12px 30px rgba(28, 36, 51, 0.2);
+
+  --shadow-field: inset 0 1px 3px rgba(28, 36, 51, 0.07);
+  --focus-ring:
+    inset 0 1px 3px rgba(28, 36, 51, 0.07),
+    0 0 0 3px rgba(15, 127, 176, 0.2);
+  --focus-border: rgba(15, 127, 176, 0.5);
+  --invalid-ring:
+    inset 0 1px 3px rgba(28, 36, 51, 0.07),
+    0 0 0 3px rgba(154, 97, 6, 0.18);
+  --invalid-border: rgba(154, 97, 6, 0.55);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: 0;
+}
+::selection { background: var(--selection); }
+button, input, select { font-family: inherit; color: inherit; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--cyan-bright); text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ================= FRAME ================= */
+
+.app {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--agent-w);
+  grid-template-rows: var(--header-h) minmax(0, 1fr);
+}
+
+/* ---------------- rail ---------------- */
+
+.rail {
+  grid-row: 1 / span 2;
+  background: var(--rail);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px 10px 12px;
+}
+
+.rail-brand { display: flex; align-items: center; gap: 9px; padding: 2px 8px 16px; }
+.rail-brand .mark {
+  width: 24px; height: 24px;
+  border-radius: var(--radius-mark);
+  background: var(--brand-mark-fill);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--signal);
+  flex-shrink: 0;
+}
+.rail-brand .word { font-size: 13px; font-weight: 600; }
+
+.rail-new {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--row);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-tile);
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.rail-new:hover { border-color: color-mix(in srgb, var(--signal) 40%, transparent); }
+.rail-new svg { width: 13px; height: 13px; opacity: 0.8; flex-shrink: 0; }
+
+.rail-section { font-size: 11.5px; color: var(--ink-2); padding: 18px 9px 6px; }
+
+/* The pending room: visible, not yours yet. */
+.rail-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radius-row);
+  font-size: 14px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.rail-item .pend-dot {
+  margin-left: auto;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+}
+
+/* The rail's own empty state. A dashed slot, not skeleton rows:
+   nothing is loading, there is simply nothing there. */
+.rail-slot {
+  margin: 8px 2px 0;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-row);
+  padding: 11px 12px;
+}
+.rail-slot .rs-title { font-size: 12px; color: var(--ink-2); margin-bottom: 3px; }
+.rail-slot .rs-line { font-size: 11.5px; line-height: 1.5; color: var(--ink-2); }
+
+.rail-fill { flex: 1; min-height: 12px; }
+
+.rail-profile {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--profile-bg);
+  box-shadow: var(--inset-top);
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.rail-profile:hover { background: var(--panel); }
+.rail-profile .who { flex: 1; min-width: 0; line-height: 1.3; }
+.rail-profile .who .nm { display: block; font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.rail-profile .who .sub { display: block; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+.rail-profile .gear { color: var(--ink-2); display: grid; place-items: center; flex-shrink: 0; }
+.rail-profile .gear svg { width: 13px; height: 13px; }
+
+.avatar {
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 700;
+  color: var(--avatar-ink);
+  flex-shrink: 0;
+}
+.avatar.a-ni {
+  width: 30px; height: 30px;
+  font-size: 10.5px;
+  background: var(--avatar-ni);
+  box-shadow: 0 0 0 2px var(--avatar-ring-ni);
+}
+.avatar.a-kw {
+  width: 22px; height: 22px;
+  font-size: 8.5px;
+  background: var(--avatar-kw);
+}
+
+/* ---------------- header ---------------- */
+
+.head {
+  grid-column: 2 / span 2;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  background: var(--header-bg);
+  min-width: 0;
+}
+.head .title { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.head .title .where { color: var(--ink-2); font-weight: 500; font-size: 12px; margin-left: 6px; }
+.head .spacer { flex: 1; }
+.who-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.who-chip svg { width: 12px; height: 12px; }
+
+/* Comp-only controls. This file shows more than one state of one
+   screen, so it needs a way to see the others. Not part of the product. */
+.state-switch { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.state-switch .sw-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.sw-group {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--row);
+}
+.sw-btn {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4.5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.sw-btn:hover { color: var(--ink); }
+.sw-btn[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+}
+
+.theme-toggle {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+/* ---------------- main column ---------------- */
+
+.main {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 38px 48px 34px;
+  display: flex;
+}
+.col {
+  width: 100%;
+  max-width: var(--main-w);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ---- the pending invite, as one row ---- */
+
+.invite-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid var(--amber-bar-line);
+  background: var(--amber-bar-bg);
+  border-radius: var(--radius-field);
+}
+.invite-bar .txt { font-size: 14px; color: var(--ink); min-width: 0; }
+.invite-bar .txt b { font-weight: 600; }
+.invite-bar .spacer { flex: 1; }
+.nudge-btn {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--amber);
+  background: transparent;
+  border: 1px solid var(--amber-btn-line);
+  border-radius: var(--radius-mark);
+  padding: 5px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+.nudge-btn:hover { background: var(--amber-dim); }
+.nudge-btn[data-sent="true"] {
+  cursor: default;
+  color: var(--signal);
+  border-color: color-mix(in srgb, var(--signal) 36%, transparent);
+  background: transparent;
+}
+
+/* ---- headline block ---- */
+
+h1 {
+  font-size: 28px;
+  line-height: 1.16;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  margin-bottom: 9px;
+  text-wrap: balance;
+}
+.hero-sub {
+  font-size: 14.5px;
+  line-height: 1.58;
+  color: var(--ink-2);
+  max-width: var(--measure-sub);
+  text-wrap: pretty;
+}
+
+/* ---- create-room card, tier 2 ---- */
+
+.create-card {
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-2);
+  padding: 24px 24px 20px;
+}
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+
+.room-input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--field);
+  border: 1px solid var(--line-field);
+  border-radius: var(--radius);
+  padding: 13px 15px;
+  outline: none;
+  box-shadow: var(--shadow-field);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.room-input::placeholder { color: var(--ink-3); }
+.room-input:focus {
+  border-color: var(--focus-border);
+  box-shadow: var(--focus-ring);
+}
+.room-input[aria-invalid="true"],
+.room-input[aria-invalid="true"]:focus {
+  border-color: var(--invalid-border);
+  box-shadow: var(--invalid-ring);
+}
+
+.field-error {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--amber);
+}
+.field-error svg { width: 12px; height: 12px; flex-shrink: 0; }
+.create-card[data-invalid="true"] .field-error { display: flex; }
+
+.repo-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 12px;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+}
+.repo-row > svg { width: 13px; height: 13px; color: var(--ink-2); flex-shrink: 0; }
+.repo-row .path {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.repo-row .path .slug { color: var(--ink); }
+.repo-row .path .slug.placeholder { color: var(--ink-3); }
+.repo-row .spacer { flex: 1; }
+.linkish {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--cyan);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--cyan-underline);
+  transition: border-color 0.16s ease;
+}
+.linkish:hover { border-bottom-color: var(--cyan); }
+
+.card-actions {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.card-actions .spacer { flex: 1; }
+
+.disclosure-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 14px;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+.disclosure-btn:hover { color: var(--ink); }
+/* System rule: chevron is -90deg collapsed, 0deg open. The revision
+   drew it pointing down while collapsed, which said the opposite. */
+.disclosure-btn .chev {
+  width: 11px; height: 11px;
+  transform: rotate(-90deg);
+  transition: transform 0.18s ease;
+}
+.disclosure-btn[aria-expanded="true"] .chev { transform: rotate(0deg); }
+
+.primary-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--invert-ink);
+  background: var(--invert-fill);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow-invert);
+  transition: transform 0.15s ease, filter 0.16s ease, box-shadow 0.2s ease;
+}
+.primary-btn:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: var(--shadow-invert-hi); }
+.primary-btn:active { transform: translateY(0); }
+.primary-btn[data-busy="true"] { cursor: default; transform: none; filter: none; }
+.primary-btn[data-busy="true"] .keycap { display: none; }
+.keycap {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--keycap-ink);
+  border: 1px solid var(--keycap-line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+}
+
+.options {
+  display: flex;
+  gap: 14px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.options[hidden] { display: none; }
+.options .opt { flex: 1; min-width: 0; }
+.options label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.options select {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--field);
+  border: 1px solid var(--line-field);
+  border-radius: var(--radius-select);
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.options select:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--cyan-dim); }
+
+.card-fine {
+  margin-top: 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: var(--measure-sub);
+}
+
+/* ---- join card, pinned to the bottom, tier 1 ---- */
+
+.join-card {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 18px 20px;
+}
+.join-row { display: flex; align-items: center; gap: 12px; }
+.join-row .join-label { font-size: 14px; color: var(--ink-2); flex-shrink: 0; white-space: nowrap; }
+.join-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--field);
+  border: 1px solid var(--line-field);
+  border-radius: var(--radius-select);
+  padding: 9px 12px;
+  outline: none;
+  box-shadow: var(--shadow-field);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.join-input::placeholder { color: var(--ink-3); }
+.join-input:focus { border-color: var(--focus-border); box-shadow: var(--focus-ring); }
+.quiet-btn {
+  font-size: 14px;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-select);
+  padding: 9px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.quiet-btn:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+
+.market-row {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px;
+  color: var(--ink-2);
+  border-top: 1px solid var(--line);
+  padding-top: 15px;
+}
+.market-row .spacer { flex: 1; }
+.market-row .count { font-size: 13px; white-space: nowrap; }
+
+/* ---------------- agent sidebar ---------------- */
+
+.agent {
+  border-left: 1px solid var(--line);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.agent-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.agent-tile {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-tile);
+  background: var(--agent-tile-fill);
+  border: 1px solid var(--agent-tile-line);
+  display: grid; place-items: center;
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+.agent-tile svg { width: 14px; height: 14px; }
+.agent-head .id { flex: 1; min-width: 0; }
+.agent-head .id .nm { font-size: 13px; font-weight: 600; }
+.agent-head .id .st { font-size: 13px; color: var(--ink-2); }
+.private-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-badge);
+  padding: 3px 7px;
+  flex-shrink: 0;
+}
+.private-badge svg { width: 9px; height: 9px; }
+
+.agent-void {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  min-height: 0;
+}
+.agent-void p {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  text-align: center;
+  max-width: var(--measure-agent);
+}
+
+.composer-wrap { padding: 0 14px 16px; }
+.composer {
+  background: var(--composer-bg);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  padding: 13px 13px 10px 16px;
+}
+.composer .prompt { font-size: 13px; color: var(--ink-2); }
+.composer .tools { display: flex; align-items: center; gap: 8px; margin-top: 20px; }
+.composer .tools .spacer { flex: 1; }
+.c-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.c-btn:hover:not(:disabled) { color: var(--ink); border-color: var(--line-strong); }
+.c-btn:disabled { cursor: default; }
+.c-btn svg { width: 12px; height: 12px; }
+.c-btn.send {
+  width: 27px; height: 27px;
+  border: none;
+  background: var(--row);
+}
+
+/* ================= STATE SWITCHING =================
+   One switch drives the amber bar and the rail copy together, so the
+   first-run screen is never shown next to an invite that is not there. */
+.app[data-invite="none"] .only-pending { display: none; }
+.app[data-invite="pending"] .only-first-run { display: none; }
+
+/* ================= LOAD ================= */
+.invite-bar, .create-card, .join-card { animation: rise 0.5s ease both; }
+.create-card { animation-delay: 0.06s; }
+.join-card { animation-delay: 0.12s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1180px) {
+  .app { grid-template-columns: var(--rail-w) minmax(0, 1fr); }
+  .head { grid-column: 2 / span 1; }
+  .agent { display: none; }
+  .main { padding: 30px 32px 28px; }
+}
+@media (max-width: 940px) {
+  .state-switch .sw-label { display: none; }
+  .sw-btn { font-size: 12px; padding: 4px 9px; }
+  .who-chip { display: none; }
+}
+@media (max-width: 620px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .rail { display: none; }
+  .head { grid-column: 1 / span 1; padding: 0 16px; gap: 10px; }
+  .head .title .where { display: none; }
+  .main { padding: 22px 16px 24px; }
+  h1 { font-size: 24px; }
+  .create-card { padding: 18px 16px 16px; border-radius: var(--radius-panel); }
+  .join-card { padding: 16px; }
+  .invite-bar { flex-wrap: wrap; }
+  .invite-bar .spacer { display: none; }
+  .join-row { flex-wrap: wrap; }
+  .join-row .join-input { flex: 1 1 150px; }
+  .options { flex-direction: column; gap: 12px; }
+  .card-actions { flex-wrap: wrap; gap: 10px; }
+  .market-row { flex-wrap: wrap; }
+  .market-row .spacer { display: none; }
+}
+
+/* ================= REDUCED MOTION ================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app" data-invite="pending">
+
+  <!-- ================= RAIL ================= -->
+  <nav class="rail" aria-label="Rooms">
+    <div class="rail-brand">
+      <span class="mark" aria-hidden="true">&#9630;&#9626;</span>
+      <span class="word">Agent Rooms</span>
+    </div>
+
+    <button class="rail-new" id="railNew" type="button">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 8h12M8 2v12"/></svg>
+      New room
+    </button>
+
+    <div class="rail-section">Rooms</div>
+
+    <!-- Pending: the room is visible, you are not in it yet. -->
+    <div class="rail-item only-pending" title="Kai has not added you yet">
+      night-market
+      <span class="pend-dot" aria-hidden="true"></span>
+    </div>
+
+    <div class="rail-slot">
+      <div class="rs-title only-pending">One on the way</div>
+      <div class="rs-line only-pending">night-market appears here the moment Kai adds you.</div>
+      <div class="rs-title only-first-run">Nothing here yet</div>
+      <div class="rs-line only-first-run">Rooms you start, or get added to, show up in this list.</div>
+    </div>
+
+    <div class="rail-fill"></div>
+
+    <button class="rail-profile" type="button">
+      <span class="avatar a-ni" aria-hidden="true">NI</span>
+      <span class="who">
+        <span class="nm">Nova Ibarra</span>
+        <span class="sub">No workbench yet</span>
+      </span>
+      <span class="gear" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.1"/><path d="M8 2.2v1.6M8 12.2v1.6M2.2 8h1.6M12.2 8h1.6M3.9 3.9l1.1 1.1M11 11l1.1 1.1M12.1 3.9L11 5M5 11l-1.1 1.1"/></svg>
+      </span>
+    </button>
+  </nav>
+
+  <!-- ================= HEADER ================= -->
+  <header class="head">
+    <span class="title">Agent Rooms <span class="where">no room open</span></span>
+    <span class="spacer"></span>
+
+    <div class="state-switch">
+      <span class="sw-label">preview</span>
+      <div class="sw-group" role="group" aria-label="Preview the invite state">
+        <button class="sw-btn" type="button" id="swPending" aria-pressed="true">Pending invite</button>
+        <button class="sw-btn" type="button" id="swFirstRun" aria-pressed="false">First run</button>
+      </div>
+      <div class="sw-group" role="group" aria-label="Preview the room name field">
+        <button class="sw-btn" type="button" id="swEmpty" aria-pressed="true">Empty</button>
+        <button class="sw-btn" type="button" id="swFilled" aria-pressed="false">Prefilled</button>
+      </div>
+    </div>
+
+    <span class="who-chip">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      novaibarra
+    </span>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle light and dark" aria-label="Toggle color theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </header>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+    <div class="col">
+
+      <!-- ---------- the pending invite, one row ---------- -->
+      <div class="invite-bar only-pending">
+        <span class="avatar a-kw" aria-hidden="true">KW</span>
+        <span class="txt">Kai has your request for <b>night-market</b>. Sent 2h ago, he was here 20m ago.</span>
+        <span class="spacer"></span>
+        <button class="nudge-btn" type="button" id="nudgeBtn">Nudge</button>
+      </div>
+
+      <!-- ---------- headline ---------- -->
+      <div>
+        <h1>You are in. Open a room.</h1>
+        <p class="hero-sub">A few people, one repo, one conversation. Your agent sits on the right, private until you promote.</p>
+      </div>
+
+      <!-- ---------- create a room ---------- -->
+      <form class="create-card" id="createCard" novalidate>
+        <label class="field-label" for="roomName">Room name</label>
+        <input class="room-input" id="roomName" name="roomName" type="text"
+               placeholder="night-market" autocomplete="off" spellcheck="false"
+               aria-describedby="roomNameError">
+
+        <p class="field-error" id="roomNameError" role="alert">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 4.8v3.6M8 10.9v.1"/></svg>
+          A room needs a name before it can open. Lowercase letters and dashes.
+        </p>
+
+        <div class="repo-row">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span class="path">novaibarra/<span class="slug placeholder" id="repoSlug">your-room-name</span></span>
+          <span class="spacer"></span>
+          <button class="linkish" type="button" id="useOwnRepo">use a repo I own</button>
+        </div>
+
+        <div class="card-actions">
+          <button class="disclosure-btn" type="button" id="optionsBtn" aria-expanded="false" aria-controls="optionsPanel">
+            <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+            Options
+          </button>
+          <span class="spacer"></span>
+          <button class="primary-btn" type="submit" id="openRoomBtn">
+            <span class="lbl">Open the room</span>
+            <span class="keycap" aria-hidden="true">&#9166;</span>
+          </button>
+        </div>
+
+        <div class="options" id="optionsPanel" hidden>
+          <div class="opt">
+            <label for="license">License</label>
+            <select id="license" name="license">
+              <option>MIT</option>
+              <option>Apache-2.0</option>
+              <option>BSD-3-Clause</option>
+            </select>
+          </div>
+          <div class="opt">
+            <label for="budget">Daily tokens per person</label>
+            <select id="budget" name="budget">
+              <option>200,000</option>
+              <option>500,000</option>
+              <option>no cap</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="card-fine">Creates the repo on your GitHub, seeds a first commit, opens the room with you as maintainer. Delete the room and the repo goes with it.</p>
+      </form>
+
+      <!-- ---------- join, pinned to the bottom ---------- -->
+      <section class="join-card" aria-label="Join a room that already exists">
+        <div class="join-row">
+          <label class="join-label" for="inviteLink">Have an invite link?</label>
+          <input class="join-input" id="inviteLink" name="inviteLink" type="text"
+                 placeholder="agentrooms.app/join/7f3c1a" autocomplete="off" spellcheck="false">
+          <button class="quiet-btn" type="button" id="joinBtn">Join</button>
+        </div>
+        <div class="market-row">
+          <span>Or read <a href="direction-c2.html">Night Market</a>, a finished room kept exactly as it ended.</span>
+          <span class="spacer"></span>
+          <span class="count">23 proposals, 9 adopted</span>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= AGENT SIDEBAR ================= -->
+  <aside class="agent" aria-label="Your private agent">
+    <div class="agent-head">
+      <span class="agent-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M8 10h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"/><circle cx="9.5" cy="15" r="0.5" fill="currentColor"/><circle cx="14.5" cy="15" r="0.5" fill="currentColor"/></svg>
+      </span>
+      <div class="id">
+        <div class="nm">Your agent</div>
+        <div class="st">waiting for a room</div>
+      </div>
+      <span class="private-badge">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+        private
+      </span>
+    </div>
+
+    <div class="agent-void">
+      <p>This column is yours alone. It wakes up the moment a room opens.</p>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <div class="prompt">Ask your agent, only you see this</div>
+        <div class="tools">
+          <button class="c-btn" type="button" aria-label="Attach a file" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <span class="spacer"></span>
+          <button class="c-btn send" type="button" aria-label="Send to your agent" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var app = document.getElementById("app");
+
+  /* ---------- theme: follow the OS until the person decides ---------- */
+  var media = window.matchMedia("(prefers-color-scheme: light)");
+  var manual = false;
+
+  function applyTheme(light) {
+    root.setAttribute("data-theme", light ? "light" : "dark");
+  }
+  applyTheme(media.matches);
+
+  function onSystemChange(e) { if (!manual) { applyTheme(e.matches); } }
+  if (media.addEventListener) { media.addEventListener("change", onSystemChange); }
+  else if (media.addListener) { media.addListener(onSystemChange); }
+
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    manual = true;
+    applyTheme(root.getAttribute("data-theme") !== "light");
+  });
+
+  /* ---------- invite state: one switch, two consequences (comp only) ----------
+     The amber bar and the rail copy are the same fact stated twice, so
+     they are never allowed to disagree. */
+  var swPending = document.getElementById("swPending");
+  var swFirstRun = document.getElementById("swFirstRun");
+
+  function setInvite(which) {
+    var pending = which === "pending";
+    app.setAttribute("data-invite", pending ? "pending" : "none");
+    swPending.setAttribute("aria-pressed", pending ? "true" : "false");
+    swFirstRun.setAttribute("aria-pressed", pending ? "false" : "true");
+  }
+  swPending.addEventListener("click", function () { setInvite("pending"); });
+  swFirstRun.addEventListener("click", function () { setInvite("none"); });
+
+  /* ---------- room name drives the repo it will create ---------- */
+  var createCard = document.getElementById("createCard");
+  var roomName = document.getElementById("roomName");
+  var repoSlug = document.getElementById("repoSlug");
+
+  function slug(v) {
+    return v.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
+  function syncRepo() {
+    var s = slug(roomName.value);
+    if (s) {
+      repoSlug.textContent = s;
+      repoSlug.classList.remove("placeholder");
+    } else {
+      repoSlug.textContent = "your-room-name";
+      repoSlug.classList.add("placeholder");
+    }
+  }
+
+  function clearInvalid() {
+    createCard.removeAttribute("data-invalid");
+    roomName.removeAttribute("aria-invalid");
+  }
+
+  roomName.addEventListener("input", function () {
+    syncRepo();
+    if (slug(roomName.value)) { clearInvalid(); }
+  });
+
+  /* ---------- the field's two comp states: empty, and prefilled ---------- */
+  var swEmpty = document.getElementById("swEmpty");
+  var swFilled = document.getElementById("swFilled");
+
+  function setFieldState(which) {
+    var filled = which === "filled";
+    swEmpty.setAttribute("aria-pressed", filled ? "false" : "true");
+    swFilled.setAttribute("aria-pressed", filled ? "true" : "false");
+    clearInvalid();
+    roomName.value = filled ? "night-market" : "";
+    syncRepo();
+    if (filled) { roomName.focus(); } else { roomName.blur(); }
+  }
+  swEmpty.addEventListener("click", function () { setFieldState("empty"); });
+  swFilled.addEventListener("click", function () { setFieldState("filled"); });
+
+  /* ---------- the Options disclosure ---------- */
+  var optionsBtn = document.getElementById("optionsBtn");
+  var optionsPanel = document.getElementById("optionsPanel");
+  optionsBtn.addEventListener("click", function () {
+    var open = optionsBtn.getAttribute("aria-expanded") === "true";
+    optionsBtn.setAttribute("aria-expanded", open ? "false" : "true");
+    optionsPanel.hidden = open;
+  });
+
+  /* ---------- open the room, or say why it cannot ---------- */
+  var openBtn = document.getElementById("openRoomBtn");
+  var openLabel = openBtn.querySelector(".lbl");
+
+  createCard.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (openBtn.getAttribute("data-busy") === "true") { return; }
+
+    var s = slug(roomName.value);
+    if (!s) {
+      createCard.setAttribute("data-invalid", "true");
+      roomName.setAttribute("aria-invalid", "true");
+      roomName.focus();
+      return;
+    }
+    clearInvalid();
+
+    var was = openLabel.textContent;
+    openBtn.setAttribute("data-busy", "true");
+    openLabel.textContent = "Opening " + s + " and seeding the repo";
+    setTimeout(function () {
+      openBtn.removeAttribute("data-busy");
+      openLabel.textContent = was;
+    }, 2200);
+  });
+
+  /* ---------- the nudge, once ---------- */
+  var nudge = document.getElementById("nudgeBtn");
+  nudge.addEventListener("click", function () {
+    if (nudge.getAttribute("data-sent") === "true") { return; }
+    nudge.setAttribute("data-sent", "true");
+    nudge.textContent = "Nudged";
+    setTimeout(function () {
+      nudge.removeAttribute("data-sent");
+      nudge.textContent = "Nudge";
+    }, 2200);
+  });
+
+  syncRepo();
+})();
+</script>
+</body>
+</html>

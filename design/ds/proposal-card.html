@@ -1,0 +1,507 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signal Lab - Proposal Card</title>
+<style>
+.theme-dark, .theme-light {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+.theme-dark {
+  --bg: #0b0e14; --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(84,118,168,0.07), transparent 68%);
+  --panel: #10141d; --panel-2: #141926; --card: #131826; --card-hover: #171d2e;
+  --line: rgba(148, 168, 205, 0.13); --line-strong: rgba(148, 168, 205, 0.22);
+  --hairline: rgba(148, 168, 205, 0.09);
+  --ink: #e6ebf5; --ink-2: #9aa7bf; --ink-3: #5f6c85;
+  --signal: #4ade80; --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e; --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0; --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5; --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f; --rose-dim: rgba(247, 124, 143, 0.14);
+  --glow-adopt: 0 0 0 1px rgba(74, 222, 128, 0.28), 0 0 28px rgba(74, 222, 128, 0.08);
+  --shadow-card: 0 1px 1px rgba(0, 0, 0, 0.22), 0 6px 16px rgba(3, 6, 12, 0.30), 0 18px 40px rgba(3, 6, 12, 0.22);
+  --radius: 12px;
+}
+.theme-light {
+  --bg: #f3f4f0; --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(70,96,138,0.05), transparent 68%);
+  --panel: #fafaf7; --panel-2: #f0f1ec; --card: #ffffff; --card-hover: #fdfdfb;
+  --line: rgba(48, 62, 88, 0.13); --line-strong: rgba(48, 62, 88, 0.24);
+  --hairline: rgba(48, 62, 88, 0.09);
+  --ink: #1c2433; --ink-2: #55617a; --ink-3: #8b96ab;
+  --signal: #14934e; --signal-dim: rgba(20, 147, 78, 0.1);
+  --amber: #b0700a; --amber-dim: rgba(176, 112, 10, 0.1);
+  --cyan: #0f7fb0; --cyan-dim: rgba(15, 127, 176, 0.09);
+  --violet: #7048c8; --violet-dim: rgba(112, 72, 200, 0.09);
+  --rose: #c94b60; --rose-dim: rgba(201, 75, 96, 0.1);
+  --glow-adopt: 0 0 0 1px rgba(20, 147, 78, 0.3), 0 0 24px rgba(20, 147, 78, 0.07);
+  --shadow-card: 0 1px 1px rgba(28, 36, 51, 0.05), 0 5px 14px rgba(28, 36, 51, 0.06), 0 16px 36px rgba(28, 36, 51, 0.05);
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-ui); background: #05070a; color: #cbd2e0; padding: 24px; font-size: 14px; line-height: 1.5; }
+h1.doc-title { font-size: 18px; font-weight: 700; color: #f2f4f9; margin-bottom: 4px; }
+p.doc-sub { font-size: 12.5px; color: #7d879c; margin-bottom: 22px; max-width: 74ch; }
+.compare-wrap { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.panel { flex: 1 1 480px; min-width: 380px; border-radius: 14px; overflow: hidden; background: var(--bg); color: var(--ink); position: relative; }
+.panel::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: var(--bg-glow);
+}
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cyan) 45%, transparent); }
+  55% { box-shadow: 0 0 0 5px transparent; }
+}
+@keyframes node-blink {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cyan) 40%, transparent); }
+  50% { box-shadow: 0 0 0 5px transparent; }
+}
+.node-demo {
+  display: inline-block; width: 11px; height: 11px; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--cyan); margin-right: 8px; vertical-align: middle;
+  animation: node-blink 1.8s ease-in-out infinite;
+}
+.panel-inner { position: relative; z-index: 1; padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+.panel-tag { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-3); }
+.state-label {
+  font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-3); margin-top: 4px;
+}
+
+/* ===== card component, copied from direction-c.html ===== */
+.avatar {
+  width: 22px; height: 22px; border-radius: 50%; border-width: 0;
+  display: grid; place-items: center; font-size: 9px; font-weight: 700; letter-spacing: 0.02em;
+  color: #0b0e14; flex-shrink: 0;
+}
+.avatar.a-priya { background: #8fd0a8; }
+.avatar.a-dele  { background: #86bfe8; }
+.avatar.a-mara  { background: #d3aef0; }
+.avatar.a-tomas { background: #f0c489; }
+.avatar.a-sana  { background: #f0a3b1; }
+
+.card-body {
+  background: var(--card); border: 1px solid var(--hairline); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); padding: 16px 18px 14px;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+.card-body.forced-hover { background: var(--card-hover); border-color: var(--line-strong); transform: translateY(-1px); }
+
+.card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.byline { font-size: 12.5px; color: var(--ink-2); }
+.byline b { color: var(--ink); font-weight: 600; }
+.card-head .spacer { flex: 1; }
+.timestamp { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+
+.state-chip {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2.5px 8px; border-radius: 5px; border: 1px solid transparent;
+}
+.state-chip.proposed { color: var(--amber); background: var(--amber-dim); border-color: color-mix(in srgb, var(--amber) 25%, transparent); }
+.state-chip.forking  { color: var(--cyan);  background: var(--cyan-dim);  border-color: color-mix(in srgb, var(--cyan) 25%, transparent); }
+.state-chip.review   { color: var(--violet); background: var(--violet-dim); border-color: color-mix(in srgb, var(--violet) 25%, transparent); }
+.state-chip.adopted  { color: var(--signal); background: var(--signal-dim); border-color: color-mix(in srgb, var(--signal) 30%, transparent); }
+.state-chip.rejected { color: var(--rose); background: var(--rose-dim); border-color: color-mix(in srgb, var(--rose) 25%, transparent); }
+
+.intent { font-size: 15px; font-weight: 600; letter-spacing: 0.005em; margin-bottom: 5px; }
+.summary { font-size: 13px; color: var(--ink-2); margin-bottom: 12px; max-width: 60ch; }
+
+.remix-note {
+  border-left: 2px solid var(--violet); background: var(--violet-dim); border-radius: 0 8px 8px 0;
+  padding: 9px 12px; margin-bottom: 12px; font-size: 12.5px; color: var(--ink-2);
+}
+.remix-note .rn-label {
+  font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--violet); display: block; margin-bottom: 3px;
+}
+.rejection-note {
+  border-left: 2px solid var(--rose); background: var(--rose-dim); border-radius: 0 8px 8px 0;
+  padding: 9px 12px; margin-bottom: 12px; font-size: 12.5px; color: var(--ink-2);
+}
+.rejection-note .rn-label {
+  font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--rose); display: block; margin-bottom: 3px;
+}
+
+.card-meta { display: flex; align-items: center; gap: 14px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.meta-item { display: inline-flex; align-items: center; gap: 5px; }
+.meta-item svg { width: 12px; height: 12px; }
+.meta-item.hot { color: var(--cyan); }
+.card-meta .spacer { flex: 1; }
+
+.mini-btn {
+  font-family: var(--font-ui); font-size: 11.5px; font-weight: 600; color: var(--ink-2);
+  background: transparent; border: 1px solid var(--line); border-radius: 7px; padding: 4px 11px; cursor: pointer;
+}
+.mini-btn.primary { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 30%, transparent); }
+.hash {
+  font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 5px; padding: 1.5px 6px;
+}
+
+/* Adoption ceremony */
+.adoption-banner {
+  display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--signal); margin-bottom: 8px;
+}
+.adoption-banner::before, .adoption-banner::after {
+  content: ""; height: 1px; flex: 1;
+  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--signal) 45%, transparent), transparent);
+}
+.adoption-banner .flare { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.adoption-banner .spark { width: 7px; height: 7px; background: var(--signal); transform: rotate(45deg); animation: spark-spin 3.2s linear infinite; }
+@keyframes spark-spin { to { transform: rotate(405deg); } }
+
+.adoption-event .card-body {
+  border-color: color-mix(in srgb, var(--signal) 32%, var(--line));
+  box-shadow: var(--glow-adopt), var(--shadow-card);
+  position: relative; overflow: hidden;
+}
+.adoption-event .card-body::before {
+  content: ""; position: absolute; top: 0; left: -60%; width: 45%; height: 100%;
+  background: linear-gradient(105deg, transparent, color-mix(in srgb, var(--signal) 7%, transparent), transparent);
+  animation: sweep 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes sweep { 0%, 62% { left: -60%; } 86%, 100% { left: 130%; } }
+
+.lineage {
+  margin: 12px 0; border: 1px dashed color-mix(in srgb, var(--line-strong) 90%, transparent); border-radius: 9px;
+  padding: 10px 12px; background: color-mix(in srgb, var(--panel-2) 65%, transparent);
+}
+.lineage-title { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 8px; }
+.lineage-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); padding: 3px 0; position: relative; }
+.lineage-row .l-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; position: relative; z-index: 1; }
+.lineage-row:not(:last-child)::before {
+  content: ""; position: absolute; left: 3px; top: 16px; width: 1px; height: calc(100% - 8px); background: var(--line-strong);
+}
+.lineage-row .l-dot.origin { background: var(--ink-3); }
+.lineage-row .l-dot.remix { background: var(--violet); }
+.lineage-row .l-dot.final { background: var(--signal); box-shadow: 0 0 8px color-mix(in srgb, var(--signal) 55%, transparent); }
+.lineage-row b { color: var(--ink); font-weight: 600; }
+.lineage-row .hash { margin-left: auto; }
+.lineage-row .credit { font-family: var(--font-mono); font-size: 10px; color: var(--ink-3); }
+.code-inline { font-family: var(--font-mono); font-size: 11.5px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; color: var(--ink-2); }
+
+.adopt-footer { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
+.adopt-footer .reactors { display: flex; }
+.adopt-footer .avatar { width: 18px; height: 18px; font-size: 7.5px; margin-left: -5px; border-width: 1.5px; }
+.adopt-footer .avatar:first-child { margin-left: 0; }
+.cheer { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.cheer b { color: var(--signal); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">Components - Proposal card, all states</h1>
+<p class="doc-sub">Rejected is not present in direction-c.html. The <code>--rose</code> token is defined in the source root but never applied anywhere in that file, so it is reused here for the rejected state as the most plausible intent (see README for the full ambiguity note). A forced-hover variant simulates <code>.card:hover .card-body</code> since static preview cannot trigger real <code>:hover</code>.</p>
+
+<div class="compare-wrap">
+
+  <div class="panel theme-dark">
+    <div class="panel-inner">
+      <div class="panel-tag">● dark</div>
+
+      <div>
+        <div class="state-label">open / proposed</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-priya">PR</div>
+            <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+            <div class="spacer"></div>
+            <span class="state-chip proposed">proposed</span>
+            <span class="timestamp">1h</span>
+          </div>
+          <h3 class="intent">Open-hours model for vendors</h3>
+          <p class="summary">A schedule schema that handles the messy reality of night markets: seasonal openings, weather closures, and vendors who set up at 6pm "ish".</p>
+          <div class="card-meta">
+            <span class="meta-item">2 forks</span>
+            <span class="meta-item">5 notes</span>
+            <span class="hash">pr/open-hours</span>
+            <div class="spacer"></div>
+            <button class="mini-btn primary">Fork</button>
+            <button class="mini-btn">Remix</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">open, hover state (forced, mirrors .card:hover .card-body)</div>
+        <div class="card-body forced-hover">
+          <div class="card-head">
+            <div class="avatar a-priya">PR</div>
+            <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+            <div class="spacer"></div>
+            <span class="state-chip proposed">proposed</span>
+            <span class="timestamp">1h</span>
+          </div>
+          <h3 class="intent">Open-hours model for vendors</h3>
+          <p class="summary">On hover: background lifts to card-hover, border to line-strong, card translates up 1px over 0.18s ease.</p>
+          <div class="card-meta">
+            <span class="meta-item">2 forks</span>
+            <span class="hash">pr/open-hours</span>
+            <div class="spacer"></div>
+            <button class="mini-btn primary">Fork</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">fork live (node blinks cyan while the fork is in progress)</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-tomas">TR</div>
+            <span class="byline"><span class="node-demo"></span><b>Tomás Rivera</b> is forking Sana's proposal</span>
+            <div class="spacer"></div>
+            <span class="state-chip forking">fork live</span>
+            <span class="timestamp">now</span>
+          </div>
+          <h3 class="intent">Geolocation onboarding flow</h3>
+          <p class="summary">Tomás pulled Sana's location permission flow into his workbench. His agent is rewriting the fallback path for browsers that deny geolocation.</p>
+          <div class="card-meta">
+            <span class="meta-item hot">fork in progress</span>
+            <span class="hash">from sq/geo-onboard</span>
+            <div class="spacer"></div>
+            <button class="mini-btn">Watch</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">in review</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-dele">DO</div>
+            <span class="byline"><b>Dele Okafor</b> promoted from his agent</span>
+            <div class="spacer"></div>
+            <span class="state-chip review">in review</span>
+            <span class="timestamp">3h</span>
+          </div>
+          <h3 class="intent">Stall detail sheet with photo strip</h3>
+          <p class="summary">Bottom sheet that slides over the map. Two adopt votes in, needs one more.</p>
+          <div class="card-meta">
+            <span class="meta-item">2 / 3 adopt votes</span>
+            <span class="meta-item">1 fork</span>
+            <span class="hash">do/stall-sheet</span>
+            <div class="spacer"></div>
+            <button class="mini-btn primary">Vote adopt</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="adoption-event">
+        <div class="state-label">adopted - full ceremony</div>
+        <div class="adoption-banner"><span class="flare"><span class="spark"></span>Adopted into the build<span class="spark"></span></span></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-mara">MJ</div>
+            <span class="byline"><b>Mara Jensen's</b> remix won the round</span>
+            <div class="spacer"></div>
+            <span class="state-chip adopted">adopted</span>
+            <span class="timestamp">18m</span>
+          </div>
+          <h3 class="intent">Stall map with pin clustering</h3>
+          <p class="summary">Clusters stall pins at low zoom, expands past zoom 15. Cold load dropped from 3.1s to 0.9s.</p>
+          <div class="remix-note">
+            <span class="rn-label">Remix note · what changed from the parent</span>
+            Kept Dele's tile layer and pin design. Replaced flat pin list with supercluster indexing.
+          </div>
+          <div class="lineage">
+            <div class="lineage-title">Credit lineage</div>
+            <div class="lineage-row"><span class="l-dot origin"></span><span><b>Dele Okafor</b> · Basic map view</span><span class="credit">origin</span><span class="hash">a3d91be</span></div>
+            <div class="lineage-row"><span class="l-dot remix"></span><span><b>Mara Jensen</b> · remixed clustering</span><span class="credit">remix</span><span class="hash">7c02f4d</span></div>
+            <div class="lineage-row"><span class="l-dot final"></span><span><b>Room</b> · adopted to <span class="code-inline">main</span></span><span class="credit">canonical</span><span class="hash">e41f8c2</span></div>
+          </div>
+          <div class="adopt-footer">
+            <div class="reactors">
+              <div class="avatar a-priya">PR</div><div class="avatar a-dele">DO</div><div class="avatar a-tomas">TR</div><div class="avatar a-sana">SQ</div>
+            </div>
+            <span class="cheer">4 cheers · credit split <b>Mara 60</b> / <b>Dele 40</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">rejected (constructed - see note above)</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-tomas">TR</div>
+            <span class="byline"><b>Tomás Rivera</b> promoted from his agent</span>
+            <div class="spacer"></div>
+            <span class="state-chip rejected">rejected</span>
+            <span class="timestamp">2d</span>
+          </div>
+          <h3 class="intent">Push notification opt-in modal</h3>
+          <p class="summary">Full-screen modal blocking first map view until notification permission is granted or dismissed.</p>
+          <div class="rejection-note">
+            <span class="rn-label">Room note · why this did not land</span>
+            Room voted this blocks first paint; asked for a deferred, dismissible prompt instead. Not adopted.
+          </div>
+          <div class="card-meta">
+            <span class="meta-item">0 / 3 adopt votes</span>
+            <span class="hash">tr/notif-modal</span>
+            <div class="spacer"></div>
+            <button class="mini-btn">Reopen as remix</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="panel theme-light">
+    <div class="panel-inner">
+      <div class="panel-tag">● light</div>
+
+      <div>
+        <div class="state-label">open / proposed</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-priya">PR</div>
+            <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+            <div class="spacer"></div>
+            <span class="state-chip proposed">proposed</span>
+            <span class="timestamp">1h</span>
+          </div>
+          <h3 class="intent">Open-hours model for vendors</h3>
+          <p class="summary">A schedule schema that handles the messy reality of night markets: seasonal openings, weather closures, and vendors who set up at 6pm "ish".</p>
+          <div class="card-meta">
+            <span class="meta-item">2 forks</span>
+            <span class="meta-item">5 notes</span>
+            <span class="hash">pr/open-hours</span>
+            <div class="spacer"></div>
+            <button class="mini-btn primary">Fork</button>
+            <button class="mini-btn">Remix</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">open, hover state (forced, mirrors .card:hover .card-body)</div>
+        <div class="card-body forced-hover">
+          <div class="card-head">
+            <div class="avatar a-priya">PR</div>
+            <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+            <div class="spacer"></div>
+            <span class="state-chip proposed">proposed</span>
+            <span class="timestamp">1h</span>
+          </div>
+          <h3 class="intent">Open-hours model for vendors</h3>
+          <p class="summary">On hover: background lifts to card-hover, border to line-strong, card translates up 1px over 0.18s ease.</p>
+          <div class="card-meta">
+            <span class="meta-item">2 forks</span>
+            <span class="hash">pr/open-hours</span>
+            <div class="spacer"></div>
+            <button class="mini-btn primary">Fork</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">fork live (node blinks cyan while the fork is in progress)</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-tomas">TR</div>
+            <span class="byline"><span class="node-demo"></span><b>Tomás Rivera</b> is forking Sana's proposal</span>
+            <div class="spacer"></div>
+            <span class="state-chip forking">fork live</span>
+            <span class="timestamp">now</span>
+          </div>
+          <h3 class="intent">Geolocation onboarding flow</h3>
+          <p class="summary">Tomás pulled Sana's location permission flow into his workbench. His agent is rewriting the fallback path for browsers that deny geolocation.</p>
+          <div class="card-meta">
+            <span class="meta-item hot">fork in progress</span>
+            <span class="hash">from sq/geo-onboard</span>
+            <div class="spacer"></div>
+            <button class="mini-btn">Watch</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">in review</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-dele">DO</div>
+            <span class="byline"><b>Dele Okafor</b> promoted from his agent</span>
+            <div class="spacer"></div>
+            <span class="state-chip review">in review</span>
+            <span class="timestamp">3h</span>
+          </div>
+          <h3 class="intent">Stall detail sheet with photo strip</h3>
+          <p class="summary">Bottom sheet that slides over the map. Two adopt votes in, needs one more.</p>
+          <div class="card-meta">
+            <span class="meta-item">2 / 3 adopt votes</span>
+            <span class="meta-item">1 fork</span>
+            <span class="hash">do/stall-sheet</span>
+            <div class="spacer"></div>
+            <button class="mini-btn primary">Vote adopt</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="adoption-event">
+        <div class="state-label">adopted - full ceremony</div>
+        <div class="adoption-banner"><span class="flare"><span class="spark"></span>Adopted into the build<span class="spark"></span></span></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-mara">MJ</div>
+            <span class="byline"><b>Mara Jensen's</b> remix won the round</span>
+            <div class="spacer"></div>
+            <span class="state-chip adopted">adopted</span>
+            <span class="timestamp">18m</span>
+          </div>
+          <h3 class="intent">Stall map with pin clustering</h3>
+          <p class="summary">Clusters stall pins at low zoom, expands past zoom 15. Cold load dropped from 3.1s to 0.9s.</p>
+          <div class="remix-note">
+            <span class="rn-label">Remix note · what changed from the parent</span>
+            Kept Dele's tile layer and pin design. Replaced flat pin list with supercluster indexing.
+          </div>
+          <div class="lineage">
+            <div class="lineage-title">Credit lineage</div>
+            <div class="lineage-row"><span class="l-dot origin"></span><span><b>Dele Okafor</b> · Basic map view</span><span class="credit">origin</span><span class="hash">a3d91be</span></div>
+            <div class="lineage-row"><span class="l-dot remix"></span><span><b>Mara Jensen</b> · remixed clustering</span><span class="credit">remix</span><span class="hash">7c02f4d</span></div>
+            <div class="lineage-row"><span class="l-dot final"></span><span><b>Room</b> · adopted to <span class="code-inline">main</span></span><span class="credit">canonical</span><span class="hash">e41f8c2</span></div>
+          </div>
+          <div class="adopt-footer">
+            <div class="reactors">
+              <div class="avatar a-priya">PR</div><div class="avatar a-dele">DO</div><div class="avatar a-tomas">TR</div><div class="avatar a-sana">SQ</div>
+            </div>
+            <span class="cheer">4 cheers · credit split <b>Mara 60</b> / <b>Dele 40</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="state-label">rejected (constructed - see note above)</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="avatar a-tomas">TR</div>
+            <span class="byline"><b>Tomás Rivera</b> promoted from his agent</span>
+            <div class="spacer"></div>
+            <span class="state-chip rejected">rejected</span>
+            <span class="timestamp">2d</span>
+          </div>
+          <h3 class="intent">Push notification opt-in modal</h3>
+          <p class="summary">Full-screen modal blocking first map view until notification permission is granted or dismissed.</p>
+          <div class="rejection-note">
+            <span class="rn-label">Room note · why this did not land</span>
+            Room voted this blocks first paint; asked for a deferred, dismissible prompt instead. Not adopted.
+          </div>
+          <div class="card-meta">
+            <span class="meta-item">0 / 3 adopt votes</span>
+            <span class="hash">tr/notif-modal</span>
+            <div class="spacer"></div>
+            <button class="mini-btn">Reopen as remix</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

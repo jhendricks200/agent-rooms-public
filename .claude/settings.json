@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vercel *)",
+      "Bash(npx vercel:*)"
+    ],
+    "deny": [
+      "Bash(npx vercel integration remove *)",
+      "Bash(npx vercel integration-resource remove *)",
+      "Bash(npx vercel integration-resource rm *)",
+      "Bash(npx vercel ir remove *)",
+      "Bash(npx vercel ir rm *)",
+      "Bash(npx vercel project rm *)",
+      "Bash(npx vercel remove *)",
+      "Bash(npx vercel rm *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -qiE 'neon\\.tech|prod\\.env|env\\.production' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"This command references the production database environment. Confirm before it runs.\"}}' || true",
+            "statusMessage": "Checking for production database access"
+          }
+        ]
+      }
+    ]
+  }
+}

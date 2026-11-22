@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Agent Rooms: screen designs</title>
+<style>
+ :root{color-scheme:light dark;font-family:-apple-system,system-ui,sans-serif}
+ body{margin:0;padding:48px 24px;display:grid;place-items:center;min-height:100vh;background:light-dark(#faf9f7,#0e121c);color:light-dark(#1a1a1a,#ececec)}
+ main{max-width:760px;width:100%}
+ h1{font-size:22px;font-weight:650;margin:0 0 4px}
+ p.sub{margin:0 0 28px;opacity:.6;font-size:14px}
+ a.card{display:block;text-decoration:none;color:inherit;border:1px solid light-dark(#e2e0dc,#232a3a);border-radius:12px;padding:18px 22px;margin-bottom:12px;transition:border-color .15s,transform .15s}
+ a.card:hover{border-color:light-dark(#b5b2ac,#3a465e);transform:translateY(-1px)}
+ .name{font-weight:600;font-size:16px}
+ .desc{font-size:13.5px;opacity:.65;margin-top:4px;line-height:1.45}
+ .ref{margin-top:24px;font-size:13px;opacity:.5}
+</style></head><body><main>
+<h1>Agent Rooms: newly designed screens</h1>
+<p class="sub">Opus 5 at high effort, in the locked Signal lab language. Each has its own light and dark toggle.</p>
+<a class="card" href="/screen-signin.html"><div class="name">Sign in</div><div class="desc">First thing every tester sees. Replays the loop as a recorded session instead of explaining it in prose. Includes the allowlist-refused state.</div></a>
+<a class="card" href="/screen-proposal.html"><div class="name">Proposal detail</div><div class="desc">Restructured around the fork decision. Provenance moved to a sticky trust rail. All four states: open, adopted, rejected, superseded.</div></a>
+<a class="card" href="/screen-fork.html"><div class="name">Fork bundle</div><div class="desc">The five parts hung off one continuous thread that ends at the workspace path. Includes the empty-note case.</div></a>
+<a class="card" href="/screen-empty.html"><div class="name">Empty state</div><div class="desc">Teaches the loop, then offers a real room-creation form. Includes the awaiting-invite variant.</div></a>
+<p class="ref">Reference: <a href="/direction-c2.html" style="color:inherit">direction-c2.html</a>, the blessed room screen.</p>
+</main></body></html>

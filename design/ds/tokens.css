@@ -1,0 +1,140 @@
+/* ============================================================
+   Agent Rooms · Signal Lab - design tokens
+   Extracted verbatim from design/direction-c2.html (the blessed
+   "Signal lab" comp). Dark is the native/default theme; light is
+   applied via [data-theme="light"] on the root element.
+   ============================================================ */
+
+:root {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  /* Night lab (dark is the native habitat) */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(84, 118, 168, 0.07), transparent 68%);
+  --rail: #0d1119;
+  --panel: #10141d;
+  --panel-2: #141926;
+  --card: #131826;
+  --card-hover: #171d2e;
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #5f6c85;
+
+  --signal: #4ade80;          /* adoption / build alive */
+  --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e;           /* proposed */
+  --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0;            /* fork activity */
+  --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5;          /* remix */
+  --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f;
+
+  --glow-adopt: 0 0 0 1px rgba(74, 222, 128, 0.28), 0 0 28px rgba(74, 222, 128, 0.08);
+
+  /* Elevation hierarchy: page < card < floating composer < modal */
+  --hairline: rgba(148, 168, 205, 0.09);
+  --shadow-card:
+    0 1px 1px rgba(0, 0, 0, 0.22),
+    0 6px 16px rgba(3, 6, 12, 0.30),
+    0 18px 40px rgba(3, 6, 12, 0.22);
+  --shadow-float:
+    0 1px 0 rgba(148, 168, 205, 0.07) inset,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 14px 34px rgba(2, 4, 9, 0.5),
+    0 32px 72px rgba(2, 4, 9, 0.36);
+  --composer-bg: rgba(23, 29, 44, 0.82);
+  --send-fill: #e6ebf5;
+  --send-ink: #0b0e14;
+  --radius: 12px;
+}
+
+:root[data-theme="light"] {
+  /* Day shift in the same lab: warm paper, same instruments */
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(70, 96, 138, 0.05), transparent 68%);
+  --rail: #ecede8;
+  --panel: #fafaf7;
+  --panel-2: #f0f1ec;
+  --card: #ffffff;
+  --card-hover: #fdfdfb;
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #8b96ab;
+
+  --signal: #14934e;
+  --signal-dim: rgba(20, 147, 78, 0.1);
+  --amber: #b0700a;
+  --amber-dim: rgba(176, 112, 10, 0.1);
+  --cyan: #0f7fb0;
+  --cyan-dim: rgba(15, 127, 176, 0.09);
+  --violet: #7048c8;
+  --violet-dim: rgba(112, 72, 200, 0.09);
+  --rose: #c94b60;
+
+  --glow-adopt: 0 0 0 1px rgba(20, 147, 78, 0.3), 0 0 24px rgba(20, 147, 78, 0.07);
+
+  --hairline: rgba(48, 62, 88, 0.09);
+  --shadow-card:
+    0 1px 1px rgba(28, 36, 51, 0.05),
+    0 5px 14px rgba(28, 36, 51, 0.06),
+    0 16px 36px rgba(28, 36, 51, 0.05);
+  --shadow-float:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 2px 4px rgba(28, 36, 51, 0.07),
+    0 12px 30px rgba(28, 36, 51, 0.12),
+    0 30px 64px rgba(28, 36, 51, 0.08);
+  --composer-bg: rgba(255, 255, 255, 0.86);
+  --send-fill: #1c2433;
+  --send-ink: #f6f7f4;
+}
+
+/* Shared type scale, spacing, and radii used across component CSS
+   (documented, not enforced as variables in direction-c2.html  - 
+   these are the literal values that recur throughout its rules). */
+
+/* Type scale
+   9.5px  - rail section labels, mono, uppercase, tracked
+   10px   - state chips, lineage title, oc-label, mono, uppercase
+   10.5px - timestamps, room-line, meta, mono
+   11px   - card-meta, env-row, mono
+   11.5px - mini-btn, code-inline
+   12px   - adopt-footer, lineage-row
+   12.5px - byline, chat-head .who, feed-sub
+   13px   - body copy: summary, chat-text, msg, agent-id name
+   13.5px - composer textarea
+   14px   - body base (root font-size)
+   14.5px - room-composer input
+   15px   - card .intent, room-title h1
+*/
+
+/* Spacing (padding/gap literals in use)
+   2px, 3px, 4px, 5px, 6px, 7px, 8px, 9px, 10px, 11px, 12px,
+   13px, 14px, 16px, 18px, 20px, 22px, 26px, 28px, 34px
+*/
+
+/* Radii
+   4px  - code-inline
+   5px  - hash, state-chip, count badge
+   6px  - env-ico
+   7px  - rail-search-btn, mini-btn
+   8px  - rail-item, rail-brand .mark, promote-btn
+   9px  - lineage box
+   12px - --radius (card-body, msg.user), agent output-card
+   14px - hairline var reference tier
+   20px - agent composer-box
+   24px - room-composer rc-box
+   50%  - avatars, icon buttons, send buttons (circular)
+*/
+
+/* Elevation tiers
+   page            - var(--bg) + body::before var(--bg-glow), no shadow
+   card            - var(--shadow-card): 3-layer stacked shadow, ambient + contact
+   floating composer - var(--shadow-float): inset highlight + 4-layer shadow, heavier blur
+   adopted card    - var(--glow-adopt) layered under var(--shadow-card): outline ring + soft bloom
+*/

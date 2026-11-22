@@ -1,0 +1,281 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signal Lab - Tokens</title>
+<style>
+/* Design-system doc chrome (not part of the product CSS) */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+/* Satoshi is named first for anyone who has it installed. The font files
+   are not kept in this repository (Fontshare licence), so the stack falls
+   through to the system fonts otherwise. */
+body {
+  font-family: "Satoshi", "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  background: #05070a;
+  color: #cbd2e0;
+  padding: 28px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+h1.doc-title { font-size: 19px; font-weight: 700; color: #f2f4f9; margin-bottom: 4px; }
+p.doc-sub { font-size: 12.5px; color: #7d879c; margin-bottom: 24px; max-width: 78ch; }
+h2.doc-h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7d879c; margin: 32px 0 12px; }
+h2.doc-h2:first-of-type { margin-top: 0; }
+.compare-wrap { display: flex; flex-wrap: wrap; gap: 20px; }
+.panel-tag { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7d879c; margin-bottom: 8px; }
+
+/* ===== Token block: verbatim from direction-c2.html, scoped to
+   .panel-dark / .panel-light instead of :root so both themes can
+   render on screen at once, side by side. ===== */
+.panel-dark, .panel-light {
+  --font-ui: "Satoshi", "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+  --radius: 12px;
+  border-radius: 14px;
+  padding: 20px;
+  flex: 1 1 460px;
+}
+.panel-dark {
+  --bg: #0b0e14; --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(84,118,168,0.07), transparent 68%);
+  --rail: #0d1119; --panel: #10141d; --panel-2: #141926; --card: #131826; --card-hover: #171d2e;
+  --line: rgba(148,168,205,0.13); --line-strong: rgba(148,168,205,0.22);
+  --ink: #e6ebf5; --ink-2: #9aa7bf; --ink-3: #5f6c85;
+  --signal: #4ade80; --signal-dim: rgba(74,222,128,0.14);
+  --amber: #fbbf5e; --amber-dim: rgba(251,191,94,0.13);
+  --cyan: #53c5f0; --cyan-dim: rgba(83,197,240,0.13);
+  --violet: #b18cf5; --violet-dim: rgba(177,140,245,0.14);
+  --rose: #f77c8f;
+  --glow-adopt: 0 0 0 1px rgba(74,222,128,0.28), 0 0 28px rgba(74,222,128,0.08);
+  --hairline: rgba(148,168,205,0.09);
+  --shadow-card: 0 1px 1px rgba(0,0,0,0.22), 0 6px 16px rgba(3,6,12,0.30), 0 18px 40px rgba(3,6,12,0.22);
+  --shadow-float: 0 1px 0 rgba(148,168,205,0.07) inset, 0 2px 4px rgba(0,0,0,0.28), 0 14px 34px rgba(2,4,9,0.5), 0 32px 72px rgba(2,4,9,0.36);
+  --composer-bg: rgba(23,29,44,0.82); --send-fill: #e6ebf5; --send-ink: #0b0e14;
+  --shadow-input: inset 0 1px 3px rgba(0,0,0,0.26), inset 0 0 0 1px rgba(148,168,205,0.07), 0 1px 0 rgba(148,168,205,0.05);
+  --focus-ring: 0 0 0 3px rgba(83,197,240,0.24), 0 0 20px rgba(83,197,240,0.2);
+  --scrim: rgba(0,0,0,0.62); --modal-bg: #0e121c; --input-bg: #1a2132;
+  --field-border: rgba(148,168,205,0.17); --panel-raised: #1c2436; --label-ink: #8b9ab6;
+  --btn-punch-fill: #f6f9ff; --btn-punch-ink: #05070a;
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line);
+}
+.panel-light {
+  --bg: #f3f4f0; --bg-glow: radial-gradient(1100px 520px at 38% -8%, rgba(70,96,138,0.05), transparent 68%);
+  --rail: #ecede8; --panel: #fafaf7; --panel-2: #f0f1ec; --card: #ffffff; --card-hover: #fdfdfb;
+  --line: rgba(48,62,88,0.13); --line-strong: rgba(48,62,88,0.24);
+  --ink: #1c2433; --ink-2: #55617a; --ink-3: #8b96ab;
+  --signal: #14934e; --signal-dim: rgba(20,147,78,0.1);
+  --amber: #b0700a; --amber-dim: rgba(176,112,10,0.1);
+  --cyan: #0f7fb0; --cyan-dim: rgba(15,127,176,0.09);
+  --violet: #7048c8; --violet-dim: rgba(112,72,200,0.09);
+  --rose: #c94b60;
+  --glow-adopt: 0 0 0 1px rgba(20,147,78,0.3), 0 0 24px rgba(20,147,78,0.07);
+  --hairline: rgba(48,62,88,0.09);
+  --shadow-card: 0 1px 1px rgba(28,36,51,0.05), 0 5px 14px rgba(28,36,51,0.06), 0 16px 36px rgba(28,36,51,0.05);
+  --shadow-float: 0 1px 0 rgba(255,255,255,0.65) inset, 0 2px 4px rgba(28,36,51,0.07), 0 12px 30px rgba(28,36,51,0.12), 0 30px 64px rgba(28,36,51,0.08);
+  --composer-bg: rgba(255,255,255,0.86); --send-fill: #1c2433; --send-ink: #f6f7f4;
+  --shadow-input: inset 0 1px 3px rgba(28,36,51,0.08), inset 0 0 0 1px rgba(48,62,88,0.05), 0 1px 0 rgba(255,255,255,0.6);
+  --focus-ring: 0 0 0 3px rgba(15,127,176,0.2), 0 0 18px rgba(15,127,176,0.14);
+  --scrim: rgba(12,16,24,0.55); --modal-bg: #f6f7f2; --input-bg: #edeee8;
+  --field-border: rgba(48,62,88,0.16); --panel-raised: #ffffff; --label-ink: #6b7690;
+  --btn-punch-fill: #141b28; --btn-punch-ink: #ffffff;
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line);
+}
+
+/* ===== Swatch grid ===== */
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 6px; }
+.swatch { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.swatch .fill { height: 46px; }
+.swatch .info { padding: 8px 10px; }
+.swatch .nm { font-size: 12px; font-weight: 600; color: var(--ink); }
+.swatch .val { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); margin-top: 2px; word-break: break-all; }
+
+/* ===== Type scale rows ===== */
+.type-row { display: flex; align-items: baseline; gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.type-row:last-child { border-bottom: none; }
+.type-row .px { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); width: 56px; flex-shrink: 0; }
+.type-row .sample { color: var(--ink); }
+.type-row .use { margin-left: auto; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+
+/* ===== Spacing / radii strips ===== */
+.strip-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.strip-row .lbl { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); width: 44px; flex-shrink: 0; }
+.strip-box { height: 18px; background: var(--cyan-dim); border: 1px solid var(--cyan); border-radius: 3px; }
+.radius-box { width: 44px; height: 44px; background: var(--card); border: 1px solid var(--line-strong); display: grid; place-items: center; font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-3); }
+.radius-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+
+/* ===== Shadow tiers ===== */
+.shadow-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+.shadow-card-demo { width: 150px; height: 90px; background: var(--card); border: 1px solid var(--hairline); border-radius: var(--radius); box-shadow: var(--shadow-card); display: grid; place-items: center; font-size: 11px; color: var(--ink-2); }
+.shadow-float-demo { width: 150px; height: 90px; background: var(--composer-bg); border: 1px solid var(--hairline); border-radius: 20px; box-shadow: var(--shadow-float); display: grid; place-items: center; font-size: 11px; color: var(--ink-2); }
+.shadow-adopt-demo { width: 150px; height: 90px; background: var(--card); border: 1px solid color-mix(in srgb, var(--signal) 32%, var(--line)); border-radius: var(--radius); box-shadow: var(--glow-adopt), var(--shadow-card); display: grid; place-items: center; font-size: 11px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">Foundations - Design tokens</h1>
+<p class="doc-sub">Every literal value below is copied verbatim from <code>design/direction-c2.html</code> (the blessed "Signal lab" composition). Machine-readable custom properties live in <code>ds/tokens.css</code>. Both themes are rendered explicitly here as fixed panels, neither depends on the OS or browser color scheme.</p>
+
+<h2 class="doc-h2">Color</h2>
+<div class="compare-wrap">
+  <div class="panel-dark">
+    <div class="panel-tag">dark · native</div>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="fill" style="background:#0b0e14"></div><div class="info"><div class="nm">bg</div><div class="val">#0b0e14</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#0d1119"></div><div class="info"><div class="nm">rail</div><div class="val">#0d1119</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#10141d"></div><div class="info"><div class="nm">panel</div><div class="val">#10141d</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#141926"></div><div class="info"><div class="nm">panel-2</div><div class="val">#141926</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#131826"></div><div class="info"><div class="nm">card</div><div class="val">#131826</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#171d2e"></div><div class="info"><div class="nm">card-hover</div><div class="val">#171d2e</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#0e121c"></div><div class="info"><div class="nm">modal-bg</div><div class="val">#0e121c</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#1a2132"></div><div class="info"><div class="nm">input-bg</div><div class="val">#1a2132</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#1c2436"></div><div class="info"><div class="nm">panel-raised</div><div class="val">#1c2436</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#e6ebf5"></div><div class="info"><div class="nm">ink</div><div class="val">#e6ebf5</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#9aa7bf"></div><div class="info"><div class="nm">ink-2</div><div class="val">#9aa7bf</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#5f6c85"></div><div class="info"><div class="nm">ink-3</div><div class="val">#5f6c85</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#4ade80"></div><div class="info"><div class="nm">signal (adopt)</div><div class="val">#4ade80</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#fbbf5e"></div><div class="info"><div class="nm">amber (proposed)</div><div class="val">#fbbf5e</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#53c5f0"></div><div class="info"><div class="nm">cyan (fork)</div><div class="val">#53c5f0</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#b18cf5"></div><div class="info"><div class="nm">violet (remix)</div><div class="val">#b18cf5</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#f77c8f"></div><div class="info"><div class="nm">rose</div><div class="val">#f77c8f</div></div></div>
+    </div>
+  </div>
+  <div class="panel-light">
+    <div class="panel-tag">light · day shift</div>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="fill" style="background:#f3f4f0"></div><div class="info"><div class="nm">bg</div><div class="val">#f3f4f0</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#ecede8"></div><div class="info"><div class="nm">rail</div><div class="val">#ecede8</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#fafaf7"></div><div class="info"><div class="nm">panel</div><div class="val">#fafaf7</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#f0f1ec"></div><div class="info"><div class="nm">panel-2</div><div class="val">#f0f1ec</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#ffffff"></div><div class="info"><div class="nm">card</div><div class="val">#ffffff</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#fdfdfb"></div><div class="info"><div class="nm">card-hover</div><div class="val">#fdfdfb</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#fafaf7"></div><div class="info"><div class="nm">modal-bg</div><div class="val">#fafaf7</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#f1f2ed"></div><div class="info"><div class="nm">input-bg</div><div class="val">#f1f2ed</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#ffffff"></div><div class="info"><div class="nm">panel-raised</div><div class="val">#ffffff</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#1c2433"></div><div class="info"><div class="nm">ink</div><div class="val">#1c2433</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#55617a"></div><div class="info"><div class="nm">ink-2</div><div class="val">#55617a</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#8b96ab"></div><div class="info"><div class="nm">ink-3</div><div class="val">#8b96ab</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#14934e"></div><div class="info"><div class="nm">signal (adopt)</div><div class="val">#14934e</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#b0700a"></div><div class="info"><div class="nm">amber (proposed)</div><div class="val">#b0700a</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#0f7fb0"></div><div class="info"><div class="nm">cyan (fork)</div><div class="val">#0f7fb0</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#7048c8"></div><div class="info"><div class="nm">violet (remix)</div><div class="val">#7048c8</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#c94b60"></div><div class="info"><div class="nm">rose</div><div class="val">#c94b60</div></div></div>
+    </div>
+  </div>
+</div>
+
+<h2 class="doc-h2">Type scale &amp; fonts</h2>
+<div class="compare-wrap">
+  <div class="panel-dark">
+    <div class="panel-tag">dark</div>
+    <div class="type-row"><span class="px">9.5px</span><span class="sample" style="font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3); font-size:9.5px;">rail section</span><span class="use">.rail-section</span></div>
+    <div class="type-row"><span class="px">10px</span><span class="sample" style="font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.08em; color:var(--amber); font-size:10px;">proposed</span><span class="use">.state-chip</span></div>
+    <div class="type-row"><span class="px">10.5px</span><span class="sample" style="font-family:var(--font-mono); color:var(--ink-3); font-size:10.5px;">18m · main @ e41f8c2</span><span class="use">.timestamp / .room-line</span></div>
+    <div class="type-row"><span class="px">11px</span><span class="sample" style="font-family:var(--font-mono); color:var(--ink-3); font-size:11px;">fork in progress</span><span class="use">.card-meta / .env-row</span></div>
+    <div class="type-row"><span class="px">11.5px</span><span class="sample" style="font-weight:600; color:var(--ink-2); font-size:11.5px;">Watch</span><span class="use">.mini-btn</span></div>
+    <div class="type-row"><span class="px">12.5px</span><span class="sample" style="color:var(--ink-2); font-size:12.5px;"><b style="color:var(--ink)">Tomás Rivera</b> is forking</span><span class="use">.byline</span></div>
+    <div class="type-row"><span class="px">13px</span><span class="sample" style="font-size:13px;">Clusters stall pins at low zoom so dense night markets stay readable.</span><span class="use">.summary / .chat-text</span></div>
+    <div class="type-row"><span class="px">14px</span><span class="sample" style="font-size:14px;">Body base font-size, set on the body element</span><span class="use">body</span></div>
+    <div class="type-row"><span class="px">14.5px</span><span class="sample" style="font-size:14.5px;">Message #night-market</span><span class="use">.room-composer input</span></div>
+    <div class="type-row"><span class="px">15px</span><span class="sample" style="font-weight:600; font-size:15px;">Stall map with pin clustering</span><span class="use">.intent / h1</span></div>
+    <div class="type-row"><span class="px">font-ui</span><span class="sample" style="font-family:var(--font-ui);">Satoshi (variable 300-900), falls back to Avenir Next, Segoe UI</span><span class="use">--font-ui</span></div>
+    <div class="type-row"><span class="px">font-mono</span><span class="sample" style="font-family:var(--font-mono);">SF Mono, Cascadia Code, JetBrains Mono, Menlo</span><span class="use">--font-mono</span></div>
+  </div>
+  <div class="panel-light">
+    <div class="panel-tag">light</div>
+    <div class="type-row"><span class="px">9.5px</span><span class="sample" style="font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.14em; color:var(--ink-3); font-size:9.5px;">rail section</span><span class="use">.rail-section</span></div>
+    <div class="type-row"><span class="px">10px</span><span class="sample" style="font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.08em; color:var(--amber); font-size:10px;">proposed</span><span class="use">.state-chip</span></div>
+    <div class="type-row"><span class="px">10.5px</span><span class="sample" style="font-family:var(--font-mono); color:var(--ink-3); font-size:10.5px;">18m · main @ e41f8c2</span><span class="use">.timestamp / .room-line</span></div>
+    <div class="type-row"><span class="px">11px</span><span class="sample" style="font-family:var(--font-mono); color:var(--ink-3); font-size:11px;">fork in progress</span><span class="use">.card-meta / .env-row</span></div>
+    <div class="type-row"><span class="px">11.5px</span><span class="sample" style="font-weight:600; color:var(--ink-2); font-size:11.5px;">Watch</span><span class="use">.mini-btn</span></div>
+    <div class="type-row"><span class="px">12.5px</span><span class="sample" style="color:var(--ink-2); font-size:12.5px;"><b style="color:var(--ink)">Tomás Rivera</b> is forking</span><span class="use">.byline</span></div>
+    <div class="type-row"><span class="px">13px</span><span class="sample" style="font-size:13px;">Clusters stall pins at low zoom so dense night markets stay readable.</span><span class="use">.summary / .chat-text</span></div>
+    <div class="type-row"><span class="px">14px</span><span class="sample" style="font-size:14px;">Body base font-size, set on the body element</span><span class="use">body</span></div>
+    <div class="type-row"><span class="px">14.5px</span><span class="sample" style="font-size:14.5px;">Message #night-market</span><span class="use">.room-composer input</span></div>
+    <div class="type-row"><span class="px">15px</span><span class="sample" style="font-weight:600; font-size:15px;">Stall map with pin clustering</span><span class="use">.intent / h1</span></div>
+    <div class="type-row"><span class="px">font-ui</span><span class="sample" style="font-family:var(--font-ui);">Satoshi (variable 300-900), falls back to Avenir Next, Segoe UI</span><span class="use">--font-ui</span></div>
+    <div class="type-row"><span class="px">font-mono</span><span class="sample" style="font-family:var(--font-mono);">SF Mono, Cascadia Code, JetBrains Mono, Menlo</span><span class="use">--font-mono</span></div>
+  </div>
+</div>
+
+<h2 class="doc-h2">Spacing (literal values in use)</h2>
+<div class="compare-wrap">
+  <div class="panel-dark">
+    <div class="panel-tag">dark</div>
+    <div class="strip-row"><span class="lbl">4px</span><div class="strip-box" style="width:4px"></div></div>
+    <div class="strip-row"><span class="lbl">8px</span><div class="strip-box" style="width:8px"></div></div>
+    <div class="strip-row"><span class="lbl">10px</span><div class="strip-box" style="width:10px"></div></div>
+    <div class="strip-row"><span class="lbl">14px</span><div class="strip-box" style="width:14px"></div></div>
+    <div class="strip-row"><span class="lbl">18px</span><div class="strip-box" style="width:18px"></div></div>
+    <div class="strip-row"><span class="lbl">22px</span><div class="strip-box" style="width:22px"></div></div>
+    <div class="strip-row"><span class="lbl">26px</span><div class="strip-box" style="width:26px"></div></div>
+    <div class="strip-row"><span class="lbl">34px</span><div class="strip-box" style="width:34px"></div></div>
+  </div>
+  <div class="panel-light">
+    <div class="panel-tag">light</div>
+    <div class="strip-row"><span class="lbl">4px</span><div class="strip-box" style="width:4px"></div></div>
+    <div class="strip-row"><span class="lbl">8px</span><div class="strip-box" style="width:8px"></div></div>
+    <div class="strip-row"><span class="lbl">10px</span><div class="strip-box" style="width:10px"></div></div>
+    <div class="strip-row"><span class="lbl">14px</span><div class="strip-box" style="width:14px"></div></div>
+    <div class="strip-row"><span class="lbl">18px</span><div class="strip-box" style="width:18px"></div></div>
+    <div class="strip-row"><span class="lbl">22px</span><div class="strip-box" style="width:22px"></div></div>
+    <div class="strip-row"><span class="lbl">26px</span><div class="strip-box" style="width:26px"></div></div>
+    <div class="strip-row"><span class="lbl">34px</span><div class="strip-box" style="width:34px"></div></div>
+  </div>
+</div>
+
+<h2 class="doc-h2">Radii</h2>
+<div class="compare-wrap">
+  <div class="panel-dark">
+    <div class="panel-tag">dark</div>
+    <div class="radius-row">
+      <div class="radius-box" style="border-radius:4px">4</div>
+      <div class="radius-box" style="border-radius:5px">5</div>
+      <div class="radius-box" style="border-radius:6px">6</div>
+      <div class="radius-box" style="border-radius:7px">7</div>
+      <div class="radius-box" style="border-radius:8px">8</div>
+      <div class="radius-box" style="border-radius:9px">9</div>
+      <div class="radius-box" style="border-radius:var(--radius)">12</div>
+      <div class="radius-box" style="border-radius:20px">20</div>
+      <div class="radius-box" style="border-radius:24px">24</div>
+      <div class="radius-box" style="border-radius:50%">50%</div>
+    </div>
+  </div>
+  <div class="panel-light">
+    <div class="panel-tag">light</div>
+    <div class="radius-row">
+      <div class="radius-box" style="border-radius:4px">4</div>
+      <div class="radius-box" style="border-radius:5px">5</div>
+      <div class="radius-box" style="border-radius:6px">6</div>
+      <div class="radius-box" style="border-radius:7px">7</div>
+      <div class="radius-box" style="border-radius:8px">8</div>
+      <div class="radius-box" style="border-radius:9px">9</div>
+      <div class="radius-box" style="border-radius:var(--radius)">12</div>
+      <div class="radius-box" style="border-radius:20px">20</div>
+      <div class="radius-box" style="border-radius:24px">24</div>
+      <div class="radius-box" style="border-radius:50%">50%</div>
+    </div>
+  </div>
+</div>
+
+<h2 class="doc-h2">Elevation / shadow tiers</h2>
+<div class="compare-wrap">
+  <div class="panel-dark">
+    <div class="panel-tag">dark</div>
+    <div class="shadow-row">
+      <div class="shadow-card-demo">card</div>
+      <div class="shadow-float-demo">floating composer</div>
+      <div class="shadow-adopt-demo">adopted (glow + card)</div>
+    </div>
+  </div>
+  <div class="panel-light">
+    <div class="panel-tag">light</div>
+    <div class="shadow-row">
+      <div class="shadow-card-demo">card</div>
+      <div class="shadow-float-demo">floating composer</div>
+      <div class="shadow-adopt-demo">adopted (glow + card)</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

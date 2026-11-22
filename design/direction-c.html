@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms · Signal Lab · Night Market</title>
+<style>
+/* ============================================================
+   DIRECTION C · SIGNAL LAB
+   The room as a shared workshop at night. Blueprint grid,
+   monospace instrumentation, soft activity pulses, one small
+   ceremony when a remix gets adopted into the build.
+   ============================================================ */
+
+:root {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  /* Night lab (dark is the native habitat) */
+  --bg: #0b0e14;
+  --bg-grid: rgba(94, 129, 172, 0.055);
+  --bg-grid-major: rgba(94, 129, 172, 0.09);
+  --panel: #10141d;
+  --panel-2: #141926;
+  --card: #131826;
+  --card-hover: #171d2e;
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #5f6c85;
+
+  --signal: #4ade80;          /* adoption / build alive */
+  --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e;           /* proposed */
+  --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0;            /* fork activity */
+  --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5;          /* remix */
+  --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f;
+
+  --glow-adopt: 0 0 0 1px rgba(74, 222, 128, 0.28), 0 0 28px rgba(74, 222, 128, 0.08);
+  --shadow-card: 0 1px 0 rgba(0,0,0,0.25), 0 8px 24px rgba(3, 6, 12, 0.35);
+  --radius: 12px;
+}
+
+:root[data-theme="light"] {
+  /* Day shift in the same lab: paper blueprint */
+  --bg: #f3f4f0;
+  --bg-grid: rgba(70, 96, 138, 0.07);
+  --bg-grid-major: rgba(70, 96, 138, 0.12);
+  --panel: #fafaf7;
+  --panel-2: #f0f1ec;
+  --card: #ffffff;
+  --card-hover: #fdfdfb;
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #8b96ab;
+
+  --signal: #14934e;
+  --signal-dim: rgba(20, 147, 78, 0.1);
+  --amber: #b0700a;
+  --amber-dim: rgba(176, 112, 10, 0.1);
+  --cyan: #0f7fb0;
+  --cyan-dim: rgba(15, 127, 176, 0.09);
+  --violet: #7048c8;
+  --violet-dim: rgba(112, 72, 200, 0.09);
+  --rose: #c94b60;
+
+  --glow-adopt: 0 0 0 1px rgba(20, 147, 78, 0.3), 0 0 24px rgba(20, 147, 78, 0.07);
+  --shadow-card: 0 1px 2px rgba(28, 36, 51, 0.06), 0 6px 18px rgba(28, 36, 51, 0.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* Blueprint grid over the whole stage */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(var(--bg-grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid-major) 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px, 140px 140px, 140px 140px;
+  z-index: 0;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: 58px 1fr;
+  grid-template-columns: 1fr 372px;
+  grid-template-areas:
+    "header header"
+    "feed   agent";
+  height: 100vh;
+  max-width: 1560px;
+  margin: 0 auto;
+}
+
+/* ================= ROOM HEADER ================= */
+
+.room-header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.room-mark {
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(140deg, #1d2b3f, #101724);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--signal);
+  flex-shrink: 0;
+}
+:root[data-theme="light"] .room-mark {
+  background: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+}
+
+.room-title {
+  display: flex; flex-direction: column; gap: 1px;
+  min-width: 0;
+}
+.room-title h1 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.room-title h1 .room-kind {
+  color: var(--ink-3);
+  font-weight: 500;
+  margin-left: 7px;
+  font-size: 12px;
+}
+.repo-line {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.repo-line a { color: var(--ink-2); text-decoration: none; }
+.repo-line a:hover { color: var(--cyan); }
+
+.build-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--signal);
+  background: var(--signal-dim);
+  border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent);
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+}
+.build-chip .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--signal);
+  animation: pulse-soft 2.6s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 45%, transparent); }
+  55% { box-shadow: 0 0 0 5px transparent; }
+}
+
+.header-spacer { flex: 1; }
+
+.members {
+  display: flex; align-items: center;
+}
+.avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--panel);
+  display: grid; place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #0b0e14;
+  margin-left: -7px;
+  position: relative;
+  transition: transform 0.18s ease;
+}
+.avatar:first-child { margin-left: 0; }
+.members:hover .avatar { transform: translateY(-1px); }
+.avatar.a-priya { background: #8fd0a8; }
+.avatar.a-dele  { background: #86bfe8; }
+.avatar.a-mara  { background: #d3aef0; }
+.avatar.a-tomas { background: #f0c489; }
+.avatar.a-sana  { background: #f0a3b1; }
+.avatar .presence {
+  position: absolute; right: -1px; bottom: -1px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--signal);
+  border: 2px solid var(--panel);
+}
+.avatar .presence.away { background: var(--ink-3); }
+
+.members-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-left: 10px;
+}
+
+.theme-toggle {
+  margin-left: 14px;
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 15px; height: 15px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+/* ================= FEED ================= */
+
+.feed-pane {
+  grid-area: feed;
+  overflow-y: auto;
+  padding: 26px 34px 60px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.feed-inner { max-width: 720px; margin: 0 auto; }
+
+.feed-top {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 6px;
+}
+.feed-top h2 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-2);
+}
+.live-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--cyan);
+}
+.live-tag .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--cyan);
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+.feed-top .spacer { flex: 1; }
+.feed-sub {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-bottom: 22px;
+}
+
+/* Timeline spine */
+.feed-stream {
+  position: relative;
+  display: flex; flex-direction: column; gap: 16px;
+  padding-left: 22px;
+}
+.feed-stream::before {
+  content: "";
+  position: absolute;
+  left: 5px; top: 8px; bottom: 8px;
+  width: 1px;
+  background: linear-gradient(to bottom,
+    transparent,
+    var(--line-strong) 8%,
+    var(--line-strong) 92%,
+    transparent);
+}
+
+.node {
+  position: absolute;
+  left: -22px;
+  top: 22px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--ink-3);
+  z-index: 2;
+}
+.card { position: relative; }
+.card.state-proposed .node { border-color: var(--amber); }
+.card.state-fork .node { border-color: var(--cyan); animation: node-blink 1.8s ease-in-out infinite; }
+.card.state-review .node { border-color: var(--violet); }
+.card.state-adopted .node {
+  border-color: var(--signal);
+  background: var(--signal);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--signal) 50%, transparent);
+}
+@keyframes node-blink {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cyan) 40%, transparent); }
+  50% { box-shadow: 0 0 0 5px transparent; }
+}
+
+.card-body {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: 16px 18px 14px;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+.card:hover .card-body {
+  background: var(--card-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.card-head {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 8px;
+}
+.card-head .avatar {
+  width: 22px; height: 22px; margin-left: 0;
+  border-width: 0;
+  font-size: 9px;
+}
+.byline { font-size: 12.5px; color: var(--ink-2); }
+.byline b { color: var(--ink); font-weight: 600; }
+.card-head .spacer { flex: 1; }
+.timestamp {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+
+.state-chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2.5px 8px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+}
+.state-chip.proposed { color: var(--amber); background: var(--amber-dim); border-color: color-mix(in srgb, var(--amber) 25%, transparent); }
+.state-chip.forking  { color: var(--cyan);  background: var(--cyan-dim);  border-color: color-mix(in srgb, var(--cyan) 25%, transparent); }
+.state-chip.review   { color: var(--violet); background: var(--violet-dim); border-color: color-mix(in srgb, var(--violet) 25%, transparent); }
+.state-chip.adopted  { color: var(--signal); background: var(--signal-dim); border-color: color-mix(in srgb, var(--signal) 30%, transparent); }
+
+.intent {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  margin-bottom: 5px;
+}
+.summary {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+  max-width: 60ch;
+}
+
+.remix-note {
+  border-left: 2px solid var(--violet);
+  background: var(--violet-dim);
+  border-radius: 0 8px 8px 0;
+  padding: 9px 12px;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.remix-note .rn-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--violet);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.card-meta {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.meta-item { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: color 0.15s ease; }
+.meta-item:hover { color: var(--ink); }
+.meta-item svg { width: 12px; height: 12px; }
+.meta-item.hot { color: var(--cyan); }
+.card-meta .spacer { flex: 1; }
+
+.mini-btn {
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 4px 11px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+.mini-btn:hover { border-color: var(--line-strong); color: var(--ink); background: var(--panel-2); }
+.mini-btn.primary { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 30%, transparent); }
+.mini-btn.primary:hover { background: var(--cyan-dim); }
+
+.hash {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1.5px 6px;
+}
+
+/* ============ ADOPTION EVENT (signature moment) ============ */
+
+.adoption-event { margin: 4px 0; }
+.adoption-event .node { top: 30px; }
+
+.adoption-banner {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--signal);
+  margin-bottom: 8px;
+  animation: banner-in 0.7s ease both;
+}
+@keyframes banner-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.adoption-banner::before, .adoption-banner::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--signal) 45%, transparent), transparent);
+}
+.adoption-banner .flare {
+  display: inline-flex; align-items: center; gap: 7px;
+  white-space: nowrap;
+}
+.adoption-banner .spark {
+  width: 7px; height: 7px;
+  background: var(--signal);
+  transform: rotate(45deg);
+  animation: spark-spin 3.2s linear infinite;
+}
+@keyframes spark-spin {
+  to { transform: rotate(405deg); }
+}
+
+.adoption-event .card-body {
+  border-color: color-mix(in srgb, var(--signal) 32%, var(--line));
+  box-shadow: var(--glow-adopt), var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+.adoption-event .card-body::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 45%; height: 100%;
+  background: linear-gradient(105deg, transparent, color-mix(in srgb, var(--signal) 7%, transparent), transparent);
+  animation: sweep 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes sweep {
+  0%, 62% { left: -60%; }
+  86%, 100% { left: 130%; }
+}
+
+/* Lineage thread inside the adopted card */
+.lineage {
+  margin: 12px 0;
+  border: 1px dashed color-mix(in srgb, var(--line-strong) 90%, transparent);
+  border-radius: 9px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--panel-2) 65%, transparent);
+}
+.lineage-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.lineage-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px;
+  color: var(--ink-2);
+  padding: 3px 0;
+  position: relative;
+}
+.lineage-row .l-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+  position: relative; z-index: 1;
+}
+.lineage-row:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 3px; top: 16px;
+  width: 1px; height: calc(100% - 8px);
+  background: var(--line-strong);
+}
+.lineage-row .l-dot.origin { background: var(--ink-3); }
+.lineage-row .l-dot.remix { background: var(--violet); }
+.lineage-row .l-dot.final { background: var(--signal); box-shadow: 0 0 8px color-mix(in srgb, var(--signal) 55%, transparent); }
+.lineage-row b { color: var(--ink); font-weight: 600; }
+.lineage-row .hash { margin-left: auto; }
+.lineage-row .credit {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.adopt-footer {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 12px; padding-top: 11px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.adopt-footer .reactors { display: flex; }
+.adopt-footer .avatar { width: 18px; height: 18px; font-size: 7.5px; margin-left: -5px; border-width: 1.5px; }
+.adopt-footer .avatar:first-child { margin-left: 0; }
+.cheer {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.cheer b { color: var(--signal); font-weight: 600; }
+
+/* ================= PROMOTE BAR (feed) ================= */
+
+.promote-dock {
+  position: sticky;
+  bottom: 0;
+  margin-top: 26px;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+  background: linear-gradient(to top, var(--bg) 55%, transparent);
+}
+
+/* ================= AGENT SIDEBAR ================= */
+
+.agent-pane {
+  grid-area: agent;
+  border-left: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.agent-head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 10px;
+}
+.agent-glyph {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(140deg, color-mix(in srgb, var(--cyan) 22%, var(--panel-2)), var(--panel-2));
+  border: 1px solid color-mix(in srgb, var(--cyan) 28%, var(--line));
+  display: grid; place-items: center;
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+.agent-glyph svg { width: 14px; height: 14px; }
+.agent-id { flex: 1; min-width: 0; }
+.agent-id .name { font-size: 13px; font-weight: 600; }
+.agent-id .scope {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+.private-chip {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 2.5px 7px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.private-chip svg { width: 9px; height: 9px; }
+
+.agent-chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 18px 8px;
+  display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.msg { max-width: 92%; }
+.msg.user {
+  align-self: flex-end;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px 12px 4px 12px;
+  padding: 9px 13px;
+  font-size: 13px;
+}
+.msg.agent { align-self: flex-start; font-size: 13px; color: var(--ink); }
+.msg.agent p { margin-bottom: 8px; }
+.msg.agent p:last-child { margin-bottom: 0; }
+.msg .worked {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.msg .worked::after {
+  content: "";
+  flex: 1; height: 1px;
+  background: var(--line);
+}
+.code-inline {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--ink-2);
+}
+
+/* Output card ready to promote */
+.output-card {
+  align-self: stretch;
+  border: 1px solid color-mix(in srgb, var(--amber) 30%, var(--line));
+  background: var(--card);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow-card);
+}
+.output-card .oc-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--amber);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.output-card .oc-label .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--amber);
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+.output-card .oc-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.output-card .oc-desc { font-size: 12px; color: var(--ink-2); margin-bottom: 10px; }
+.output-card .oc-files {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  margin-bottom: 11px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.output-card .oc-files .add { color: var(--signal); }
+.output-card .oc-files .mod { color: var(--amber); }
+
+.promote-btn {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #08110b;
+  background: linear-gradient(160deg, #5fe693, var(--signal));
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.2), 0 4px 16px color-mix(in srgb, var(--signal) 22%, transparent);
+}
+:root[data-theme="light"] .promote-btn { color: #ffffff; }
+.promote-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 2px 2px rgba(0,0,0,0.18), 0 8px 26px color-mix(in srgb, var(--signal) 32%, transparent);
+}
+.promote-btn:active { transform: translateY(0); }
+.promote-btn svg { width: 14px; height: 14px; }
+
+.agent-composer {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--line);
+}
+.composer-box {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px 13px 9px;
+  transition: border-color 0.18s ease;
+}
+.composer-box:focus-within { border-color: color-mix(in srgb, var(--cyan) 40%, var(--line)); }
+.composer-box textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink);
+  height: 38px;
+}
+.composer-box textarea::placeholder { color: var(--ink-3); }
+.composer-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 6px;
+}
+.composer-row .model {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+.composer-row .spacer { flex: 1; }
+.send-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+.send-btn:hover { background: var(--cyan-dim); color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 35%, transparent); }
+.send-btn svg { width: 12px; height: 12px; }
+
+/* Load-in choreography */
+.card, .adoption-event { animation: rise 0.5s ease both; }
+.feed-stream > :nth-child(1) { animation-delay: 0.05s; }
+.feed-stream > :nth-child(2) { animation-delay: 0.12s; }
+.feed-stream > :nth-child(3) { animation-delay: 0.19s; }
+.feed-stream > :nth-child(4) { animation-delay: 0.26s; }
+.feed-stream > :nth-child(5) { animation-delay: 0.33s; }
+.feed-stream > :nth-child(6) { animation-delay: 0.40s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 980px) {
+  .app { grid-template-columns: 1fr; grid-template-areas: "header" "feed"; }
+  .agent-pane { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ ROOM HEADER ============ -->
+  <header class="room-header">
+    <div class="room-mark">▞▚</div>
+    <div class="room-title">
+      <h1>Night Market <span class="room-kind">room · 5 builders</span></h1>
+      <div class="repo-line">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        <a href="#">nightmarket/app</a>
+        <span>·</span>
+        <span>main @ <span style="color: var(--ink-2)">e41f8c2</span></span>
+      </div>
+    </div>
+    <span class="build-chip"><span class="dot"></span>build passing · 47 checks</span>
+    <div class="header-spacer"></div>
+    <div class="members" title="Priya, Dele, Mara, Tomás, Sana">
+      <div class="avatar a-priya">PR<span class="presence"></span></div>
+      <div class="avatar a-dele">DO<span class="presence"></span></div>
+      <div class="avatar a-mara">MJ<span class="presence"></span></div>
+      <div class="avatar a-tomas">TR<span class="presence"></span></div>
+      <div class="avatar a-sana">SQ<span class="presence away"></span></div>
+    </div>
+    <span class="members-count">4 in the lab</span>
+    <button class="theme-toggle" id="themeToggle" title="Toggle light and dark" aria-label="Toggle color theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </header>
+
+  <!-- ============ PROPOSAL FEED ============ -->
+  <main class="feed-pane">
+    <div class="feed-inner">
+      <div class="feed-top">
+        <h2>Room Feed</h2>
+        <span class="live-tag"><span class="dot"></span>2 signals live</span>
+        <div class="spacer"></div>
+      </div>
+      <p class="feed-sub">Promoted work lands here. Fork what interests you, remix what you can improve, and the room adopts the winners into the build.</p>
+
+      <div class="feed-stream">
+
+        <!-- 1 · Fork in progress (live pulse) -->
+        <article class="card state-fork">
+          <span class="node"></span>
+          <div class="card-body">
+            <div class="card-head">
+              <div class="avatar a-tomas">TR</div>
+              <span class="byline"><b>Tomás Rivera</b> is forking Sana's proposal</span>
+              <div class="spacer"></div>
+              <span class="state-chip forking">fork live</span>
+              <span class="timestamp">now</span>
+            </div>
+            <h3 class="intent">Geolocation onboarding flow</h3>
+            <p class="summary">Tomás pulled Sana's location permission flow into his workbench. His agent is rewriting the fallback path for browsers that deny geolocation, using a neighborhood picker seeded from the markets index.</p>
+            <div class="card-meta">
+              <span class="meta-item hot">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3v6a3 3 0 0 0 3 3h3M11 3v4"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="11" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+                fork in progress
+              </span>
+              <span class="hash">from sq/geo-onboard</span>
+              <div class="spacer"></div>
+              <button class="mini-btn">Watch</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 2 · ADOPTION EVENT (signature moment) -->
+        <article class="card state-adopted adoption-event">
+          <span class="node"></span>
+          <div class="adoption-banner">
+            <span class="flare"><span class="spark"></span>Adopted into the build<span class="spark"></span></span>
+          </div>
+          <div class="card-body">
+            <div class="card-head">
+              <div class="avatar a-mara">MJ</div>
+              <span class="byline"><b>Mara Jensen's</b> remix won the round</span>
+              <div class="spacer"></div>
+              <span class="state-chip adopted">adopted</span>
+              <span class="timestamp">18m</span>
+            </div>
+            <h3 class="intent">Stall map with pin clustering</h3>
+            <p class="summary">Clusters stall pins at low zoom so dense night markets stay readable, expands to individual stalls past zoom 15. Ships with viewport-based loading so the map holds 60fps on mid-range phones.</p>
+
+            <div class="remix-note">
+              <span class="rn-label">Remix note · what changed from the parent</span>
+              Kept Dele's tile layer and stall pin design exactly as shipped. Replaced the flat pin list with supercluster indexing, and moved stall fetches from mount-time to viewport intersection. Cold load dropped from 3.1s to 0.9s on the Taipei dataset.
+            </div>
+
+            <div class="lineage">
+              <div class="lineage-title">Credit lineage</div>
+              <div class="lineage-row">
+                <span class="l-dot origin"></span>
+                <span><b>Dele Okafor</b> · Basic map view with stall pins</span>
+                <span class="credit">origin</span>
+                <span class="hash">a3d91be</span>
+              </div>
+              <div class="lineage-row">
+                <span class="l-dot remix"></span>
+                <span><b>Mara Jensen</b> · forked, remixed clustering + lazy fetch</span>
+                <span class="credit">remix</span>
+                <span class="hash">7c02f4d</span>
+              </div>
+              <div class="lineage-row">
+                <span class="l-dot final"></span>
+                <span><b>Room</b> · adopted to <span class="code-inline">main</span></span>
+                <span class="credit">canonical</span>
+                <span class="hash">e41f8c2</span>
+              </div>
+            </div>
+
+            <div class="adopt-footer">
+              <div class="reactors">
+                <div class="avatar a-priya">PR</div>
+                <div class="avatar a-dele">DO</div>
+                <div class="avatar a-tomas">TR</div>
+                <div class="avatar a-sana">SQ</div>
+              </div>
+              <span class="cheer">4 cheers · credit split <b>Mara 60</b> / <b>Dele 40</b></span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 3 · Proposed, 2 forks -->
+        <article class="card state-proposed">
+          <span class="node"></span>
+          <div class="card-body">
+            <div class="card-head">
+              <div class="avatar a-priya">PR</div>
+              <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+              <div class="spacer"></div>
+              <span class="state-chip proposed">proposed</span>
+              <span class="timestamp">1h</span>
+            </div>
+            <h3 class="intent">Open-hours model for vendors</h3>
+            <p class="summary">A schedule schema that handles the messy reality of night markets: seasonal openings, weather closures, and vendors who set up at 6pm "ish". Includes an "open now, probably" confidence field the UI can hedge with.</p>
+            <div class="card-meta">
+              <span class="meta-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+                2 forks
+              </span>
+              <span class="meta-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 10a2 2 0 0 1-2 2H6l-3 3V4a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2z"/></svg>
+                5 notes
+              </span>
+              <span class="hash">pr/open-hours</span>
+              <div class="spacer"></div>
+              <button class="mini-btn primary">Fork</button>
+              <button class="mini-btn">Remix</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 4 · In review -->
+        <article class="card state-review">
+          <span class="node"></span>
+          <div class="card-body">
+            <div class="card-head">
+              <div class="avatar a-dele">DO</div>
+              <span class="byline"><b>Dele Okafor</b> promoted from his agent</span>
+              <div class="spacer"></div>
+              <span class="state-chip review">in review</span>
+              <span class="timestamp">3h</span>
+            </div>
+            <h3 class="intent">Stall detail sheet with photo strip</h3>
+            <p class="summary">Bottom sheet that slides over the map: stall name, tonight's hours, queue estimate, and a horizontally scrolling photo strip sourced from visitor uploads. Two adopt votes in, needs one more.</p>
+            <div class="card-meta">
+              <span class="meta-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l4 4 8-9"/></svg>
+                2 / 3 adopt votes
+              </span>
+              <span class="meta-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+                1 fork
+              </span>
+              <span class="hash">do/stall-sheet</span>
+              <div class="spacer"></div>
+              <button class="mini-btn primary">Vote adopt</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 5 · Proposed with remix-note preview -->
+        <article class="card state-proposed">
+          <span class="node"></span>
+          <div class="card-body">
+            <div class="card-head">
+              <div class="avatar a-sana">SQ</div>
+              <span class="byline"><b>Sana Qureshi</b> remixed Priya's filters</span>
+              <div class="spacer"></div>
+              <span class="state-chip proposed">proposed</span>
+              <span class="timestamp">5h</span>
+            </div>
+            <h3 class="intent">Late-night filter chips</h3>
+            <p class="summary">Quick filters tuned to how people actually search after dark: "open past midnight", "cash only", "covered seating", "spicy". Chips reorder by tap frequency per city.</p>
+            <div class="remix-note">
+              <span class="rn-label">Remix note · what changed from the parent</span>
+              Priya's filter bar assumed daytime categories. Swapped the taxonomy for night-market behavior and made the chip row swipeable on mobile. Her state management is untouched underneath.
+            </div>
+            <div class="card-meta">
+              <span class="meta-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+                1 fork
+              </span>
+              <span class="hash">sq/night-chips · from pr/filters</span>
+              <div class="spacer"></div>
+              <button class="mini-btn primary">Fork</button>
+              <button class="mini-btn">Remix</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 6 · Adopted earlier (quiet) -->
+        <article class="card state-adopted">
+          <span class="node"></span>
+          <div class="card-body">
+            <div class="card-head">
+              <div class="avatar a-tomas">TR</div>
+              <span class="byline"><b>Tomás Rivera</b> promoted from his agent</span>
+              <div class="spacer"></div>
+              <span class="state-chip adopted">adopted</span>
+              <span class="timestamp">yesterday</span>
+            </div>
+            <h3 class="intent">Markets index with city seeds</h3>
+            <p class="summary">Seed dataset of 214 night markets across 12 cities with coordinates, typical hours, and transit notes. This is the backbone every map feature draws from.</p>
+            <div class="card-meta">
+              <span class="meta-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l4 4 8-9"/></svg>
+                adopted unanimous
+              </span>
+              <span class="hash">merged @ 9b7e310</span>
+              <div class="spacer"></div>
+              <button class="mini-btn">View in repo</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ PRIVATE AGENT SIDEBAR ============ -->
+  <aside class="agent-pane">
+    <div class="agent-head">
+      <div class="agent-glyph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M8 10h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"/><circle cx="9.5" cy="15" r="0.5" fill="currentColor"/><circle cx="14.5" cy="15" r="0.5" fill="currentColor"/></svg>
+      </div>
+      <div class="agent-id">
+        <div class="name">Your agent</div>
+        <div class="scope">priya · workbench 03</div>
+      </div>
+      <span class="private-chip">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+        private
+      </span>
+    </div>
+
+    <div class="agent-chat">
+      <div class="msg user">Mara's clustering just got adopted. Can my open-hours model feed the cluster tooltips, so a cluster shows how many stalls are open right now?</div>
+
+      <div class="msg agent">
+        <div class="worked">worked 41s · read 6 files</div>
+        <p>Yes, and it is a clean join. Her cluster index already carries stall ids, so I computed an <span class="code-inline">openNow</span> count per cluster from your confidence field and exposed it as a tooltip aggregate.</p>
+        <p>One catch: clusters recompute on every zoom change, so I memoized the open-hours lookup per 5-minute window. Without that it ran the schedule resolver 400 times per pan.</p>
+      </div>
+
+      <div class="msg user">Nice. Package it up, I want the room to see it before Dele's sheet goes in.</div>
+
+      <div class="output-card">
+        <div class="oc-label"><span class="dot"></span>Ready to promote</div>
+        <div class="oc-title">Live "open now" counts on map clusters</div>
+        <div class="oc-desc">Joins the open-hours model to Mara's adopted clustering. Tooltips read "12 stalls, 9 open now" with the confidence hedge applied.</div>
+        <div class="oc-files">
+          <span class="add">+ src/map/clusterOpenNow.ts</span>
+          <span class="add">+ src/hours/windowMemo.ts</span>
+          <span class="mod">~ src/map/ClusterTooltip.tsx</span>
+        </div>
+        <button class="promote-btn" id="promoteBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          Promote to room
+        </button>
+      </div>
+    </div>
+
+    <div class="agent-composer">
+      <div class="composer-box">
+        <textarea placeholder="Ask your agent anything. Only you see this."></textarea>
+        <div class="composer-row">
+          <span class="model">forge-2 · fast</span>
+          <div class="spacer"></div>
+          <button class="send-btn" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var stored = null;
+  try { stored = localStorage.getItem("signal-lab-theme"); } catch (e) {}
+  function systemTheme() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  }
+  function apply(theme) { root.setAttribute("data-theme", theme); }
+  apply(stored || systemTheme());
+
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+    apply(next);
+    try { localStorage.setItem("signal-lab-theme", next); } catch (e) {}
+  });
+
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", function (e) {
+      var saved = null;
+      try { saved = localStorage.getItem("signal-lab-theme"); } catch (err) {}
+      if (!saved) apply(e.matches ? "light" : "dark");
+    });
+  }
+
+  // Promote micro-interaction: brief confirm state
+  var btn = document.getElementById("promoteBtn");
+  btn.addEventListener("click", function () {
+    var original = btn.innerHTML;
+    btn.innerHTML = "Promoted ✓ now in the room feed";
+    btn.style.filter = "saturate(1.2)";
+    setTimeout(function () {
+      btn.innerHTML = original;
+      btn.style.filter = "";
+    }, 2200);
+  });
+})();
+</script>
+</body>
+</html>

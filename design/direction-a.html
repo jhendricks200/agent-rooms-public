@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms · night-market</title>
+<style>
+  /* ============ INSTRUMENT ============
+     Direction A for Agent Rooms.
+     Calm neutrals, hairline dividers, quiet chips,
+     restrained red/green numerics. The proposal card
+     is the hero object. Interface disappears behind content. */
+
+  :root {
+    --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* light theme */
+    --bg-app: #ececea;
+    --bg-shell: #f7f7f5;
+    --bg-nav: #f1f1ef;
+    --bg-panel: #fbfbfa;
+    --bg-card: #ffffff;
+    --bg-card-hover: #ffffff;
+    --bg-inset: #f2f2f0;
+    --bg-chip: #ededeb;
+    --bg-input: #f0f0ee;
+    --bg-bubble-user: #e8e8e5;
+    --ink-1: #1a1c1e;
+    --ink-2: #55585c;
+    --ink-3: #8b8e93;
+    --hairline: rgba(20, 22, 24, 0.10);
+    --hairline-strong: rgba(20, 22, 24, 0.16);
+    --accent: #2f6fed;
+    --accent-ink: #2a5fc9;
+    --green: #1a7f45;
+    --green-soft: rgba(26, 127, 69, 0.10);
+    --red: #c43d3d;
+    --red-soft: rgba(196, 61, 61, 0.09);
+    --amber: #b07a1e;
+    --amber-soft: rgba(176, 122, 30, 0.10);
+    --card-shadow: 0 1px 2px rgba(18, 20, 22, 0.05);
+    --card-shadow-hover: 0 4px 14px rgba(18, 20, 22, 0.09);
+    --lineage: rgba(26, 127, 69, 0.35);
+    --scroll-thumb: rgba(20, 22, 24, 0.16);
+  }
+
+  html[data-theme="dark"] {
+    --bg-app: #000000;
+    --bg-shell: #101214;
+    --bg-nav: #16181b;
+    --bg-panel: #131518;
+    --bg-card: #1a1d20;
+    --bg-card-hover: #1d2024;
+    --bg-inset: #14161a;
+    --bg-chip: #23262b;
+    --bg-input: #1d2025;
+    --bg-bubble-user: #23262b;
+    --ink-1: #e8eaec;
+    --ink-2: #a2a7ad;
+    --ink-3: #6c7178;
+    --hairline: rgba(235, 238, 240, 0.08);
+    --hairline-strong: rgba(235, 238, 240, 0.14);
+    --accent: #5c8ef4;
+    --accent-ink: #7ba3f6;
+    --green: #4fc47f;
+    --green-soft: rgba(79, 196, 127, 0.10);
+    --red: #e0605c;
+    --red-soft: rgba(224, 96, 92, 0.10);
+    --amber: #d9a244;
+    --amber-soft: rgba(217, 162, 68, 0.10);
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 5px 18px rgba(0, 0, 0, 0.45);
+    --lineage: rgba(79, 196, 127, 0.35);
+    --scroll-thumb: rgba(235, 238, 240, 0.14);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg-app);
+    color: var(--ink-1);
+    font-size: 13.5px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* ============ SHELL ============ */
+  .shell {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr) 340px;
+    height: 100vh;
+    max-width: 1560px;
+    margin: 0 auto;
+    background: var(--bg-shell);
+    border-left: 1px solid var(--hairline);
+    border-right: 1px solid var(--hairline);
+    transition: background 0.25s ease;
+  }
+
+  /* ============ LEFT NAV ============ */
+  .nav {
+    background: var(--bg-nav);
+    border-right: 1px solid var(--hairline);
+    display: flex;
+    flex-direction: column;
+    padding: 14px 10px 12px;
+    overflow-y: auto;
+    transition: background 0.25s ease;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px 14px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-brand .mark {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    background: var(--ink-1);
+    color: var(--bg-nav);
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+
+  .nav-section {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    text-transform: none;
+    padding: 14px 8px 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 7px;
+    color: var(--ink-2);
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+
+  .nav-item:hover { background: var(--bg-chip); color: var(--ink-1); }
+
+  .nav-item.active {
+    background: var(--bg-chip);
+    color: var(--ink-1);
+    font-weight: 500;
+  }
+
+  .nav-item svg { flex-shrink: 0; opacity: 0.7; }
+
+  .nav-item .count {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--ink-3);
+  }
+
+  .nav-item .dot {
+    margin-left: auto;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .nav-footer {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 8px;
+    padding-right: 4px;
+  }
+
+  .avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+
+  .av-mo { background: #7a5ec4; }
+  .av-dr { background: #3d7a5c; }
+  .av-pr { background: #b3653a; }
+  .av-tw { background: #4a6f9e; }
+  .av-sl { background: #9e4a6b; }
+
+  .nav-footer .name { font-size: 12.5px; font-weight: 500; color: var(--ink-1); }
+
+  .theme-toggle {
+    margin-left: auto;
+    width: 26px; height: 26px;
+    border: 1px solid var(--hairline-strong);
+    background: transparent;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--ink-2);
+    display: grid;
+    place-items: center;
+    transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+  }
+  .theme-toggle:hover { background: var(--bg-chip); color: var(--ink-1); }
+  .theme-toggle:active { transform: scale(0.92); }
+  .theme-toggle .sun { display: none; }
+  html[data-theme="dark"] .theme-toggle .sun { display: block; }
+  html[data-theme="dark"] .theme-toggle .moon { display: none; }
+
+  /* ============ CENTER: ROOM ============ */
+  .room {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--bg-shell);
+    transition: background 0.25s ease;
+  }
+
+  .room-header {
+    padding: 14px 28px 12px;
+    border-bottom: 1px solid var(--hairline);
+    flex-shrink: 0;
+  }
+
+  .room-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .room-name {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .room-name .hash { color: var(--ink-3); font-weight: 400; }
+
+  .repo-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-2);
+    background: var(--bg-chip);
+    border: 1px solid var(--hairline);
+    padding: 2.5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.12s ease, color 0.12s ease;
+  }
+  .repo-chip:hover { border-color: var(--hairline-strong); color: var(--ink-1); }
+
+  .build-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--green);
+    background: var(--green-soft);
+    padding: 2.5px 9px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .build-chip .pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .room-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 9px;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  .members {
+    display: flex;
+    align-items: center;
+  }
+
+  .members .avatar {
+    width: 20px; height: 20px;
+    font-size: 8.5px;
+    border: 2px solid var(--bg-shell);
+    margin-left: -5px;
+    transition: transform 0.14s ease, border-color 0.25s ease;
+    cursor: default;
+  }
+  .members .avatar:first-child { margin-left: 0; }
+  .members .avatar:hover { transform: translateY(-2px); z-index: 2; position: relative; }
+
+  .meta-sep { width: 1px; height: 12px; background: var(--hairline-strong); }
+
+  .meta-stat { display: flex; align-items: center; gap: 5px; }
+  .meta-stat b { color: var(--ink-2); font-weight: 500; }
+
+  /* ============ FEED ============ */
+  .feed {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 28px 28px;
+  }
+
+  .feed-inner { max-width: 720px; margin: 0 auto; }
+
+  .feed-filter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .filter-pill {
+    font-size: 12px;
+    padding: 3.5px 11px;
+    border-radius: 999px;
+    color: var(--ink-3);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: color 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    background: transparent;
+    font-family: var(--font-ui);
+  }
+  .filter-pill:hover { color: var(--ink-1); background: var(--bg-chip); }
+  .filter-pill.active {
+    color: var(--ink-1);
+    background: var(--bg-chip);
+    border-color: var(--hairline);
+    font-weight: 500;
+  }
+
+  .filter-count { font-family: var(--font-mono); font-size: 10.5px; margin-left: 3px; opacity: 0.7; }
+
+  .feed-sort {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .feed-sort:hover { color: var(--ink-1); }
+
+  /* ============ PROPOSAL CARD: the hero ============ */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 14px;
+    padding: 15px 18px 13px;
+    transition: box-shadow 0.16s ease, border-color 0.16s ease, transform 0.16s ease, background 0.25s ease;
+    cursor: pointer;
+    animation: card-in 0.4s ease backwards;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.02s; }
+  .card:nth-child(2) { animation-delay: 0.06s; }
+  .card:nth-child(3) { animation-delay: 0.10s; }
+  .card:nth-child(4) { animation-delay: 0.14s; }
+  .card:nth-child(5) { animation-delay: 0.18s; }
+  .card:nth-child(6) { animation-delay: 0.22s; }
+  .card:nth-child(7) { animation-delay: 0.26s; }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .card:hover {
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--hairline-strong);
+    transform: translateY(-1px);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .card-top .avatar { width: 20px; height: 20px; font-size: 8.5px; }
+
+  .card-author { font-size: 12.5px; font-weight: 500; color: var(--ink-1); }
+  .card-id { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+  .card-time { font-size: 11.5px; color: var(--ink-3); margin-left: auto; }
+
+  .badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 1.5px 8px;
+    border-radius: 5px;
+    letter-spacing: 0.02em;
+  }
+  .badge.open { color: var(--accent-ink); background: transparent; border: 1px solid var(--hairline-strong); }
+  .badge.adopted { color: var(--green); background: var(--green-soft); }
+  .badge.rejected { color: var(--red); background: var(--red-soft); }
+  .badge.review { color: var(--amber); background: var(--amber-soft); }
+
+  .card-intent {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.008em;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+
+  .card-desc {
+    font-size: 12.5px;
+    color: var(--ink-2);
+    margin-bottom: 10px;
+    line-height: 1.55;
+  }
+
+  /* lineage strip for remixes */
+  .lineage {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    padding: 5px 10px 5px 8px;
+    margin-bottom: 10px;
+    border-left: 2px solid var(--lineage);
+    background: var(--green-soft);
+    border-radius: 0 7px 7px 0;
+  }
+  .lineage .fork-icon { color: var(--green); flex-shrink: 0; }
+  .lineage b { color: var(--ink-2); font-weight: 500; }
+  .lineage .lin-id { font-family: var(--font-mono); font-size: 10.5px; }
+  .lineage:hover b { color: var(--ink-1); }
+
+  .lineage.rejected-parent {
+    border-left-color: var(--hairline-strong);
+    background: var(--bg-inset);
+  }
+  .lineage.rejected-parent .fork-icon { color: var(--ink-3); }
+
+  /* remix note preview */
+  .remix-note {
+    font-size: 12px;
+    color: var(--ink-2);
+    background: var(--bg-inset);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    line-height: 1.55;
+    position: relative;
+  }
+  .remix-note .rn-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  /* diff summary */
+  .diff-block {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--bg-inset);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+  }
+
+  .diff-line {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    white-space: nowrap;
+    padding: 1px 0;
+    color: var(--ink-2);
+  }
+  .diff-line .file { color: var(--ink-2); }
+  .diff-line .plus { color: var(--green); }
+  .diff-line .minus { color: var(--red); }
+  .diff-line .nums { margin-left: auto; display: flex; gap: 8px; }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-top: 9px;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .card-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    padding: 3.5px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: var(--font-ui);
+    font-weight: 500;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+  .card-action:hover { background: var(--bg-chip); color: var(--ink-1); }
+  .card-action svg { opacity: 0.75; }
+
+  .card-action.forked { color: var(--ink-2); }
+  .card-action .n { font-family: var(--font-mono); font-size: 10.5px; }
+
+  .adopt-stamp {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 500;
+  }
+  .adopt-stamp .sha { font-family: var(--font-mono); font-size: 10.5px; opacity: 0.8; }
+
+  .reject-stamp {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+
+  .votes {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+  }
+  .vote-btn {
+    border: none;
+    background: transparent;
+    color: var(--ink-3);
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3.5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease, transform 0.1s ease;
+  }
+  .vote-btn:hover { background: var(--bg-chip); color: var(--ink-1); }
+  .vote-btn:active { transform: scale(0.94); }
+  .vote-btn.voted { color: var(--green); }
+
+  /* faded treatment for rejected */
+  .card.is-rejected { opacity: 0.62; }
+  .card.is-rejected:hover { opacity: 0.85; }
+
+  /* adopted cards get a whisper of green on the edge */
+  .card.is-adopted { border-left: 2px solid var(--lineage); }
+
+  /* ============ RIGHT: PRIVATE AGENT ============ */
+  .agent {
+    background: var(--bg-panel);
+    border-left: 1px solid var(--hairline);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    transition: background 0.25s ease;
+  }
+
+  .agent-header {
+    padding: 13px 18px 11px;
+    border-bottom: 1px solid var(--hairline);
+    flex-shrink: 0;
+  }
+
+  .agent-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .agent-orb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--accent), transparent 75%), var(--bg-chip);
+    border: 1px solid var(--hairline-strong);
+    flex-shrink: 0;
+  }
+
+  .private-chip {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+    border: 1px solid var(--hairline);
+    padding: 1.5px 7px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .agent-sub {
+    font-size: 11.5px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .agent-sub code {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    background: var(--bg-chip);
+    padding: 0.5px 5px;
+    border-radius: 4px;
+  }
+
+  .agent-chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .msg-user {
+    align-self: flex-end;
+    max-width: 85%;
+    background: var(--bg-bubble-user);
+    padding: 8px 13px;
+    border-radius: 14px 14px 4px 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    transition: background 0.25s ease;
+  }
+
+  .msg-agent {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--ink-1);
+  }
+
+  .msg-agent p { margin-bottom: 8px; }
+  .msg-agent p:last-child { margin-bottom: 0; }
+
+  .msg-agent code {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    background: var(--bg-chip);
+    padding: 0.5px 5px;
+    border-radius: 4px;
+  }
+
+  .worked-line {
+    font-size: 11px;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+  .worked-line:hover { color: var(--ink-2); }
+
+  /* the draft object inside agent chat: promotable output */
+  .draft {
+    border: 1px solid var(--hairline-strong);
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 11px 13px 11px;
+    box-shadow: var(--card-shadow);
+    transition: background 0.25s ease, border-color 0.16s ease;
+  }
+  .draft:hover { border-color: var(--accent); }
+
+  .draft-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .draft-title { font-size: 12.5px; font-weight: 600; margin-bottom: 3px; }
+
+  .draft-files {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    margin-bottom: 9px;
+  }
+  .draft-files .plus { color: var(--green); }
+  .draft-files .minus { color: var(--red); }
+
+  .promote-btn {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--ink-1);
+    color: var(--bg-card);
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-ui);
+    padding: 7px 0;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+  }
+  .promote-btn:hover { opacity: 0.88; }
+  .promote-btn:active { transform: scale(0.98); }
+  .promote-btn.promoted {
+    background: var(--green-soft);
+    color: var(--green);
+    cursor: default;
+  }
+
+  .agent-input-wrap {
+    padding: 12px 14px 14px;
+    flex-shrink: 0;
+  }
+
+  .agent-input {
+    background: var(--bg-input);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 10px 12px 8px;
+    transition: border-color 0.15s ease, background 0.25s ease;
+  }
+  .agent-input:focus-within { border-color: var(--hairline-strong); }
+
+  .agent-input textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    resize: none;
+    font-family: var(--font-ui);
+    font-size: 12.5px;
+    color: var(--ink-1);
+    outline: none;
+    height: 20px;
+    line-height: 20px;
+  }
+  .agent-input textarea::placeholder { color: var(--ink-3); }
+
+  .agent-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .input-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--ink-3);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 5px;
+    transition: color 0.12s ease, background 0.12s ease;
+  }
+  .input-chip:hover { color: var(--ink-1); background: var(--bg-chip); }
+
+  .model-chip {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+    cursor: pointer;
+  }
+  .model-chip:hover { color: var(--ink-1); }
+
+  .send-btn {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: var(--ink-1);
+    color: var(--bg-card);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+  }
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:active { transform: scale(0.9); }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: var(--ink-1);
+    color: var(--bg-card);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 9px 18px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 1180px) {
+    .shell { grid-template-columns: 200px minmax(0, 1fr) 300px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ LEFT NAV ============ -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <span class="mark">AR</span>
+      Agent Rooms
+    </div>
+
+    <div class="nav-item">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 8h12M8 2v12" stroke-linecap="round"/></svg>
+      New room
+    </div>
+    <div class="nav-item">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+      Search
+    </div>
+
+    <div class="nav-section">Rooms</div>
+    <div class="nav-item active">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+      night-market
+      <span class="count">17</span>
+    </div>
+    <div class="nav-item">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+      trail-notes
+      <span class="dot"></span>
+    </div>
+    <div class="nav-item">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+      split-bill-bot
+    </div>
+
+    <div class="nav-section">This room</div>
+    <div class="nav-item active" style="background: transparent; font-weight: 500;">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 6h5M5.5 9h3.5"/></svg>
+      Proposals
+      <span class="count">6</span>
+    </div>
+    <div class="nav-item">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+      Canonical build
+    </div>
+    <div class="nav-item">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3" stroke-linecap="round"/></svg>
+      Timeline
+    </div>
+    <div class="nav-item">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="5.5" cy="6" r="2.2"/><circle cx="10.5" cy="6" r="2.2"/><path d="M2 13c0-1.9 1.6-3.2 3.5-3.2S9 11.1 9 13M9.5 9.9c1.8.1 3.5 1.3 3.5 3.1"/></svg>
+      Members
+      <span class="count">5</span>
+    </div>
+
+    <div class="nav-footer">
+      <span class="avatar av-mo">MO</span>
+      <span class="name">Maya Okafor</span>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light / dark">
+        <svg class="moon" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M13.5 9.5A6 6 0 0 1 6.5 2.5a6 6 0 1 0 7 7Z" stroke-linejoin="round"/></svg>
+        <svg class="sun" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M12.6 3.4l-1.1 1.1M4.5 11.5l-1.1 1.1" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============ CENTER: ROOM ============ -->
+  <main class="room">
+    <header class="room-header">
+      <div class="room-title-row">
+        <span class="room-name"><span class="hash">#</span>night-market</span>
+        <span class="repo-chip">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          okafor-m/night-market
+        </span>
+        <span class="build-chip"><span class="pulse"></span>build passing · v0.4.2</span>
+      </div>
+      <div class="room-meta-row">
+        <span class="members">
+          <span class="avatar av-mo" title="Maya Okafor">MO</span>
+          <span class="avatar av-dr" title="Daniel Reyes">DR</span>
+          <span class="avatar av-pr" title="Priya Raman">PR</span>
+          <span class="avatar av-tw" title="Tom Whitfield">TW</span>
+          <span class="avatar av-sl" title="Sasha Lindqvist">SL</span>
+        </span>
+        <span class="meta-sep"></span>
+        <span class="meta-stat"><b>6</b> proposals</span>
+        <span class="meta-stat"><b>9</b> forks</span>
+        <span class="meta-stat"><b>2</b> adopted this week</span>
+        <span class="meta-sep"></span>
+        <span class="meta-stat">last adoption <b>2h ago</b></span>
+      </div>
+    </header>
+
+    <div class="feed">
+      <div class="feed-inner">
+
+        <div class="feed-filter">
+          <button class="filter-pill active">All <span class="filter-count">6</span></button>
+          <button class="filter-pill">Open <span class="filter-count">3</span></button>
+          <button class="filter-pill">Adopted <span class="filter-count">2</span></button>
+          <button class="filter-pill">Rejected <span class="filter-count">1</span></button>
+          <span class="feed-sort">
+            Newest first
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6.5 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+
+        <!-- CARD 1: open, fresh -->
+        <article class="card">
+          <div class="card-top">
+            <span class="avatar av-sl">SL</span>
+            <span class="card-author">Sasha Lindqvist</span>
+            <span class="card-id">P-021</span>
+            <span class="badge open">Open</span>
+            <span class="card-time">12 min ago</span>
+          </div>
+          <h3 class="card-intent">Cache tonight's open stalls in localStorage so the map paints instantly on repeat visits</h3>
+          <p class="card-desc">First paint currently waits on the stalls API. This snapshots the last response keyed by date, hydrates the map from cache, then reconciles when the network answers. Stale badge shows if the cache is older than 20 minutes.</p>
+          <div class="diff-block">
+            <div class="diff-line"><span class="file">src/lib/stallCache.ts</span><span class="nums"><span class="plus">+84</span><span class="minus">-0</span></span></div>
+            <div class="diff-line"><span class="file">src/map/MapCanvas.tsx</span><span class="nums"><span class="plus">+22</span><span class="minus">-9</span></span></div>
+          </div>
+          <div class="card-footer">
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+              Fork
+            </button>
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 10a2 2 0 0 1-2 2H6l-3.5 2.5V4a2 2 0 0 1 2-2H12a2 2 0 0 1 2 2v6Z" stroke-linejoin="round"/></svg>
+              Discuss <span class="n">2</span>
+            </button>
+            <span class="votes">
+              <button class="vote-btn" data-vote>▲ 3</button>
+            </span>
+          </div>
+        </article>
+
+        <!-- CARD 2: adopted remix with lineage -->
+        <article class="card is-adopted">
+          <div class="card-top">
+            <span class="avatar av-dr">DR</span>
+            <span class="card-author">Daniel Reyes</span>
+            <span class="card-id">P-019</span>
+            <span class="badge adopted">Adopted</span>
+            <span class="card-time">2h ago</span>
+          </div>
+          <div class="lineage">
+            <svg class="fork-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+            Remix of <b>P-014 · Geolocation on first visit</b> <span class="lin-id">by Priya Raman</span>
+          </div>
+          <h3 class="card-intent">Ask for location only after the first map interaction, with a neighborhood picker fallback</h3>
+          <p class="card-desc">Keeps Priya's geolocation flow but moves the permission prompt to the moment someone pans or searches, when intent is obvious. Denials drop into a neighborhood picker instead of a dead end.</p>
+          <div class="remix-note">
+            <span class="rn-label">Remix note</span>
+            Priya's version prompted on load and we saw 61% denials in the test group. Same flow, later trigger. All the fallback UI is hers, untouched, and she keeps credit on those files.
+          </div>
+          <div class="diff-block">
+            <div class="diff-line"><span class="file">src/onboarding/useLocationGate.ts</span><span class="nums"><span class="plus">+47</span><span class="minus">-31</span></span></div>
+            <div class="diff-line"><span class="file">src/onboarding/NeighborhoodPicker.tsx</span><span class="nums"><span class="plus">+3</span><span class="minus">-1</span></span></div>
+          </div>
+          <div class="card-footer">
+            <button class="card-action forked">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+              Forks <span class="n">2</span>
+            </button>
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 10a2 2 0 0 1-2 2H6l-3.5 2.5V4a2 2 0 0 1 2-2H12a2 2 0 0 1 2 2v6Z" stroke-linejoin="round"/></svg>
+              Discuss <span class="n">8</span>
+            </button>
+            <span class="adopt-stamp">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 8.5 3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Merged to main · <span class="sha">e41f92c</span> · credit: Reyes + Raman
+            </span>
+          </div>
+        </article>
+
+        <!-- CARD 3: open, forked a lot -->
+        <article class="card">
+          <div class="card-top">
+            <span class="avatar av-tw">TW</span>
+            <span class="card-author">Tom Whitfield</span>
+            <span class="card-id">P-018</span>
+            <span class="badge open">Open</span>
+            <span class="card-time">5h ago</span>
+          </div>
+          <h3 class="card-intent">Nightly scraper for vendor hours from the city's street-vending permit feed</h3>
+          <p class="card-desc">Pulls the open-data permit CSV at 02:00, normalizes stall names against our vendors table with fuzzy matching, and flags conflicts for manual review instead of overwriting. Runs as a scheduled worker.</p>
+          <div class="diff-block">
+            <div class="diff-line"><span class="file">workers/permit-sync/index.ts</span><span class="nums"><span class="plus">+156</span><span class="minus">-0</span></span></div>
+            <div class="diff-line"><span class="file">workers/permit-sync/match.ts</span><span class="nums"><span class="plus">+64</span><span class="minus">-0</span></span></div>
+            <div class="diff-line"><span class="file">db/migrations/007_vendor_hours.sql</span><span class="nums"><span class="plus">+18</span><span class="minus">-2</span></span></div>
+          </div>
+          <div class="card-footer">
+            <button class="card-action forked">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+              Forks <span class="n">3</span>
+            </button>
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 10a2 2 0 0 1-2 2H6l-3.5 2.5V4a2 2 0 0 1 2-2H12a2 2 0 0 1 2 2v6Z" stroke-linejoin="round"/></svg>
+              Discuss <span class="n">5</span>
+            </button>
+            <span class="votes">
+              <button class="vote-btn voted" data-vote>▲ 4</button>
+            </span>
+          </div>
+        </article>
+
+        <!-- CARD 4: open remix of the scraper -->
+        <article class="card">
+          <div class="card-top">
+            <span class="avatar av-pr">PR</span>
+            <span class="card-author">Priya Raman</span>
+            <span class="card-id">P-020</span>
+            <span class="badge review">In review</span>
+            <span class="card-time">3h ago</span>
+          </div>
+          <div class="lineage">
+            <svg class="fork-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+            Remix of <b>P-018 · Nightly permit scraper</b> <span class="lin-id">by Tom Whitfield</span>
+          </div>
+          <h3 class="card-intent">Same scraper, but stream diffs into the room feed instead of a review queue</h3>
+          <div class="remix-note">
+            <span class="rn-label">Remix note</span>
+            Tom's conflict queue means someone has to remember to check it. This posts each night's changes as a digest card here, so review happens where we already look.
+          </div>
+          <div class="card-footer">
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+              Fork
+            </button>
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 10a2 2 0 0 1-2 2H6l-3.5 2.5V4a2 2 0 0 1 2-2H12a2 2 0 0 1 2 2v6Z" stroke-linejoin="round"/></svg>
+              Discuss <span class="n">3</span>
+            </button>
+            <span class="votes">
+              <button class="vote-btn" data-vote>▲ 2</button>
+            </span>
+          </div>
+        </article>
+
+        <!-- CARD 5: adopted, original -->
+        <article class="card is-adopted">
+          <div class="card-top">
+            <span class="avatar av-mo">MO</span>
+            <span class="card-author">Maya Okafor</span>
+            <span class="card-id">P-016</span>
+            <span class="badge adopted">Adopted</span>
+            <span class="card-time">Yesterday</span>
+          </div>
+          <h3 class="card-intent">Cluster stall pins above zoom 14 so dense markets stay readable</h3>
+          <p class="card-desc">Supercluster over the stall layer with count bubbles that expand on tap. Keeps individual pins below zoom 14 where clustering would just hide the market you're standing in.</p>
+          <div class="diff-block">
+            <div class="diff-line"><span class="file">src/map/clusterLayer.ts</span><span class="nums"><span class="plus">+112</span><span class="minus">-6</span></span></div>
+            <div class="diff-line"><span class="file">src/map/MapCanvas.tsx</span><span class="nums"><span class="plus">+19</span><span class="minus">-24</span></span></div>
+          </div>
+          <div class="card-footer">
+            <button class="card-action forked">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+              Forks <span class="n">1</span>
+            </button>
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 10a2 2 0 0 1-2 2H6l-3.5 2.5V4a2 2 0 0 1 2-2H12a2 2 0 0 1 2 2v6Z" stroke-linejoin="round"/></svg>
+              Discuss <span class="n">4</span>
+            </button>
+            <span class="adopt-stamp">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 8.5 3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Merged to main · <span class="sha">b7d03a1</span> · credit: Okafor
+            </span>
+          </div>
+        </article>
+
+        <!-- CARD 6: rejected -->
+        <article class="card is-rejected">
+          <div class="card-top">
+            <span class="avatar av-tw">TW</span>
+            <span class="card-author">Tom Whitfield</span>
+            <span class="card-id">P-015</span>
+            <span class="badge rejected">Rejected</span>
+            <span class="card-time">2 days ago</span>
+          </div>
+          <h3 class="card-intent">Replace the stalls REST endpoint with a GraphQL layer</h3>
+          <p class="card-desc">Single schema for stalls, vendors, and hours so the client can shape its own queries. Adds Apollo Server in front of the existing Postgres access layer.</p>
+          <div class="card-footer">
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+              Fork
+            </button>
+            <button class="card-action">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 10a2 2 0 0 1-2 2H6l-3.5 2.5V4a2 2 0 0 1 2-2H12a2 2 0 0 1 2 2v6Z" stroke-linejoin="round"/></svg>
+              Discuss <span class="n">11</span>
+            </button>
+            <span class="reject-stamp">Closed by vote, 1 to 4 · "too much surface for v0"</span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ RIGHT: PRIVATE AGENT ============ -->
+  <aside class="agent">
+    <header class="agent-header">
+      <div class="agent-title">
+        <span class="agent-orb"></span>
+        Your agent
+        <span class="private-chip">
+          <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
+          PRIVATE
+        </span>
+      </div>
+      <div class="agent-sub">Only you see this thread. Working on <code>night-market</code>, branch <code>maya/search-radius</code>.</div>
+    </header>
+
+    <div class="agent-chat">
+      <div class="msg-user">the search only finds stalls by exact name. can we do fuzzy matching plus a "near me" radius filter?</div>
+
+      <div class="worked-line">
+        Worked for 2m 04s
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 4 4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <div class="msg-agent">
+        <p>Done on your branch. I swapped the exact-match lookup in <code>searchStalls.ts</code> for trigram similarity with a 0.3 floor, so "papusa" now finds "Pupusas La Reina". The radius filter reads the location the map already holds, no new permission prompt.</p>
+        <p>Tests pass, 14 new cases. One tradeoff to flag: trigram search needs the <code>pg_trgm</code> extension, which the room's canonical database already enables, so no migration risk.</p>
+      </div>
+
+      <div class="draft" id="draftCard">
+        <div class="draft-label">
+          <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 6h5M5.5 9h3.5"/></svg>
+          Draft proposal
+        </div>
+        <div class="draft-title">Fuzzy stall search with a near-me radius filter</div>
+        <div class="draft-files">
+          src/search/searchStalls.ts <span class="plus">+58</span> <span class="minus">-17</span> · src/search/RadiusControl.tsx <span class="plus">+41</span> <span class="minus">-0</span>
+        </div>
+        <button class="promote-btn" id="promoteBtn">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 12.5v-9M4.5 7 8 3.5 11.5 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Promote to #night-market
+        </button>
+      </div>
+
+      <div class="msg-user">will it collide with sasha's localStorage cache proposal?</div>
+
+      <div class="msg-agent">
+        <p>No overlap. Sasha's P-021 touches <code>stallCache.ts</code> and <code>MapCanvas.tsx</code>; this change stays inside <code>src/search/</code>. If both are adopted they merge cleanly, and I re-checked against her fork's latest commit to be sure.</p>
+      </div>
+    </div>
+
+    <div class="agent-input-wrap">
+      <div class="agent-input">
+        <textarea placeholder="Ask your agent anything" rows="1"></textarea>
+        <div class="agent-input-row">
+          <span class="input-chip">
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 8h12M8 2v12" stroke-linecap="round"/></svg>
+            Attach
+          </span>
+          <span class="input-chip">
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/><path d="M3.5 5v6M12.5 5v2a3 3 0 0 1-3 3H5"/></svg>
+            Branch
+          </span>
+          <span class="model-chip">quill-4 · fast</span>
+          <button class="send-btn" title="Send">
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 12.5v-9M4.5 7 8 3.5 11.5 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<div class="toast" id="toast">Promoted to #night-market as P-022</div>
+
+<script>
+  // ---- theme: default to OS, toggle overrides ----
+  (function () {
+    var root = document.documentElement;
+    var stored = null; // static mockup: no persistence
+    function apply(dark) {
+      if (dark) root.setAttribute('data-theme', 'dark');
+      else root.removeAttribute('data-theme');
+    }
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    apply(mq.matches);
+    mq.addEventListener('change', function (e) { if (stored === null) apply(e.matches); });
+    document.getElementById('themeToggle').addEventListener('click', function () {
+      var dark = root.hasAttribute('data-theme');
+      stored = !dark;
+      apply(!dark);
+    });
+  })();
+
+  // ---- promote micro-interaction ----
+  (function () {
+    var btn = document.getElementById('promoteBtn');
+    var toast = document.getElementById('toast');
+    btn.addEventListener('click', function () {
+      if (btn.classList.contains('promoted')) return;
+      btn.classList.add('promoted');
+      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 8.5 3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Promoted as P-022';
+      toast.classList.add('show');
+      setTimeout(function () { toast.classList.remove('show'); }, 2600);
+    });
+  })();
+
+  // ---- vote micro-interaction ----
+  document.querySelectorAll('[data-vote]').forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var n = parseInt(b.textContent.replace(/\D/g, ''), 10);
+      var voted = b.classList.toggle('voted');
+      b.textContent = '▲ ' + (voted ? n + 1 : n - 1);
+    });
+  });
+
+  // ---- filter pills: visual state only ----
+  document.querySelectorAll('.filter-pill').forEach(function (p) {
+    p.addEventListener('click', function () {
+      document.querySelectorAll('.filter-pill').forEach(function (x) { x.classList.remove('active'); });
+      p.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

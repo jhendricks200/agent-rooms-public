@@ -1,0 +1,1839 @@
+<!-- @dsCard group="Screens" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms &middot; Room</title>
+<style>
+/* ============================================================
+   SCREEN · ROOM  (Signal Lab v2)
+
+   Content, structure and interactions come from
+   design/direction-c2.html, the blessed direction exploration:
+   nav rail, group chat down the middle with proposal cards inline,
+   an environment panel above the private agent sidebar, and a
+   composer at the foot of both columns. That file is the v1
+   reference and is left untouched; this is the v2 port.
+
+   Token values are the ones in design/ds/tokens-v2.css, inlined
+   here so the comp opens as a single file. Nothing is invented at
+   the token layer.
+
+   The v2 system in one line: panels carry no border, they separate
+   from the page by fill and shadow; body copy is near-white and
+   metadata is gray, only two ink levels; section headings are
+   quieter than the content under them; line measure is capped in
+   pixels, not ch.
+
+   What this file adds that direction-c2 did not draw.
+
+   1. The environment panel rebuilt on the status-row vocabulary
+      from the sign-in aside: 26px circular emblems, solid opaque
+      fill at full tone strength, glyph punched out in near-black
+      or near-white ink, sentence-case labels in near-white, values
+      right-aligned in gray with mono for SHAs and counts. Color is
+      assigned by meaning, and a row with no state of its own (the
+      repo) gets the neutral emblem, not a colored one.
+   2. A quiet room. direction-c2 only draws a busy room, so a room
+      with nothing in flight had no designed treatment. The feed,
+      the rail and the agent column each get one here.
+   3. Build failing, in rose. direction-c2 only ever draws the
+      passing state, and ds/README.md flags the failing treatment
+      as invented rather than extracted, so it is designed properly
+      here: the environment row, a room-level note, and adopt held
+      back while main is red.
+   4. A light theme, derived from the v1 light ramp in ds/tokens.css
+      with the v2 roles mapped onto it.
+   5. :focus-visible, reduced motion, and the v1 breakpoints.
+
+   Two deliberate departures from direction-c2, both in service of
+   the rule that green means adoption and passing builds only. The
+   promote button moves from the green gradient to the cyan one,
+   which v2 names as the primary-action fill; and the active nav
+   row loses its green edge marker, keeping the row fill alone.
+   The rose emblem is a sixth recipe: tokens-v2 records rose as
+   "deletion counts only", and a failing build is the one other
+   thing in this product that has genuinely gone wrong.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- surfaces ---- */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --rail: #0d1119;
+  --panel: #171d2e;
+  --row: #141926;
+  --field: #1a2132;
+  --header-bg: rgba(16, 20, 29, 0.82);
+  --sidebar-bg: rgba(16, 20, 29, 0.88);
+  --panel-sunken: rgba(20, 25, 38, 0.5);
+  --composer-bg: rgba(23, 29, 44, 0.7);
+  --profile-bg: rgba(23, 29, 44, 0.72);
+  --inset-top: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+  --avatar-ring: #10141d;
+
+  /* ---- lines: dividers and controls only ---- */
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --line-field: rgba(148, 168, 205, 0.17);
+
+  /* ---- ink: two levels do the work, plus field labels ---- */
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #8b9ab6;
+  --dot-ancestor: #5f6c85;
+
+  /* ---- signal colors ---- */
+  --signal: #4ade80;
+  --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e;
+  --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0;
+  --cyan-bright: #7ad3f5;
+  --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5;
+  --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f;
+  --rose-dim: rgba(247, 124, 143, 0.14);
+  --selection: rgba(83, 197, 240, 0.26);
+  --neutral-emblem: #e6ebf5;
+  --emblem-ink: #0b0e14;
+  --agent-tile-fill: linear-gradient(140deg, rgba(83, 197, 240, 0.14), #141926);
+  --agent-tile-line: rgba(83, 197, 240, 0.2);
+
+  /* ---- action fills ---- */
+  --grad-cyan: linear-gradient(160deg, #7ad3f5, #53c5f0);
+  --grad-cyan-ink: #04121a;
+  --shadow-btn-cyan: 0 1px 0 rgba(0, 0, 0, 0.2), 0 4px 16px rgba(83, 197, 240, 0.22);
+  --invert-fill: #f6f9ff;
+  --invert-ink: #05070a;
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+
+  /* ---- avatars ---- */
+  --avatar-pr: #8fd0a8;
+  --avatar-do: #86bfe8;
+  --avatar-mj: #d3aef0;
+  --avatar-tr: #f0c489;
+  --avatar-sq: #f0a3b1;
+  --avatar-ink: #0b0e14;
+
+  /* ---- elevation: three tiers, no panel borders ---- */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+  --shadow-2:
+    inset 0 1px 0 rgba(148, 168, 205, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(3, 6, 12, 0.36),
+    0 24px 52px rgba(3, 6, 12, 0.28);
+  --shadow-3:
+    0 1px 0 rgba(148, 168, 205, 0.07) inset,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 20px 48px rgba(2, 4, 9, 0.55),
+    0 44px 96px rgba(2, 4, 9, 0.42);
+  --glow-adopt: 0 0 34px rgba(74, 222, 128, 0.10);
+
+  /* ---- fields ---- */
+  --shadow-field: inset 0 1px 3px rgba(0, 0, 0, 0.26);
+  --focus-ring:
+    inset 0 1px 3px rgba(0, 0, 0, 0.26),
+    0 0 0 3px rgba(83, 197, 240, 0.16);
+  --focus-border: rgba(83, 197, 240, 0.4);
+  --glow-live: 0 0 8px rgba(74, 222, 128, 0.7);
+
+  /* ---- radii: 14-20px on surfaces, 10-12px on rows ---- */
+  --radius-keycap: 4px;
+  --radius-badge: 5px;
+  --radius-mark: 7px;
+  --radius-tile: 8px;
+  --radius-select: 9px;
+  --radius-row: 10px;
+  --radius-field: 11px;
+  --radius: 12px;
+  --radius-panel: 16px;
+  --radius-panel-lg: 18px;
+  --radius-panel-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ---- measure: pixel caps, not ch ---- */
+  --measure: 560px;
+  --measure-sub: 470px;
+  --measure-agent: 215px;
+
+  /* ---- layout ---- */
+  --rail-w: 216px;
+  --agent-w: 316px;
+  --header-h: 54px;
+  --feed-w: 716px;
+}
+
+:root[data-theme="light"] {
+  /* Derived from the v1 light ramp in design/ds/tokens.css, with the
+     v2 roles mapped onto it. Panels stay borderless: in light the
+     separation comes from a white fill on a warm gray page plus a
+     much shallower shadow, since a dark halo reads as dirt here. */
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+  --rail: #ecede8;
+  --panel: #ffffff;
+  --row: #f0f1ec;
+  --field: #edeee8;
+  --header-bg: rgba(250, 250, 247, 0.86);
+  --sidebar-bg: rgba(248, 249, 245, 0.9);
+  --panel-sunken: rgba(236, 237, 232, 0.72);
+  --composer-bg: rgba(240, 241, 236, 0.8);
+  --profile-bg: rgba(240, 241, 236, 0.85);
+  --inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --avatar-ring: #ffffff;
+
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --line-field: rgba(48, 62, 88, 0.16);
+
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #6b7690;
+  --dot-ancestor: #8b96ab;
+
+  --signal: #14934e;
+  --signal-dim: rgba(20, 147, 78, 0.1);
+  --amber: #9a6106;
+  --amber-dim: rgba(154, 97, 6, 0.1);
+  --cyan: #0f7fb0;
+  --cyan-bright: #0b6a93;
+  --cyan-dim: rgba(15, 127, 176, 0.09);
+  --violet: #7048c8;
+  --violet-dim: rgba(112, 72, 200, 0.09);
+  --rose: #c94b60;
+  --rose-dim: rgba(201, 75, 96, 0.1);
+  --selection: rgba(15, 127, 176, 0.2);
+  --neutral-emblem: #55617a;
+  --emblem-ink: #ffffff;
+  --agent-tile-fill: linear-gradient(140deg, rgba(15, 127, 176, 0.1), #f0f1ec);
+  --agent-tile-line: rgba(15, 127, 176, 0.22);
+
+  --grad-cyan: linear-gradient(160deg, #1594c9, #0f7fb0);
+  --grad-cyan-ink: #ffffff;
+  --shadow-btn-cyan: 0 1px 0 rgba(28, 36, 51, 0.08), 0 4px 16px rgba(15, 127, 176, 0.2);
+  --invert-fill: #141b28;
+  --invert-ink: #ffffff;
+  --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+
+  --avatar-ink: #12181f;
+
+  --shadow-1:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 4px 12px rgba(28, 36, 51, 0.05);
+  --shadow-2:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 8px 20px rgba(28, 36, 51, 0.07),
+    0 22px 48px rgba(28, 36, 51, 0.05);
+  --shadow-3:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px rgba(28, 36, 51, 0.06),
+    0 16px 38px rgba(28, 36, 51, 0.1),
+    0 34px 70px rgba(28, 36, 51, 0.07);
+  --glow-adopt: 0 0 30px rgba(20, 147, 78, 0.09);
+
+  --shadow-field: inset 0 1px 3px rgba(28, 36, 51, 0.07);
+  --focus-ring:
+    inset 0 1px 3px rgba(28, 36, 51, 0.07),
+    0 0 0 3px rgba(15, 127, 176, 0.2);
+  --focus-border: rgba(15, 127, 176, 0.5);
+  --glow-live: 0 0 8px rgba(20, 147, 78, 0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: 0;
+}
+::selection { background: var(--selection); }
+button, input, textarea { font-family: inherit; color: inherit; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--cyan-bright); text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ================= FRAME ================= */
+
+.app {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--agent-w);
+  grid-template-rows: var(--header-h) minmax(0, 1fr);
+}
+
+/* ================= STATE SWITCHING (comp only) =================
+   Three states of one screen share one markup tree. s-live is the
+   room with work in it, shown for both active and failing; s-quiet
+   is the room at rest; s-fail and s-pass swap the build treatment. */
+.app[data-state="quiet"] .s-live { display: none; }
+.app:not([data-state="quiet"]) .s-quiet { display: none; }
+.app:not([data-state="failing"]) .s-fail { display: none; }
+.app[data-state="failing"] .s-pass { display: none; }
+
+/* ================= RAIL ================= */
+
+.rail {
+  grid-row: 1 / span 2;
+  background: var(--rail);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px 10px 12px;
+}
+
+.rail-brand { display: flex; align-items: center; gap: 9px; padding: 2px 8px 16px; }
+.rail-brand .mark {
+  width: 24px; height: 24px;
+  border-radius: var(--radius-mark);
+  background: var(--brand-mark-fill);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--signal);
+  flex-shrink: 0;
+}
+.rail-brand .word { font-size: 13px; font-weight: 600; }
+.rail-brand .spacer { flex: 1; }
+.rail-icon-btn {
+  width: 26px; height: 26px;
+  border-radius: var(--radius-mark);
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.rail-icon-btn:hover { color: var(--ink); background: var(--row); }
+.rail-icon-btn svg { width: 14px; height: 14px; }
+
+.rail-new {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--row);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-tile);
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.rail-new:hover { border-color: var(--line-strong); background: var(--panel); }
+.rail-new svg { width: 13px; height: 13px; opacity: 0.8; flex-shrink: 0; }
+
+.rail-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  margin: 0 -2px;
+  padding: 0 2px;
+}
+
+/* Section headings are quieter than the rows beneath them. */
+.rail-section { font-size: 11.5px; color: var(--ink-2); padding: 18px 9px 6px; }
+
+.rail-item {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-row);
+  font-size: 14px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.rail-item:hover { background: var(--row); color: var(--ink); }
+.rail-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.8; }
+.rail-item .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* Selected room. The green edge marker from direction-c2 is gone:
+   green means adoption and passing builds, not "you are here". */
+.rail-item[aria-current="page"] {
+  background: var(--row);
+  color: var(--ink);
+  font-weight: 600;
+}
+.rail-item .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+.rail-item .unread {
+  margin-left: auto;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  flex-shrink: 0;
+}
+
+/* The rail's own quiet treatment: a dashed slot, not skeleton rows.
+   Nothing is loading, there is simply nothing in flight. */
+.rail-slot {
+  margin: 8px 2px 0;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-row);
+  padding: 11px 12px;
+}
+.rail-slot .rs-title { font-size: 12px; color: var(--ink); margin-bottom: 3px; }
+.rail-slot .rs-line { font-size: 11.5px; line-height: 1.5; color: var(--ink-2); }
+
+.rail-foot { padding-top: 10px; }
+.rail-profile {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--profile-bg);
+  box-shadow: var(--inset-top);
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.rail-profile:hover { background: var(--panel); }
+.rail-profile .who { flex: 1; min-width: 0; line-height: 1.3; }
+.rail-profile .who .nm { display: block; font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.rail-profile .who .sub { display: block; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+.rail-profile .gear { color: var(--ink-2); display: grid; place-items: center; flex-shrink: 0; }
+.rail-profile .gear svg { width: 13px; height: 13px; }
+
+/* ================= AVATARS ================= */
+
+.avatar {
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 700;
+  color: var(--avatar-ink);
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  font-size: 8.5px;
+}
+.avatar.a-pr { background: var(--avatar-pr); }
+.avatar.a-do { background: var(--avatar-do); }
+.avatar.a-mj { background: var(--avatar-mj); }
+.avatar.a-tr { background: var(--avatar-tr); }
+.avatar.a-sq { background: var(--avatar-sq); }
+.avatar.big { width: 30px; height: 30px; font-size: 10.5px; }
+
+.stack { display: flex; flex-shrink: 0; }
+.stack .avatar { width: 24px; height: 24px; font-size: 9px; border: 2px solid var(--avatar-ring); }
+.stack .avatar + .avatar { margin-left: -8px; }
+.stack.small .avatar { width: 20px; height: 20px; font-size: 8px; }
+
+/* ================= HEADER ================= */
+
+.head {
+  grid-column: 2 / span 2;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--header-bg);
+  min-width: 0;
+}
+.head .room { min-width: 0; line-height: 1.3; display: flex; flex-direction: column; }
+.head .room .t { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.head .room .t .kind { color: var(--ink-2); font-weight: 500; font-size: 12px; margin-left: 7px; }
+.head .room .sub { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+.head .spacer { flex: 1; }
+.head .in-lab { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: var(--radius-mark);
+  padding: 3.5px 9px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.badge.proposed { color: var(--amber);  background: var(--amber-dim);  border: 1px solid color-mix(in srgb, var(--amber) 25%, transparent); }
+.badge.forking  { color: var(--cyan);   background: var(--cyan-dim);   border: 1px solid color-mix(in srgb, var(--cyan) 25%, transparent); }
+.badge.review   { color: var(--violet); background: var(--violet-dim); border: 1px solid color-mix(in srgb, var(--violet) 25%, transparent); }
+.badge.adopted  { color: var(--signal); background: var(--signal-dim); border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent); }
+.badge.failing  { color: var(--rose);   background: var(--rose-dim);   border: 1px solid color-mix(in srgb, var(--rose) 25%, transparent); }
+.badge.quiet    { color: var(--ink-2);  background: var(--row);        border: 1px solid var(--line); }
+
+/* Comp-only controls. This file shows three states of one screen, so
+   it needs a way to see the other two. Not part of the product. */
+.state-switch { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.state-switch .sw-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.sw-group {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--row);
+}
+.sw-btn {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4.5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.sw-btn:hover { color: var(--ink); }
+.sw-btn[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+}
+
+.theme-toggle {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+/* ================= FEED ================= */
+
+.feed {
+  min-width: 0; min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.feed-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 26px 34px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.feed-col { width: 100%; max-width: var(--feed-w); margin: 0 auto; }
+
+.feed-head { display: flex; align-items: center; gap: 12px; margin-bottom: 5px; }
+/* Deliberately quieter than the stream under it. */
+.feed-head h2 { font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.feed-head .spacer { flex: 1; }
+.live {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--signal);
+  white-space: nowrap;
+}
+.live .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: var(--glow-live);
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+.live.at-rest { color: var(--ink-2); font-weight: 400; }
+.live.at-rest .dot { background: var(--ink-2); box-shadow: none; animation: none; }
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+  55% { box-shadow: 0 0 0 5px transparent; }
+}
+.feed-sub {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: var(--measure);
+  margin-bottom: 22px;
+}
+
+/* The stream and its spine. The spine is the room's chronological
+   axis, which is the one structural line the feed has. */
+.stream {
+  position: relative;
+  display: flex; flex-direction: column; gap: 18px;
+  padding-left: 24px;
+}
+.stream::before {
+  content: "";
+  position: absolute;
+  left: 5px; top: 10px; bottom: 10px;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--line) 8%, var(--line) 92%, transparent);
+}
+.node {
+  position: absolute;
+  left: -24px;
+  top: 22px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 2px var(--dot-ancestor);
+  z-index: 2;
+}
+
+/* ---- chat on the spine ---- */
+.chat { position: relative; padding: 2px 2px 2px 0; }
+.chat .node {
+  top: 7px;
+  width: 7px; height: 7px;
+  left: -22px;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.chat-head { display: flex; align-items: center; gap: 9px; margin-bottom: 3px; }
+.chat-head .who { font-size: 14px; font-weight: 600; color: var(--ink); }
+.chat-head .when { font-size: 12.5px; color: var(--ink-2); }
+.chat-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: var(--measure);
+  padding-left: 31px;
+  text-wrap: pretty;
+}
+.chat-text .mention { color: var(--cyan); }
+
+/* ---- proposal card: a panel, no border ---- */
+.card { position: relative; }
+.card-body {
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 17px 20px 15px;
+  transition: box-shadow 0.2s ease, transform 0.18s ease;
+}
+.card:hover .card-body { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+
+.card.st-proposed .node { box-shadow: inset 0 0 0 2px var(--amber); }
+.card.st-fork .node { box-shadow: inset 0 0 0 2px var(--cyan); }
+.card.st-review .node { box-shadow: inset 0 0 0 2px var(--violet); }
+.card.st-adopted .node { background: var(--signal); box-shadow: 0 0 10px color-mix(in srgb, var(--signal) 50%, transparent); }
+
+.card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.byline { font-size: 13.5px; color: var(--ink-2); min-width: 0; }
+.byline b { color: var(--ink); font-weight: 600; }
+.card-head .spacer { flex: 1; }
+.card-head .when { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+
+.intent {
+  font-size: 17.5px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin-bottom: 6px;
+  text-wrap: balance;
+}
+.summary {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: var(--measure);
+  text-wrap: pretty;
+  margin-bottom: 14px;
+}
+
+/* Edged note, the v2 remix-note treatment: a left edge in the token
+   color, a quiet lead line, near-white body. No mono micro-label. */
+.note {
+  border-left: 2px solid var(--violet);
+  border-radius: 0 var(--radius-field) var(--radius-field) 0;
+  background: var(--panel-sunken);
+  padding: 12px 16px 13px;
+  margin-bottom: 14px;
+}
+.note .lead { font-size: 13px; color: var(--ink-2); margin-bottom: 6px; }
+.note p { font-size: 14.5px; line-height: 1.55; color: var(--ink); max-width: var(--measure); }
+.note.rose { border-left-color: var(--rose); }
+
+/* Credit lineage inside the adopted card */
+.chain {
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+  padding: 13px 16px;
+  margin-bottom: 14px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.chain .lead { font-size: 13px; color: var(--ink-2); }
+.chain-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); min-width: 0; }
+.chain-row .cdot { width: 7px; height: 7px; border-radius: 50%; background: var(--dot-ancestor); flex-shrink: 0; }
+.chain-row .cdot.remix { background: var(--violet); }
+.chain-row .cdot.final { background: var(--signal); box-shadow: 0 0 8px color-mix(in srgb, var(--signal) 55%, transparent); }
+.chain-row .txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chain-row b { color: var(--ink); font-weight: 600; }
+.chain-row .spacer { flex: 1; }
+.chain-row .sha { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); flex-shrink: 0; }
+.chain-foot {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.chain-foot b { color: var(--ink); font-weight: 600; }
+
+.card-foot {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 9px 16px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+.card-foot .spacer { flex: 1; }
+.fact { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.fact svg { width: 13px; height: 13px; flex-shrink: 0; }
+.fact.forks { color: var(--cyan); }
+.fact.adopted { color: var(--signal); }
+.fact.held { color: var(--rose); }
+.path { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+
+.btn {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.btn:hover:not(:disabled) { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.btn.primary { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 32%, transparent); }
+.btn.primary:hover { background: var(--cyan-dim); color: var(--cyan-bright); }
+.btn:disabled { cursor: default; opacity: 0.55; }
+
+/* ---- the adoption moment ---- */
+.adopted-card .card-body { box-shadow: var(--shadow-1), var(--glow-adopt); }
+.adopted-card:hover .card-body { box-shadow: var(--shadow-2), var(--glow-adopt); }
+.ribbon {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--signal);
+  margin-bottom: 9px;
+}
+.ribbon::after { content: ""; height: 1px; flex: 1; background: currentColor; opacity: 0.28; }
+.ribbon .flare { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.ribbon .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+/* ---- the room-level build note, failing only ---- */
+.room-note {
+  background: var(--panel);
+  border: none;
+  border-left: 2px solid var(--rose);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  box-shadow: var(--shadow-1);
+  padding: 16px 20px 15px;
+  margin-bottom: 22px;
+}
+.room-note .rn-head { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+.room-note .rn-head .t { font-size: 15px; font-weight: 600; color: var(--ink); }
+.room-note p { font-size: 14.5px; line-height: 1.55; color: var(--ink); max-width: var(--measure); }
+.room-note .rn-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 13px; }
+.room-note .rn-foot .checks { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); }
+
+/* ---- the feed at rest ---- */
+.quiet-slot {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-panel);
+  padding: 22px 24px;
+  text-align: left;
+}
+.quiet-slot h3 { font-size: 17.5px; font-weight: 600; letter-spacing: -0.018em; margin-bottom: 7px; }
+.quiet-slot p { font-size: 14.5px; line-height: 1.55; color: var(--ink-2); max-width: var(--measure-sub); }
+.quiet-slot .qs-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+
+/* ---- room composer ---- */
+.feed-composer { flex-shrink: 0; padding: 8px 34px 20px; }
+.rc-box {
+  max-width: var(--feed-w);
+  margin: 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--composer-bg);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  box-shadow: var(--shadow-2);
+  padding: 11px 12px 11px 14px;
+  transition: box-shadow 0.18s ease;
+}
+.rc-box:focus-within { box-shadow: var(--shadow-2), 0 0 0 3px var(--cyan-dim); }
+.rc-box input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14.5px;
+  color: var(--ink);
+}
+.rc-box input::placeholder { color: var(--ink-2); }
+.icon-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.icon-btn:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.icon-btn svg { width: 14px; height: 14px; }
+.chip-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.chip-btn:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.chip-btn svg { width: 12px; height: 12px; opacity: 0.85; }
+.send-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--invert-fill);
+  color: var(--invert-ink);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, filter 0.16s ease;
+}
+.send-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.send-btn:active { transform: translateY(0); }
+.send-btn svg { width: 14px; height: 14px; }
+
+/* ================= AGENT COLUMN ================= */
+
+.agent {
+  border-left: 1px solid var(--line);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ---- environment panel ----
+   Rebuilt on the sign-in aside's status-row vocabulary: 26px
+   circular emblems, solid and opaque at full tone strength, no ring
+   and no glow; sentence-case labels in near-white at the body size;
+   values right-aligned in gray, mono for SHAs and counts. Color
+   carries meaning: green passing, rose failing, amber room
+   identity, cyan forks in flight, violet last adopted. The repo row
+   has no state of its own, so it takes the neutral emblem. */
+.env-wrap { padding: 14px 14px 0; flex-shrink: 0; }
+.env {
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 14px 16px 12px;
+}
+.env-head {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0 0 4px;
+  cursor: pointer;
+}
+.env-head .h { font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.env-head .spacer { flex: 1; }
+.env-head .chev { color: var(--ink-2); display: grid; place-items: center; transition: transform 0.22s ease; }
+.env-head .chev svg { width: 12px; height: 12px; display: block; }
+.env[data-open="false"] .env-head .chev { transform: rotate(-90deg); }
+
+.env-rows { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.28s ease; }
+.env[data-open="false"] .env-rows { grid-template-rows: 0fr; }
+.env-rows-inner { overflow: hidden; min-height: 0; }
+
+.status-row {
+  display: flex; align-items: center; gap: 13px;
+  padding: 7px 0;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  min-width: 0;
+}
+.status-row .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-row a.label { color: var(--ink); }
+.status-row a.label:hover { color: var(--cyan); text-decoration: none; }
+.status-row .val {
+  margin-left: auto;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--ink-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-row .val.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.status-row .val.on { color: var(--signal); font-weight: 500; }
+.status-row .val.fork { color: var(--cyan); font-weight: 500; }
+.status-row .val.bad { color: var(--rose); font-weight: 500; }
+.status-row .stack { margin-left: auto; }
+
+/* Solid emblem, with the amber, neutral and rose variants this
+   panel actually uses. Opaque tone fill, glyph punched out in
+   --emblem-ink, no ring, no glow. */
+.emblem {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: var(--emblem-ink);
+  background: var(--tone);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(3, 6, 12, 0.45);
+}
+.emblem svg { width: 13px; height: 13px; }
+.emblem.e-room {
+  --tone: var(--amber);
+}
+.emblem.e-room svg { width: 14px; height: 14px; }
+.emblem.e-repo,
+.emblem.e-none {
+  --tone: var(--neutral-emblem);
+}
+.emblem.e-repo svg { width: 14px; height: 14px; }
+.emblem.e-build { --tone: var(--signal); }
+.emblem.e-fail  { --tone: var(--rose); }
+.emblem.e-fork  { --tone: var(--cyan); }
+.emblem.e-adopt { --tone: var(--violet); }
+
+/* ---- agent identity ---- */
+.agent-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 18px 12px;
+  flex-shrink: 0;
+}
+.agent-tile {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-tile);
+  background: var(--agent-tile-fill);
+  border: 1px solid var(--agent-tile-line);
+  display: grid; place-items: center;
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+.agent-tile svg { width: 14px; height: 14px; }
+.agent-head .id { flex: 1; min-width: 0; line-height: 1.3; display: flex; flex-direction: column; }
+.agent-head .id .nm { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.agent-head .id .st { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.private-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-badge);
+  padding: 3px 7px;
+  flex-shrink: 0;
+}
+.private-badge svg { width: 9px; height: 9px; }
+
+.agent-chat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 18px 10px;
+  display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.msg { max-width: 94%; }
+.msg.you {
+  align-self: flex-end;
+  background: var(--row);
+  border-radius: var(--radius) var(--radius) var(--radius-keycap) var(--radius);
+  padding: 10px 13px;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.msg.bot { align-self: flex-start; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.msg.bot p + p { margin-top: 9px; }
+.msg .worked { font-size: 13px; color: var(--ink-2); margin-bottom: 8px; }
+.code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--row);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+  color: var(--ink-2);
+}
+
+/* ready-to-promote card, tier 1 panel */
+.out {
+  align-self: stretch;
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 14px 16px;
+}
+.out .lead {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px;
+  color: var(--amber);
+  margin-bottom: 7px;
+}
+.out .lead .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+.out .t { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.out .d { font-size: 13px; line-height: 1.55; color: var(--ink-2); margin-bottom: 11px; }
+.out .files {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 13px;
+}
+.out .files .add { color: var(--signal); }
+.out .files .mod { color: var(--amber); }
+
+/* The promote button uses the cyan action fill, not the green one:
+   green is reserved for adoption and passing builds, and promoting
+   is neither. */
+.promote {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--grad-cyan-ink);
+  background: var(--grad-cyan);
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn-cyan);
+  transition: transform 0.15s ease, filter 0.18s ease;
+}
+.promote:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.promote:active { transform: translateY(0); }
+.promote svg { width: 14px; height: 14px; }
+
+/* the agent at rest */
+.agent-idle {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px 18px;
+}
+.agent-idle .inner { text-align: center; max-width: var(--measure-agent); }
+.agent-idle .t { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.agent-idle p { font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
+
+.composer-wrap { padding: 0 14px 16px; flex-shrink: 0; }
+.composer {
+  background: var(--composer-bg);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  box-shadow: var(--shadow-1);
+  padding: 13px 13px 10px 16px;
+  transition: box-shadow 0.18s ease;
+}
+.composer:focus-within { box-shadow: var(--shadow-1), 0 0 0 3px var(--cyan-dim); }
+.composer textarea {
+  width: 100%;
+  height: 38px;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.composer textarea::placeholder { color: var(--ink-2); }
+.composer .tools { display: flex; align-items: center; gap: 9px; margin-top: 8px; }
+.composer .tools .model { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+.composer .tools .spacer { flex: 1; }
+.composer .icon-btn { width: 27px; height: 27px; }
+.composer .icon-btn svg { width: 13px; height: 13px; }
+.composer .send-btn { width: 28px; height: 28px; }
+.composer .send-btn svg { width: 12px; height: 12px; }
+
+/* ================= LOAD ================= */
+.card, .chat, .quiet-slot, .room-note { animation: rise 0.5s ease both; }
+.stream > :nth-child(1) { animation-delay: 0.04s; }
+.stream > :nth-child(2) { animation-delay: 0.09s; }
+.stream > :nth-child(3) { animation-delay: 0.14s; }
+.stream > :nth-child(4) { animation-delay: 0.19s; }
+.stream > :nth-child(5) { animation-delay: 0.24s; }
+.stream > :nth-child(6) { animation-delay: 0.29s; }
+.stream > :nth-child(7) { animation-delay: 0.34s; }
+.stream > :nth-child(8) { animation-delay: 0.39s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ================= RESPONSIVE =================
+   The agent column drops first, the rail second. */
+@media (max-width: 1180px) {
+  .app { grid-template-columns: var(--rail-w) minmax(0, 1fr); }
+  .head { grid-column: 2 / span 1; }
+  .agent { display: none; }
+  .feed-scroll { padding: 22px 26px 8px; }
+  .feed-composer { padding: 8px 26px 18px; }
+}
+@media (max-width: 940px) {
+  .state-switch .sw-label { display: none; }
+  .sw-btn { font-size: 12px; padding: 4px 9px; }
+  .head .room .sub { display: none; }
+  .head .in-lab { display: none; }
+}
+@media (max-width: 620px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .rail { display: none; }
+  .head { grid-column: 1 / span 1; padding: 0 16px; gap: 10px; }
+  .head .members { display: none; }
+  .feed-scroll { padding: 18px 16px 6px; }
+  .feed-composer { padding: 6px 16px 16px; }
+  .stream { padding-left: 20px; }
+  .node { left: -20px; }
+  .chat .node { left: -18px; }
+  .chat-text { padding-left: 0; }
+  .card-body { padding: 15px 16px 14px; }
+  .intent { font-size: 16px; }
+  .rc-box .chip-btn { display: none; }
+  .card-foot { gap: 8px 12px; }
+}
+
+/* ================= REDUCED MOTION ================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app" data-state="active">
+
+  <!-- ================= RAIL ================= -->
+  <nav class="rail" aria-label="Rooms">
+    <div class="rail-brand">
+      <span class="mark" aria-hidden="true">&#9630;&#9626;</span>
+      <span class="word">Agent Rooms</span>
+      <span class="spacer"></span>
+      <button class="rail-icon-btn" type="button" aria-label="Search rooms">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <button class="rail-new" type="button">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 8h12M8 2v12"/></svg>
+      New room
+    </button>
+
+    <div class="rail-scroll">
+      <div class="rail-section">Rooms</div>
+      <a class="rail-item" href="#" aria-current="page">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+        <span class="nm">night-market</span>
+        <span class="count s-live">17</span>
+      </a>
+      <a class="rail-item" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+        <span class="nm">trail-notes</span>
+        <span class="unread s-live" aria-label="unread"></span>
+      </a>
+      <a class="rail-item" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+        <span class="nm">split-bill-bot</span>
+      </a>
+      <a class="rail-item" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+        <span class="nm">drift-journal</span>
+      </a>
+
+      <div class="rail-section">This room</div>
+      <a class="rail-item" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 6h5M5.5 9h3.5"/></svg>
+        <span class="nm">Proposals</span>
+        <span class="count s-live">6</span>
+        <span class="count s-quiet">0</span>
+      </a>
+      <a class="rail-item" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+        <span class="nm">Canonical build</span>
+      </a>
+      <a class="rail-item" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3" stroke-linecap="round"/></svg>
+        <span class="nm">Timeline</span>
+      </a>
+      <a class="rail-item" href="#">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="5.5" cy="6" r="2.2"/><circle cx="10.5" cy="6" r="2.2"/><path d="M2 13c0-1.9 1.6-3.2 3.5-3.2S9 11.1 9 13M9.5 9.9c1.8.1 3.5 1.3 3.5 3.1"/></svg>
+        <span class="nm">Members</span>
+        <span class="count">5</span>
+      </a>
+
+      <!-- The rail at rest. Same dashed slot the empty screen uses:
+           nothing is loading, there is nothing in flight. -->
+      <div class="rail-slot s-quiet">
+        <div class="rs-title">Nothing in flight</div>
+        <div class="rs-line">Proposals show up here the moment someone promotes.</div>
+      </div>
+    </div>
+
+    <div class="rail-foot">
+      <button class="rail-profile" type="button">
+        <span class="avatar a-pr big" aria-hidden="true">PR</span>
+        <span class="who">
+          <span class="nm">Priya Raman</span>
+          <span class="sub">workbench 03</span>
+        </span>
+        <span class="gear" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.1"/><path d="M8 2.2v1.6M8 12.2v1.6M2.2 8h1.6M12.2 8h1.6M3.9 3.9l1.1 1.1M11 11l1.1 1.1M12.1 3.9L11 5M5 11l-1.1 1.1"/></svg>
+        </span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= HEADER ================= -->
+  <header class="head">
+    <span class="room">
+      <span class="t">Night Market <span class="kind">room &middot; 5 builders</span></span>
+      <span class="sub">a map of every night market worth walking to</span>
+    </span>
+    <span class="spacer"></span>
+
+    <span class="badge failing s-fail">main is red</span>
+
+    <div class="state-switch">
+      <span class="sw-label">preview</span>
+      <div class="sw-group" role="group" aria-label="Preview which room state">
+        <button class="sw-btn" type="button" id="swActive" aria-pressed="true">Active</button>
+        <button class="sw-btn" type="button" id="swQuiet" aria-pressed="false">Quiet</button>
+        <button class="sw-btn" type="button" id="swFailing" aria-pressed="false">Build failing</button>
+      </div>
+    </div>
+
+    <span class="members stack small s-live" title="Priya, Dele, Mara, Tom&aacute;s, Sana" aria-hidden="true">
+      <span class="avatar a-pr">PR</span>
+      <span class="avatar a-do">DO</span>
+      <span class="avatar a-mj">MJ</span>
+      <span class="avatar a-tr">TR</span>
+      <span class="avatar a-sq">SQ</span>
+    </span>
+    <span class="in-lab s-live">4 in the lab</span>
+    <span class="in-lab s-quiet">nobody in the lab</span>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle light and dark" aria-label="Toggle color theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </header>
+
+  <!-- ================= FEED ================= -->
+  <main class="feed">
+    <div class="feed-scroll">
+      <div class="feed-col">
+
+        <div class="feed-head">
+          <h2>#night-market</h2>
+          <span class="live s-live"><span class="dot"></span>2 signals live</span>
+          <span class="live at-rest s-quiet"><span class="dot"></span>quiet since yesterday</span>
+          <span class="spacer"></span>
+        </div>
+        <p class="feed-sub s-live">The room talks here. Promoted work lands in the same stream: fork what interests you, remix what you can improve, and the room adopts the winners into the build.</p>
+        <p class="feed-sub s-quiet">The room talks here, and promoted work lands in the same stream. Nothing is open right now, so the last thing adopted is still the newest thing in the build.</p>
+
+        <!-- The build note. Failing only: it is the first thing anyone
+             needs to know, and it says plainly what still works. -->
+        <div class="room-note s-fail">
+          <div class="rn-head">
+            <span class="emblem e-fail" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.4 4.4l7.2 7.2M11.6 4.4l-7.2 7.2"/></svg>
+            </span>
+            <span class="t">main is failing</span>
+          </div>
+          <p>Typecheck and two map tests went red on <span class="path">e41f8c2</span>, the commit the last adoption landed. Adopt is held until main is green again. Promoting, forking and remixing are unaffected, and nothing already merged was reverted.</p>
+          <div class="rn-foot">
+            <button class="btn" type="button">View the run</button>
+            <span class="checks">3 of 47 checks failing &middot; started 12m ago</span>
+          </div>
+        </div>
+
+        <div class="stream">
+
+          <!-- ---------- the room with work in it ---------- -->
+
+          <div class="chat s-live">
+            <span class="node" aria-hidden="true"></span>
+            <div class="chat-head">
+              <span class="avatar a-do" aria-hidden="true">DO</span>
+              <span class="who">Dele Okafor</span>
+              <span class="when">2m</span>
+            </div>
+            <p class="chat-text">watching Tom&aacute;s fork the geo flow live, the neighborhood picker fallback is the right call. safari deniers are like 30% of my test group</p>
+          </div>
+
+          <article class="card st-fork s-live">
+            <span class="node" aria-hidden="true"></span>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-tr" aria-hidden="true">TR</span>
+                <span class="byline"><b>Tom&aacute;s Rivera</b> is forking Sana&rsquo;s proposal</span>
+                <span class="spacer"></span>
+                <span class="badge forking">fork live</span>
+                <span class="when">now</span>
+              </div>
+              <h3 class="intent">Geolocation onboarding flow</h3>
+              <p class="summary">Tom&aacute;s pulled Sana&rsquo;s location permission flow into his workbench. His agent is rewriting the fallback path for browsers that deny geolocation, using a neighborhood picker seeded from the markets index.</p>
+              <div class="card-foot">
+                <span class="fact forks">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+                  fork in progress
+                </span>
+                <span class="path">from sq/geo-onboard</span>
+                <span class="spacer"></span>
+                <button class="btn" type="button">Watch</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="card st-adopted adopted-card s-live">
+            <span class="node" aria-hidden="true"></span>
+            <div class="ribbon"><span class="flare"><span class="dot"></span>Adopted into the build</span></div>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-mj" aria-hidden="true">MJ</span>
+                <span class="byline"><b>Mara Jensen&rsquo;s</b> remix won the round</span>
+                <span class="spacer"></span>
+                <span class="badge adopted">adopted</span>
+                <span class="when">18m</span>
+              </div>
+              <h3 class="intent">Stall map with pin clustering</h3>
+              <p class="summary">Clusters stall pins at low zoom so dense night markets stay readable, and expands to individual stalls past zoom 15. Ships with viewport-based loading so the map holds 60fps on mid-range phones.</p>
+
+              <div class="note">
+                <div class="lead">What changed from the parent</div>
+                <p>Kept Dele&rsquo;s tile layer and stall pin design exactly as shipped. Replaced the flat pin list with supercluster indexing, and moved stall fetches from mount-time to viewport intersection. Cold load dropped from 3.1s to 0.9s on the Taipei dataset.</p>
+              </div>
+
+              <div class="chain">
+                <div class="lead">Credit lineage</div>
+                <div class="chain-row">
+                  <span class="cdot" aria-hidden="true"></span>
+                  <span class="txt"><b>Dele Okafor</b> &middot; basic map view with stall pins</span>
+                  <span class="spacer"></span>
+                  <span class="sha">a3d91be</span>
+                </div>
+                <div class="chain-row">
+                  <span class="cdot remix" aria-hidden="true"></span>
+                  <span class="txt"><b>Mara Jensen</b> &middot; forked, remixed clustering and lazy fetch</span>
+                  <span class="spacer"></span>
+                  <span class="sha">7c02f4d</span>
+                </div>
+                <div class="chain-row">
+                  <span class="cdot final" aria-hidden="true"></span>
+                  <span class="txt"><b>Room</b> &middot; adopted to <span class="code">main</span></span>
+                  <span class="spacer"></span>
+                  <span class="sha">e41f8c2</span>
+                </div>
+                <div class="chain-foot">Credit split <b>Mara 60</b> / <b>Dele 40</b>, recorded on the merge.</div>
+              </div>
+
+              <div class="card-foot">
+                <span class="stack small" aria-hidden="true">
+                  <span class="avatar a-pr">PR</span>
+                  <span class="avatar a-do">DO</span>
+                  <span class="avatar a-tr">TR</span>
+                  <span class="avatar a-sq">SQ</span>
+                </span>
+                <span>4 cheers</span>
+                <span class="path">merged @ e41f8c2</span>
+                <span class="spacer"></span>
+                <button class="btn" type="button">View in repo</button>
+              </div>
+            </div>
+          </article>
+
+          <div class="chat s-live">
+            <span class="node" aria-hidden="true"></span>
+            <div class="chat-head">
+              <span class="avatar a-pr" aria-hidden="true">PR</span>
+              <span class="who">Priya Raman</span>
+              <span class="when">15m</span>
+            </div>
+            <p class="chat-text">3.1s to 0.9s on Taipei is wild. <span class="mention">@Mara</span> I am wiring my open-hours model into your cluster tooltips right now, should hit the feed tonight</p>
+          </div>
+
+          <div class="chat s-live">
+            <span class="node" aria-hidden="true"></span>
+            <div class="chat-head">
+              <span class="avatar a-mj" aria-hidden="true">MJ</span>
+              <span class="who">Mara Jensen</span>
+              <span class="when">14m</span>
+            </div>
+            <p class="chat-text">go for it, the cluster index already carries stall ids so the join should be clean</p>
+          </div>
+
+          <article class="card st-proposed s-live">
+            <span class="node" aria-hidden="true"></span>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-pr" aria-hidden="true">PR</span>
+                <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+                <span class="spacer"></span>
+                <span class="badge proposed">proposed</span>
+                <span class="when">1h</span>
+              </div>
+              <h3 class="intent">Open-hours model for vendors</h3>
+              <p class="summary">A schedule schema that handles the messy reality of night markets: seasonal openings, weather closures, and vendors who set up at 6pm &ldquo;ish&rdquo;. Includes an &ldquo;open now, probably&rdquo; confidence field the UI can hedge with.</p>
+              <div class="card-foot">
+                <span class="fact forks">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+                  2 forks
+                </span>
+                <span class="fact">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 10a2 2 0 0 1-2 2H6l-3 3V4a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2z"/></svg>
+                  5 notes
+                </span>
+                <span class="path">pr/open-hours</span>
+                <span class="spacer"></span>
+                <button class="btn primary" type="button">Fork</button>
+                <button class="btn" type="button">Remix</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="card st-review s-live">
+            <span class="node" aria-hidden="true"></span>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-do" aria-hidden="true">DO</span>
+                <span class="byline"><b>Dele Okafor</b> promoted from his agent</span>
+                <span class="spacer"></span>
+                <span class="badge review">in review</span>
+                <span class="when">3h</span>
+              </div>
+              <h3 class="intent">Stall detail sheet with photo strip</h3>
+              <p class="summary">Bottom sheet that slides over the map: stall name, tonight&rsquo;s hours, queue estimate, and a horizontally scrolling photo strip sourced from visitor uploads. Two adopt votes in, needs one more.</p>
+              <div class="card-foot">
+                <span class="fact">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M2.8 8.4l3 3 7.4-8"/></svg>
+                  2 of 3 adopt votes
+                </span>
+                <span class="path">do/stall-sheet</span>
+                <span class="fact held s-fail">held while main is red</span>
+                <span class="spacer"></span>
+                <button class="btn primary s-pass" type="button">Vote adopt</button>
+                <button class="btn s-fail" type="button" disabled>Adopt on hold</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="card st-proposed s-live">
+            <span class="node" aria-hidden="true"></span>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-sq" aria-hidden="true">SQ</span>
+                <span class="byline"><b>Sana Qureshi</b> remixed Priya&rsquo;s filters</span>
+                <span class="spacer"></span>
+                <span class="badge proposed">proposed</span>
+                <span class="when">5h</span>
+              </div>
+              <h3 class="intent">Late-night filter chips</h3>
+              <p class="summary">Quick filters tuned to how people actually search after dark: open past midnight, cash only, covered seating, spicy. Chips reorder by tap frequency per city.</p>
+              <div class="note">
+                <div class="lead">What changed from the parent</div>
+                <p>Priya&rsquo;s filter bar assumed daytime categories. Swapped the taxonomy for night-market behavior and made the chip row swipeable on mobile. Her state management is untouched underneath.</p>
+              </div>
+              <div class="card-foot">
+                <span class="fact forks">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+                  1 fork
+                </span>
+                <span class="path">sq/night-chips &middot; from pr/filters</span>
+                <span class="spacer"></span>
+                <button class="btn primary" type="button">Fork</button>
+                <button class="btn" type="button">Remix</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- ---------- the room at rest ---------- -->
+
+          <div class="chat s-quiet">
+            <span class="node" aria-hidden="true"></span>
+            <div class="chat-head">
+              <span class="avatar a-tr" aria-hidden="true">TR</span>
+              <span class="who">Tom&aacute;s Rivera</span>
+              <span class="when">yesterday</span>
+            </div>
+            <p class="chat-text">index is in, 214 markets across 12 cities. everything map-shaped can draw from it now, so pick something and go</p>
+          </div>
+
+          <!-- The last adopted thing stays, so the room at rest still
+               shows what it is built on rather than an empty column. -->
+          <article class="card st-adopted s-quiet">
+            <span class="node" aria-hidden="true"></span>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-tr" aria-hidden="true">TR</span>
+                <span class="byline"><b>Tom&aacute;s Rivera</b> promoted from his agent</span>
+                <span class="spacer"></span>
+                <span class="badge adopted">adopted</span>
+                <span class="when">yesterday</span>
+              </div>
+              <h3 class="intent">Markets index with city seeds</h3>
+              <p class="summary">Seed dataset of 214 night markets across 12 cities with coordinates, typical hours, and transit notes. This is the backbone every map feature draws from.</p>
+              <div class="card-foot">
+                <span class="fact adopted">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M2.8 8.4l3 3 7.4-8"/></svg>
+                  adopted unanimous
+                </span>
+                <span class="path">merged @ 9b7e310</span>
+                <span class="spacer"></span>
+                <button class="btn" type="button">View in repo</button>
+              </div>
+            </div>
+          </article>
+
+          <div class="quiet-slot s-quiet">
+            <h3>Nothing is in flight</h3>
+            <p>No proposals open, no forks running, nobody&rsquo;s agent working. A room at rest is a fine place to be; it just means the next move is yours. Ask your agent on the right, and promote it when it is worth other eyes.</p>
+            <div class="qs-foot">
+              <button class="btn primary" type="button">Ask your agent</button>
+              <button class="btn" type="button">Browse the build</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="feed-composer">
+      <div class="rc-box">
+        <button class="icon-btn" type="button" aria-label="Add an attachment">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <input type="text" aria-label="Message the room" placeholder="Message #night-market">
+        <button class="chip-btn" type="button">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+          Attach proposal
+        </button>
+        <button class="send-btn" type="button" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= AGENT COLUMN ================= -->
+  <aside class="agent" aria-label="Environment and your private agent">
+
+    <div class="env-wrap">
+      <section class="env" id="env" data-open="true">
+        <button class="env-head" type="button" id="envHead" aria-expanded="true" aria-controls="envRows">
+          <span class="h">Environment</span>
+          <span class="spacer"></span>
+          <span class="live s-live" aria-hidden="true"><span class="dot"></span></span>
+          <span class="chev" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+          </span>
+        </button>
+        <div class="env-rows" id="envRows">
+          <div class="env-rows-inner">
+
+            <div class="status-row">
+              <span class="emblem e-room" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="3.2" width="11.2" height="9.6" rx="2"/><path d="M2.4 6.5h11.2"/></svg>
+              </span>
+              <span class="label">night-market</span>
+              <span class="val s-live">5 builders &middot; 4 here</span>
+              <span class="val s-quiet">5 builders</span>
+            </div>
+
+            <!-- No state of its own, so no colored emblem. -->
+            <div class="status-row">
+              <span class="emblem e-repo" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              </span>
+              <a class="label" href="#">nightmarket/app</a>
+              <span class="val mono">e41f8c2</span>
+            </div>
+
+            <div class="status-row s-pass">
+              <span class="emblem e-build" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3 3 7-7.6"/></svg>
+              </span>
+              <span class="label">Build</span>
+              <span class="val on">passing &middot; 47 checks</span>
+            </div>
+            <div class="status-row s-fail">
+              <span class="emblem e-fail" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.4 4.4l7.2 7.2M11.6 4.4l-7.2 7.2"/></svg>
+              </span>
+              <span class="label">Build</span>
+              <span class="val bad">failing &middot; 3 of 47</span>
+            </div>
+
+            <!-- In flight: cyan. At rest it carries no state, so it
+                 takes the neutral emblem and the gray value. -->
+            <div class="status-row s-live">
+              <span class="emblem e-fork" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+              </span>
+              <span class="label">Forks in flight</span>
+              <span class="val fork">2</span>
+            </div>
+            <div class="status-row s-quiet">
+              <span class="emblem e-none" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+              </span>
+              <span class="label">Forks in flight</span>
+              <span class="val">none</span>
+            </div>
+
+            <div class="status-row">
+              <span class="emblem e-adopt" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.9l1.85 3.9 4.05.55-2.95 2.95.75 4.1L8 11.35 4.3 13.4l.75-4.1L2.1 6.35l4.05-.55z"/></svg>
+              </span>
+              <span class="label">Last adopted</span>
+              <span class="val s-live">18m ago</span>
+              <span class="val s-quiet">yesterday</span>
+            </div>
+
+            <div class="status-row s-live">
+              <span class="emblem e-fork" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2.4v3.2M6 7.4h4a2 2 0 0 1 2 2v2.8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9.4a2 2 0 0 1 2-2z"/><circle cx="7.2" cy="11" r="0.6" fill="currentColor"/><circle cx="10.8" cy="11" r="0.6" fill="currentColor"/></svg>
+              </span>
+              <span class="label">Agents working</span>
+              <span class="stack small" title="Tom&aacute;s and Sana&rsquo;s agents are running" aria-hidden="true">
+                <span class="avatar a-tr">TR</span>
+                <span class="avatar a-sq">SQ</span>
+              </span>
+            </div>
+            <div class="status-row s-quiet">
+              <span class="emblem e-none" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2.4v3.2M6 7.4h4a2 2 0 0 1 2 2v2.8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9.4a2 2 0 0 1 2-2z"/><circle cx="7.2" cy="11" r="0.6" fill="currentColor"/><circle cx="10.8" cy="11" r="0.6" fill="currentColor"/></svg>
+              </span>
+              <span class="label">Agents working</span>
+              <span class="val">none</span>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="agent-head">
+      <span class="agent-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M8 10h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"/><circle cx="9.5" cy="15" r="0.5" fill="currentColor"/><circle cx="14.5" cy="15" r="0.5" fill="currentColor"/></svg>
+      </span>
+      <span class="id">
+        <span class="nm">Your agent</span>
+        <span class="st s-live">worked 41s ago</span>
+        <span class="st s-quiet">idle</span>
+      </span>
+      <span class="private-badge">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+        private
+      </span>
+    </div>
+
+    <div class="agent-chat s-live">
+      <div class="msg you">Mara&rsquo;s clustering just got adopted. Can my open-hours model feed the cluster tooltips, so a cluster shows how many stalls are open right now?</div>
+
+      <div class="msg bot">
+        <div class="worked">worked 41s &middot; read 6 files</div>
+        <p>Yes, and it is a clean join. Her cluster index already carries stall ids, so I computed an <span class="code">openNow</span> count per cluster from your confidence field and exposed it as a tooltip aggregate.</p>
+        <p>One catch: clusters recompute on every zoom change, so I memoized the open-hours lookup per 5-minute window. Without that it ran the schedule resolver 400 times per pan.</p>
+      </div>
+
+      <div class="msg you">Nice. Package it up, I want the room to see it before Dele&rsquo;s sheet goes in.</div>
+
+      <div class="out">
+        <div class="lead"><span class="dot" aria-hidden="true"></span>Ready to promote</div>
+        <div class="t">Live &ldquo;open now&rdquo; counts on map clusters</div>
+        <div class="d">Joins the open-hours model to Mara&rsquo;s adopted clustering. Tooltips read &ldquo;12 stalls, 9 open now&rdquo; with the confidence hedge applied.</div>
+        <div class="files">
+          <span class="add">+ src/map/clusterOpenNow.ts</span>
+          <span class="add">+ src/hours/windowMemo.ts</span>
+          <span class="mod">~ src/map/ClusterTooltip.tsx</span>
+        </div>
+        <button class="promote" type="button" id="promoteBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <span class="lbl">Promote to room</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- The agent at rest. Not an empty column: it says what this
+         side is for, and that it stays private until you promote. -->
+    <div class="agent-idle s-quiet">
+      <div class="inner">
+        <div class="t">Nothing running</div>
+        <p>This side is yours alone. Whatever you ask for stays here, in your workbench, until you promote it to the room.</p>
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <textarea aria-label="Ask your agent" placeholder="Ask your agent, only you see this"></textarea>
+        <div class="tools">
+          <button class="icon-btn" type="button" aria-label="Add context">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <span class="model">forge-2 &middot; fast</span>
+          <span class="spacer"></span>
+          <button class="send-btn" type="button" aria-label="Send to your agent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* ---------- theme: follow the OS until the person decides ---------- */
+  var media = window.matchMedia('(prefers-color-scheme: light)');
+  var manual = false;
+
+  function applyTheme(light) {
+    root.setAttribute('data-theme', light ? 'light' : 'dark');
+  }
+  applyTheme(media.matches);
+
+  function onSystemChange(e) { if (!manual) { applyTheme(e.matches); } }
+  if (media.addEventListener) { media.addEventListener('change', onSystemChange); }
+  else if (media.addListener) { media.addListener(onSystemChange); }
+
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    manual = true;
+    applyTheme(root.getAttribute('data-theme') !== 'light');
+  });
+
+  /* ---------- the three states of the room (comp only) ---------- */
+  var app = document.getElementById('app');
+  var buttons = {
+    active: document.getElementById('swActive'),
+    quiet: document.getElementById('swQuiet'),
+    failing: document.getElementById('swFailing')
+  };
+
+  function showState(which) {
+    app.setAttribute('data-state', which);
+    Object.keys(buttons).forEach(function (key) {
+      buttons[key].setAttribute('aria-pressed', key === which ? 'true' : 'false');
+    });
+  }
+
+  Object.keys(buttons).forEach(function (key) {
+    buttons[key].addEventListener('click', function () { showState(key); });
+  });
+
+  /* ---------- the environment panel collapses ---------- */
+  var env = document.getElementById('env');
+  var envHead = document.getElementById('envHead');
+  envHead.addEventListener('click', function () {
+    var open = env.getAttribute('data-open') !== 'false';
+    env.setAttribute('data-open', open ? 'false' : 'true');
+    envHead.setAttribute('aria-expanded', open ? 'false' : 'true');
+  });
+
+  /* ---------- both columns open on their newest thing ---------- */
+  var agentChat = document.querySelector('.agent-chat');
+  if (agentChat) { agentChat.scrollTop = agentChat.scrollHeight; }
+
+  /* ---------- promote, with an honest confirm ---------- */
+  var promote = document.getElementById('promoteBtn');
+  var label = promote.querySelector('.lbl');
+  promote.addEventListener('click', function () {
+    if (promote.disabled) { return; }
+    var was = label.textContent;
+    label.textContent = 'Promoted, now in the room';
+    promote.disabled = true;
+    setTimeout(function () {
+      label.textContent = was;
+      promote.disabled = false;
+    }, 2000);
+  });
+})();
+</script>
+</body>
+</html>

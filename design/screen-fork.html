@@ -1,0 +1,1282 @@
+<!-- @dsCard group="Screens" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms &middot; Fork bundle</title>
+<style>
+/* ============================================================
+   SCREEN · FORK BUNDLE  (Signal Lab v2)
+
+   Layout, copy and treatment come from frame 1c of
+   "Signal Lab Screens v2.dc.html", measured from that markup
+   rather than from the handoff README, which disagrees with
+   itself in several places. Token values are the ones in
+   design/ds/tokens-v2.css, inlined so the comp opens as one file.
+
+   The v2 system in one line: panels carry no border, they
+   separate from the page by fill and shadow; body copy is
+   near-white and metadata is gray, only two ink levels; line
+   caps are in pixels, not ch; numerals are tabular.
+
+   What changed from the v1 comp of this screen. The numbered
+   five-part spine is gone. A fork bundle is a receipt you can
+   leave, not a document you must read, so the sheet leads with
+   the one fact that is actionable, the path it landed at, keeps
+   the author's note visible because it is the only part written
+   for the reader, and collapses the change and the credit chain
+   behind two disclosures.
+
+   Four things this file adds that the revision did not draw.
+   The no-note variant, kept as a designed state with a comp-only
+   switch. A light theme, derived from the v1 light ramp in
+   ds/tokens.css with the v2 roles mapped on, since the revision
+   is dark only and the toggle predates it. Modal semantics the
+   revision dropped: dialog role, Esc, scrim dismiss, focus trap,
+   focus restore. And chevrons on the two disclosure headers,
+   which the revision left as headers that do not read as
+   controls, following the system rule of -90deg collapsed and
+   0deg open.
+
+   Two content restorations, in the revision's short voice. The
+   fork lands in a new worktree, not the reader's current
+   checkout, and a reader who is not told that will assume the
+   worse case. And the base commit sits beside the pinned
+   proposal version, because "pinned 9c41ab2" names the proposal,
+   not the base, and SHA pinning is a load-bearing claim.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- surfaces ---- */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --rail: #0d1119;
+  --panel: #171d2e;
+  --row: #141926;
+  --field: #1a2132;
+  --header-bg: rgba(16, 20, 29, 0.82);
+  --panel-sunken: rgba(20, 25, 38, 0.5);
+  --disclosure-bg: rgba(23, 29, 44, 0.5);
+  --disclosure-head: rgba(20, 25, 38, 0.5);
+  --nonote-bg: rgba(20, 25, 38, 0.6);
+
+  /* the scrim over the room, plus the saturation the backdrop loses */
+  --scrim: rgba(5, 7, 11, 0.68);
+  --backdrop-sat: 0.75;
+
+  /* ---- lines: dividers and controls only ---- */
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --line-field: rgba(148, 168, 205, 0.17);
+
+  /* ---- ink: two levels do the work ---- */
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #8b9ab6;
+  --dot-ancestor: #5f6c85;
+
+  /* ---- signal colors ---- */
+  --signal: #4ade80;
+  --amber: #fbbf5e;
+  --cyan: #53c5f0;
+  --cyan-bright: #7ad3f5;
+  --violet: #b18cf5;
+  --rose: #f77c8f;
+  --selection: rgba(83, 197, 240, 0.26);
+  --emblem-ink: #0b0e14;
+
+  /* ---- inverted action fill ---- */
+  --invert-fill: #f6f9ff;
+  --invert-ink: #05070a;
+  --keycap-ink: rgba(5, 7, 10, 0.62);
+  --keycap-line: rgba(5, 7, 10, 0.24);
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+
+  /* ---- avatars ---- */
+  --avatar-ni: #8fd0a8;
+  --avatar-tr: #f0c489;
+  --avatar-rd: #d3aef0;
+  --avatar-ink: #0b0e14;
+
+  /* ---- elevation: no panel borders ---- */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+  --shadow-3:
+    0 1px 0 rgba(148, 168, 205, 0.07) inset,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 20px 48px rgba(2, 4, 9, 0.55),
+    0 44px 96px rgba(2, 4, 9, 0.42);
+  --shadow-invert: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 22px rgba(11, 14, 20, 0.55);
+  --shadow-invert-hi: 0 2px 4px rgba(0, 0, 0, 0.28), 0 14px 32px rgba(11, 14, 20, 0.6);
+  --shadow-field: inset 0 1px 3px rgba(0, 0, 0, 0.26);
+  --focus-border: rgba(83, 197, 240, 0.4);
+  --focus-ring: 0 0 0 3px rgba(83, 197, 240, 0.24);
+
+  /* ---- radii ---- */
+  --radius-keycap: 4px;
+  --radius-badge: 5px;
+  --radius-mark: 7px;
+  --radius-tile: 8px;
+  --radius-select: 9px;
+  --radius-row: 10px;
+  --radius-field: 11px;
+  --radius-disclosure: 14px;
+  --radius-panel: 16px;
+  --radius-panel-lg: 18px;
+  --radius-pill: 999px;
+
+  /* ---- layout ---- */
+  --rail-w: 216px;
+  --header-h: 54px;
+  --modal-w: 484px;
+  --modal-inset: 20px;
+}
+
+:root[data-theme="light"] {
+  /* Derived from the v1 light ramp in design/ds/tokens.css, with the
+     v2 roles mapped onto it. Panels stay borderless: separation comes
+     from a white fill on a warm gray page plus a much shallower
+     shadow, since a dark halo reads as dirt here. The scrim goes
+     lighter for the same reason, and the sheet keeps its lift by
+     being the only pure white surface on screen. */
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+  --rail: #ecede8;
+  --panel: #ffffff;
+  --row: #f0f1ec;
+  --field: #edeee8;
+  --header-bg: rgba(250, 250, 247, 0.86);
+  --panel-sunken: rgba(236, 237, 232, 0.72);
+  --disclosure-bg: rgba(240, 241, 236, 0.7);
+  --disclosure-head: rgba(236, 237, 232, 0.8);
+  --nonote-bg: rgba(236, 237, 232, 0.8);
+
+  --scrim: rgba(24, 30, 42, 0.42);
+  --backdrop-sat: 0.7;
+
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --line-field: rgba(48, 62, 88, 0.16);
+
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #6b7690;
+  --dot-ancestor: #8b96ab;
+
+  --signal: #14934e;
+  --amber: #b0700a;
+  --cyan: #0f7fb0;
+  --cyan-bright: #0b6a93;
+  --violet: #7048c8;
+  --rose: #c94b60;
+  --selection: rgba(15, 127, 176, 0.2);
+  --emblem-ink: #ffffff;
+
+  --invert-fill: #141b28;
+  --invert-ink: #ffffff;
+  --keycap-ink: rgba(255, 255, 255, 0.72);
+  --keycap-line: rgba(255, 255, 255, 0.3);
+  --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+
+  --avatar-ink: #12181f;
+
+  --shadow-1:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 4px 12px rgba(28, 36, 51, 0.05);
+  --shadow-3:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px rgba(28, 36, 51, 0.06),
+    0 16px 38px rgba(28, 36, 51, 0.13),
+    0 38px 80px rgba(28, 36, 51, 0.10);
+  --shadow-invert: 0 1px 2px rgba(28, 36, 51, 0.16), 0 8px 22px rgba(28, 36, 51, 0.18);
+  --shadow-invert-hi: 0 2px 4px rgba(28, 36, 51, 0.18), 0 14px 32px rgba(28, 36, 51, 0.2);
+  --shadow-field: inset 0 1px 3px rgba(28, 36, 51, 0.08);
+  --focus-border: rgba(15, 127, 176, 0.5);
+  --focus-ring: 0 0 0 3px rgba(15, 127, 176, 0.2);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: 0;
+}
+::selection { background: var(--selection); }
+button { font-family: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ================================================================
+   BACKDROP · the room the fork was taken from, still sitting there.
+   Saturation drops, then a scrim goes over it. Nothing here is
+   reachable, so it is inert to the reader and to assistive tech.
+   ================================================================ */
+
+.room {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  filter: saturate(var(--backdrop-sat));
+  transition: filter 0.3s ease;
+  user-select: none;
+}
+/* Dismissing the sheet is a comp affordance, not a product state, but
+   the room should look like itself again once nothing sits over it. */
+body.sheet-closed .room { filter: none; }
+
+.room-rail {
+  background: var(--rail);
+  border-right: 1px solid var(--line);
+  padding: 16px 10px;
+}
+.brand { display: flex; align-items: center; gap: 9px; padding: 2px 8px 16px; }
+.brand .mark {
+  width: 24px; height: 24px;
+  border-radius: var(--radius-mark);
+  background: var(--brand-mark-fill);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--signal);
+  flex-shrink: 0;
+}
+.brand .word { font-size: 13px; font-weight: 600; }
+.rail-label { font-size: 11.5px; color: var(--ink-2); padding: 8px 9px 6px; }
+.rail-row {
+  display: flex; align-items: center;
+  padding: 7px 9px;
+  font-size: 13px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.rail-row.active {
+  padding: 8px 10px;
+  border-radius: var(--radius-row);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--row);
+}
+.rail-row .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-2);
+}
+
+.room-main { display: flex; flex-direction: column; min-width: 0; }
+.room-header {
+  height: var(--header-h);
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  background: var(--header-bg);
+}
+.room-header .title { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.room-header .title .kind { color: var(--ink-2); font-weight: 500; font-size: 12px; margin-left: 6px; }
+.room-header .spacer { flex: 1; }
+.room-header .repo { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+
+.room-feed {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 26px 34px;
+  display: flex; flex-direction: column; gap: 16px;
+  max-width: 760px;
+}
+.room-card {
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  padding: 17px 19px;
+  flex-shrink: 0;
+}
+.room-card .crow { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.room-card .byline { font-size: 12.5px; color: var(--ink-2); }
+.room-card .byline b { color: var(--ink); font-weight: 600; }
+.room-card .crow .spacer { flex: 1; }
+.room-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+.room-card p { font-size: 13px; line-height: 1.55; color: var(--ink-2); max-width: 500px; }
+
+.avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 9px; font-weight: 700;
+  color: var(--avatar-ink);
+  flex-shrink: 0;
+}
+.avatar.a-ni { background: var(--avatar-ni); }
+.avatar.a-tr { background: var(--avatar-tr); }
+.avatar.a-rd { background: var(--avatar-rd); }
+
+.state-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius-badge);
+  padding: 2.5px 8px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.state-badge.proposed {
+  color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 13%, transparent);
+  border-color: color-mix(in srgb, var(--amber) 25%, transparent);
+}
+.state-badge.forking {
+  color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 13%, transparent);
+  border-color: color-mix(in srgb, var(--cyan) 25%, transparent);
+}
+
+/* ================================================================
+   SCRIM + SHEET
+   ================================================================ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--scrim);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  animation: scrim-in 0.3s ease both;
+}
+.scrim[hidden] { display: none; }
+@keyframes scrim-in { from { opacity: 0; } to { opacity: 1; } }
+
+.sheet {
+  position: fixed;
+  top: var(--modal-inset);
+  right: var(--modal-inset);
+  bottom: var(--modal-inset);
+  z-index: 50;
+  width: var(--modal-w);
+  max-width: calc(100vw - (var(--modal-inset) * 2));
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: sheet-in 0.42s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+.sheet[hidden] { display: none; }
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------------- sheet header ---------------- */
+
+.sheet-head {
+  flex-shrink: 0;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.head-top { display: flex; align-items: flex-start; gap: 12px; }
+.head-glyph {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-select);
+  background: color-mix(in srgb, var(--cyan) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan) 28%, transparent);
+  display: grid; place-items: center;
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+.head-glyph svg { width: 15px; height: 15px; }
+.head-txt { flex: 1; min-width: 0; }
+.head-txt h1 {
+  font-size: 17.5px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin-bottom: 4px;
+}
+.head-txt p { font-size: 12.5px; color: var(--ink-2); }
+.sheet-close {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+.sheet-close:hover { color: var(--ink); background: var(--row); border-color: var(--line-strong); }
+.sheet-close svg { width: 11px; height: 11px; }
+
+/* ---------------- sheet body ---------------- */
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  padding: 18px 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sheet-body::-webkit-scrollbar { width: 9px; }
+.sheet-body::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* ---- lands at: the one actionable fact, first ---- */
+
+.lands { flex-shrink: 0; }
+.lands-label { font-size: 11.5px; color: var(--ink-2); margin-bottom: 7px; }
+.path-field {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--field);
+  border: 1px solid var(--line-field);
+  border-radius: var(--radius-field);
+  box-shadow: var(--shadow-field);
+  padding: 11px 10px 11px 13px;
+}
+/* The path breaks where a reader would break it: after the directory
+   it will never type, never inside the identifier that names the fork. */
+.path-field code {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.path-field code .dir { color: var(--ink-2); }
+.path-field code .leaf { white-space: nowrap; }
+.copy-mini {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  background: var(--row);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+  padding: 6px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.copy-mini:hover { color: var(--ink); border-color: var(--line-strong); }
+.copy-mini.done {
+  color: var(--signal);
+  border-color: color-mix(in srgb, var(--signal) 40%, transparent);
+}
+
+/* A fork does not land in the checkout you are standing in. Say so
+   on its own line, because a reader who is not told assumes it does. */
+.worktree-note {
+  margin-top: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.worktree-note b { color: var(--ink); font-weight: 600; }
+
+.lands-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.lands-meta code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+/* ---- the author's note, the only part written for the reader ---- */
+
+.note {
+  flex-shrink: 0;
+  background: var(--panel);
+  border: none;
+  border-left: 2px solid var(--violet);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 15px 18px 16px;
+}
+.note[hidden] { display: none; }
+.note-head {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-bottom: 12px;
+}
+.note-head .who { font-size: 14px; color: var(--violet); }
+.note-head .spacer { flex: 1; }
+.note-head .tag { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.note ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.note li { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+.note li b { color: var(--ink); font-weight: 600; }
+
+/* Empty is a recorded choice, not a blank. Same slot, quieter register. */
+.no-note {
+  flex-shrink: 0;
+  border-left: 2px solid var(--line-strong);
+  background: var(--nonote-bg);
+  border-radius: 0 12px 12px 0;
+  padding: 13px 15px 14px;
+}
+.no-note[hidden] { display: none; }
+.no-note .nn-head { font-size: 14px; color: var(--ink-2); margin-bottom: 6px; }
+.no-note p { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); margin-bottom: 11px; }
+.btn-quiet-sm {
+  font-size: 14px;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+  padding: 6px 11px;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.btn-quiet-sm:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+
+/* ---- disclosures: the evidence, folded away until wanted ---- */
+
+.disclosure {
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-disclosure);
+  overflow: hidden;
+  background: var(--disclosure-bg);
+}
+.disc-head {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--disclosure-head);
+  border: none;
+  padding: 11px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.16s ease;
+}
+.disc-head:hover { background: var(--panel); }
+.disc-emblem {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: var(--emblem-ink);
+  background: var(--tone);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(3, 6, 12, 0.45);
+}
+.disc-emblem svg { width: 13px; height: 13px; }
+.disc-emblem.e-change { --tone: var(--cyan); }
+.disc-emblem.e-chain { --tone: var(--violet); }
+.disc-head .disc-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+.disc-head .spacer { flex: 1; }
+.disc-head .stat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.disc-head .stat.plus { color: var(--signal); }
+.disc-head .stat.minus { color: var(--rose); }
+/* The system rule: -90deg collapsed, 0deg open. The revision drew
+   these two headers with no chevron at all, so they did not read
+   as controls at all. */
+.chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform 0.22s ease, color 0.16s ease;
+}
+.chev svg { width: 11px; height: 11px; }
+.disc-head[aria-expanded="true"] .chev { transform: rotate(0deg); }
+.disc-head:hover .chev { color: var(--ink); }
+
+.disc-panel { border-top: 1px solid var(--line); }
+.disc-panel[hidden] { display: none; }
+
+.file-list {
+  padding: 8px 14px 11px;
+  display: flex; flex-direction: column; gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+.file-row { display: flex; gap: 9px; padding: 3px 0; align-items: baseline; }
+.file-row .mk { width: 10px; flex-shrink: 0; }
+.file-row .mk.add { color: var(--signal); }
+.file-row .mk.mod { color: var(--amber); }
+.file-row .fp { flex: 1; min-width: 0; color: var(--ink-2); overflow-wrap: anywhere; }
+.file-row .plus { color: var(--signal); }
+.file-row .minus { color: var(--rose); }
+
+.chain-list {
+  padding: 11px 14px 12px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.chain-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.chain-row b { color: var(--ink); font-weight: 600; }
+.chain-row.pending b { color: var(--ink-2); }
+.chain-row .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chain-row .dot.origin { background: var(--dot-ancestor); }
+.chain-row .dot.remix { background: var(--violet); }
+.chain-row .dot.forked { background: var(--cyan); }
+.chain-row .dot.you { border: 1.5px dashed var(--dot-ancestor); }
+.chain-row .spacer { flex: 1; }
+.chain-row .sha {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.fine {
+  flex-shrink: 0;
+  padding-bottom: 18px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.fine code { font-family: var(--font-mono); color: var(--ink-2); }
+
+/* ---------------- sheet footer ---------------- */
+
+.sheet-foot {
+  flex-shrink: 0;
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--line);
+  display: flex; align-items: center; gap: 10px;
+}
+.sheet-foot .spacer { flex: 1; }
+.btn-quiet {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 11px 17px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.btn-quiet:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.btn-quiet.done {
+  color: var(--signal);
+  border-color: color-mix(in srgb, var(--signal) 40%, transparent);
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--invert-ink);
+  background: var(--invert-fill);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow-invert);
+  transition: transform 0.15s ease, filter 0.16s ease, box-shadow 0.2s ease;
+}
+.btn-primary:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: var(--shadow-invert-hi); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary svg { width: 14px; height: 14px; flex-shrink: 0; }
+.keycap {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--keycap-ink);
+  border: 1px solid var(--keycap-line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+}
+
+/* ================================================================
+   COMP CONTROLS · review affordance, not product chrome
+   ================================================================ */
+
+.comp-bar {
+  position: fixed;
+  left: 18px; bottom: 18px;
+  z-index: 90;
+  display: flex; align-items: center; gap: 9px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 6px 8px 6px 13px;
+  box-shadow: var(--shadow-1);
+}
+.comp-bar .cb-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.sw-group {
+  display: flex; gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--row);
+}
+.sw-btn {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4.5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.sw-btn:hover { color: var(--ink); }
+.sw-btn[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+}
+.theme-toggle {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+.reopen {
+  position: fixed;
+  right: 18px; bottom: 18px;
+  z-index: 90;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cyan);
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--cyan) 30%, var(--line));
+  border-radius: var(--radius-pill);
+  padding: 9px 17px;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+}
+.reopen svg { width: 13px; height: 13px; }
+.reopen[hidden] { display: none; }
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+@media (max-width: 1180px) {
+  .room-feed { padding: 22px 26px; }
+}
+@media (max-width: 1000px) {
+  .room { grid-template-columns: minmax(0, 1fr); }
+  .room-rail { display: none; }
+}
+/* The comp bar is review furniture, and once the sheet reaches the
+   left edge of the viewport it starts sitting on the footer. Move it
+   to a full-width strip and give the footer room above it. */
+@media (max-width: 760px) {
+  .sheet-foot { padding-bottom: 74px; }
+  .comp-bar { left: 10px; right: 10px; bottom: 10px; justify-content: center; padding-left: 10px; }
+  .comp-bar .cb-tag { display: none; }
+  .reopen { right: 10px; bottom: 62px; }
+}
+/* Below roughly 600px the sheet stops being a sheet and takes the
+   screen. A 484px panel inside a 380px viewport is not a panel. */
+@media (max-width: 600px) {
+  :root { --modal-inset: 0px; }
+  .sheet {
+    width: auto;
+    left: 0;
+    max-width: none;
+    border-radius: 0;
+  }
+  .sheet-head { padding: 18px 18px 15px; }
+  .sheet-body { padding: 16px 18px 0; }
+  .sheet-foot { padding-left: 18px; padding-right: 18px; }
+  .head-txt h1 { font-size: 16.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ BACKDROP: the room the fork was taken from ============ -->
+<div class="room" aria-hidden="true">
+  <nav class="room-rail">
+    <div class="brand">
+      <span class="mark">&#9630;&#9626;</span>
+      <span class="word">Agent Rooms</span>
+    </div>
+    <div class="rail-label">Rooms</div>
+    <div class="rail-row active">trail-notes<span class="count">23</span></div>
+    <div class="rail-row">night-market</div>
+    <div class="rail-row">split-bill-bot</div>
+  </nav>
+
+  <div class="room-main">
+    <header class="room-header">
+      <span class="title">Trail Notes <span class="kind">room &middot; 4 builders</span></span>
+      <span class="spacer"></span>
+      <span class="repo">trailnotes/app &middot; main @ 7d0e5b1</span>
+    </header>
+
+    <div class="room-feed">
+      <article class="room-card">
+        <div class="crow">
+          <span class="avatar a-ni">NI</span>
+          <span class="byline"><b>Nova Ibarra</b> promoted from her agent</span>
+          <span class="spacer"></span>
+          <span class="state-badge proposed">proposed</span>
+        </div>
+        <h3>Offline trail tiles with staleness badges</h3>
+        <p>Every tile carries the time it was fetched, the map badges anything aging or stale, and a background refresh tops up the tiles you actually walk.</p>
+      </article>
+
+      <article class="room-card">
+        <div class="crow">
+          <span class="avatar a-tr">TR</span>
+          <span class="byline"><b>Tomas Rivera</b> is forking Nova&rsquo;s proposal</span>
+          <span class="spacer"></span>
+          <span class="state-badge forking">fork live</span>
+        </div>
+        <h3>Offline trail tiles with staleness badges</h3>
+        <p>Pulled into workbench 02 a moment ago.</p>
+      </article>
+
+      <article class="room-card">
+        <div class="crow">
+          <span class="avatar a-rd">RD</span>
+          <span class="byline"><b>Rosa Delgado</b> promoted from her agent</span>
+        </div>
+        <h3>Tile eviction by last-hiked date</h3>
+        <p>Least recently hiked trails get evicted first, so the tiles you actually walk survive a cache flush.</p>
+      </article>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCRIM ============ -->
+<div class="scrim" id="scrim"></div>
+
+<!-- ============ THE FORK BUNDLE ============ -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="forkTitle">
+
+  <div class="sheet-head">
+    <div class="head-top">
+      <span class="head-glyph" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3.8v5.4a3 3 0 0 0 3 3h3M11 3.8v3.4"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11" cy="2.6" r="1.5"/><circle cx="12" cy="13.2" r="1.5"/></svg>
+      </span>
+      <div class="head-txt">
+        <h1 id="forkTitle">Forked into your workspace</h1>
+        <p>Nova&rsquo;s work is yours to change now.</p>
+      </div>
+      <button class="sheet-close" id="closeBtn" aria-label="Close fork bundle">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="sheet-body" id="sheetBody">
+
+    <!-- ---- where it landed ---- -->
+    <section class="lands" aria-labelledby="landsLabel">
+      <div class="lands-label" id="landsLabel">Lands at</div>
+      <div class="path-field">
+        <code><span class="dir">~/rooms/trail-notes/forks/</span><wbr><span class="leaf">tomas/tile-staleness</span></code>
+        <button class="copy-mini" id="copyPath" data-copy="path" aria-label="Copy the fork path">copy</button>
+      </div>
+      <p class="worktree-note">A <b>new worktree</b>, not your current working tree.</p>
+      <div class="lands-meta">
+        <span>branch <code>tr/fork-tile-staleness</code></span>
+        <span>base <code>7d0e5b1</code></span>
+        <span>pinned <code>9c41ab2</code></span>
+        <span>from PR #244</span>
+      </div>
+    </section>
+
+    <!-- ---- the note, or the recorded absence of one ---- -->
+    <section class="note" id="noteWritten" aria-label="Note from Nova">
+      <div class="note-head">
+        <span class="who">Note from Nova</span>
+        <span class="spacer"></span>
+        <span class="tag">written for you</span>
+      </div>
+      <ul>
+        <li><b>Rosa&rsquo;s eviction policy is untouched.</b> The badge reads the same lastHiked stamp her LRU already stores.</li>
+        <li><b>Refresh is wifi only, 40 tiles a run.</b> Field testers in Patagonia were burning data caps in a weekend.</li>
+        <li><b>The thresholds are guesses.</b> 14 days to aging, 60 to stale, from nowhere. Real reroute frequency beats both.</li>
+      </ul>
+    </section>
+
+    <section class="no-note" id="noteNone" hidden aria-label="No note from Nova">
+      <div class="nn-head">Nova sent this one without a note</div>
+      <p>She judged the diff and the summary sufficient. That is a recorded choice, not a blank field.</p>
+      <button class="btn-quiet-sm">Ask Nova on the proposal</button>
+    </section>
+
+    <!-- ---- the change ---- -->
+    <section class="disclosure">
+      <button class="disc-head" id="discChange" aria-expanded="false" aria-controls="panelChange">
+        <span class="disc-emblem e-change" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 2.8h4.8l3.9 3.9v6.5H3.6z"/><path d="M8.4 2.8v3.9h3.9"/></svg>
+        </span>
+        <span class="disc-name">The change</span>
+        <span class="spacer"></span>
+        <span class="stat">4 files</span>
+        <span class="stat plus">+220</span>
+        <span class="stat minus">&minus;16</span>
+        <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></span>
+      </button>
+      <div class="disc-panel" id="panelChange" hidden>
+        <div class="file-list">
+          <div class="file-row"><span class="mk add">+</span><span class="fp">src/tiles/staleness.ts</span><span class="plus">+94</span></div>
+          <div class="file-row"><span class="mk mod">~</span><span class="fp">src/tiles/tileCache.ts</span><span class="plus">+37</span><span class="minus">&minus;12</span></div>
+          <div class="file-row"><span class="mk mod">~</span><span class="fp">src/map/TileLayer.tsx</span><span class="plus">+28</span><span class="minus">&minus;4</span></div>
+          <div class="file-row"><span class="mk add">+</span><span class="fp">src/tiles/__tests__/staleness.test.ts</span><span class="plus">+61</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- credit chain ---- -->
+    <section class="disclosure">
+      <button class="disc-head" id="discChain" aria-expanded="false" aria-controls="panelChain">
+        <span class="disc-emblem e-chain" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+        </span>
+        <span class="disc-name">Credit chain</span>
+        <span class="spacer"></span>
+        <span class="stat">Kai &rarr; Rosa &rarr; Nova &rarr; you</span>
+        <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></span>
+      </button>
+      <div class="disc-panel" id="panelChain" hidden>
+        <div class="chain-list">
+          <div class="chain-row"><span class="dot origin"></span><b>Kai</b> vector tile cache<span class="spacer"></span><span class="sha">4f1c9ae</span></div>
+          <div class="chain-row"><span class="dot remix"></span><b>Rosa</b> last-hiked eviction<span class="spacer"></span><span class="sha">b83d206</span></div>
+          <div class="chain-row"><span class="dot forked"></span><b>Nova</b> staleness badges<span class="spacer"></span><span class="sha">9c41ab2</span></div>
+          <div class="chain-row pending"><span class="dot you"></span><b>You</b> joins the chain when you promote</div>
+        </div>
+      </div>
+    </section>
+
+    <p class="fine">Writes <code>.agent-rooms/FORK_CONTEXT.md</code> and one pointer line in <code>CLAUDE.md</code>. No agent session or chat history travels with a fork.</p>
+  </div>
+
+  <div class="sheet-foot">
+    <button class="btn-quiet" id="copyBundle">Copy bundle</button>
+    <span class="spacer"></span>
+    <button class="btn-primary" id="openWs">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.2A1.7 1.7 0 0 1 4.2 2.5h2.3l1.3 1.7h4A1.7 1.7 0 0 1 13.5 6v5.8a1.7 1.7 0 0 1-1.7 1.7H4.2a1.7 1.7 0 0 1-1.7-1.7z"/></svg>
+      <span class="lbl">Open workspace</span>
+      <span class="keycap" aria-hidden="true">&#9166;</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============ COMP CONTROLS, not product chrome ============ -->
+<div class="comp-bar">
+  <span class="cb-tag">comp</span>
+  <div class="sw-group" role="group" aria-label="Preview which note state">
+    <button class="sw-btn" id="swNote" aria-pressed="true">Note written</button>
+    <button class="sw-btn" id="swNone" aria-pressed="false">No note</button>
+  </div>
+  <button class="theme-toggle" id="themeToggle" title="Toggle light and dark" aria-label="Toggle color theme">
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+</div>
+
+<button class="reopen" id="reopenBtn" hidden>
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3.8v5.4a3 3 0 0 0 3 3h3M11 3.8v3.4"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11" cy="2.6" r="1.5"/><circle cx="12" cy="13.2" r="1.5"/></svg>
+  Reopen fork bundle
+</button>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* ---------- theme: follow the OS until the person decides ---------- */
+  var media = window.matchMedia('(prefers-color-scheme: light)');
+  var manual = false;
+
+  function applyTheme(light) {
+    root.setAttribute('data-theme', light ? 'light' : 'dark');
+  }
+  applyTheme(media.matches);
+
+  function onSystemChange(e) { if (!manual) { applyTheme(e.matches); } }
+  if (media.addEventListener) { media.addEventListener('change', onSystemChange); }
+  else if (media.addListener) { media.addListener(onSystemChange); }
+
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    manual = true;
+    applyTheme(root.getAttribute('data-theme') !== 'light');
+  });
+
+  /* ---------- the two disclosures ---------- */
+  function wireDisclosure(headId, panelId) {
+    var head = document.getElementById(headId);
+    var panel = document.getElementById(panelId);
+    head.addEventListener('click', function () {
+      var open = head.getAttribute('aria-expanded') === 'true';
+      head.setAttribute('aria-expanded', open ? 'false' : 'true');
+      panel.hidden = open;
+    });
+  }
+  wireDisclosure('discChange', 'panelChange');
+  wireDisclosure('discChain', 'panelChain');
+
+  /* ---------- the note state (comp only) ---------- */
+  var noteWritten = document.getElementById('noteWritten');
+  var noteNone = document.getElementById('noteNone');
+  var swNote = document.getElementById('swNote');
+  var swNone = document.getElementById('swNone');
+
+  function showNote(written) {
+    noteWritten.hidden = !written;
+    noteNone.hidden = written;
+    swNote.setAttribute('aria-pressed', written ? 'true' : 'false');
+    swNone.setAttribute('aria-pressed', written ? 'false' : 'true');
+  }
+  swNote.addEventListener('click', function () { showNote(true); });
+  swNone.addEventListener('click', function () { showNote(false); });
+
+  /* ---------- clipboard ---------- */
+  var PATH = '~/rooms/trail-notes/forks/tomas/tile-staleness';
+  var BASE_SHA = '7d0e5b1c9a2f4386bb17ce40d95f2ea31c608b74';
+
+  function bundleText() {
+    var note = noteWritten.hidden
+      ? '(none. Nova chose not to add context. Recorded as a choice, not a gap.)'
+      : [
+          "- Rosa's eviction policy is untouched. The badge reads the same lastHiked stamp her LRU already stores.",
+          '- Refresh is wifi only, 40 tiles a run. Field testers in Patagonia were burning data caps in a weekend.',
+          '- The thresholds are guesses. 14 days to aging, 60 to stale, from nowhere.'
+        ].join('\n');
+    return [
+      '# FORK_CONTEXT.md',
+      '',
+      'Forked from: Offline trail tiles with staleness badges',
+      'Author: Nova Ibarra  ·  proposal version 9c41ab2  ·  PR #244',
+      '',
+      '## Lands at',
+      PATH + '  (new worktree)',
+      'branch: tr/fork-tile-staleness',
+      'base:   ' + BASE_SHA,
+      'pinned: 9c41ab2',
+      '',
+      '## The change',
+      '4 files, +220 -16',
+      '+ src/tiles/staleness.ts                   +94',
+      '~ src/tiles/tileCache.ts                   +37 -12',
+      '~ src/map/TileLayer.tsx                    +28 -4',
+      '+ src/tiles/__tests__/staleness.test.ts    +61',
+      '',
+      '## Credit chain',
+      'Kai   4f1c9ae  vector tile cache',
+      'Rosa  b83d206  last-hiked eviction',
+      'Nova  9c41ab2  staleness badges',
+      'You   (pending)',
+      '',
+      '## Note from Nova',
+      note,
+      ''
+    ].join('\n');
+  }
+
+  function writeClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).catch(function () {});
+    }
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (err) { /* nothing to do */ }
+    document.body.removeChild(ta);
+    return Promise.resolve();
+  }
+
+  /* Both copy affordances say so when they worked. A copy button that
+     gives no feedback is indistinguishable from one that failed. */
+  function flash(btn, label) {
+    if (btn.dataset.busy === '1') { return; }
+    btn.dataset.busy = '1';
+    var target = btn.querySelector('.lbl') || btn;
+    var was = target.textContent;
+    target.textContent = label;
+    btn.classList.add('done');
+    setTimeout(function () {
+      target.textContent = was;
+      btn.classList.remove('done');
+      btn.dataset.busy = '0';
+    }, 1800);
+  }
+
+  var copyPath = document.getElementById('copyPath');
+  copyPath.addEventListener('click', function () {
+    writeClipboard(PATH);
+    flash(copyPath, 'copied');
+  });
+
+  var copyBundle = document.getElementById('copyBundle');
+  copyBundle.addEventListener('click', function () {
+    var text = bundleText();
+    writeClipboard(text);
+    flash(copyBundle, 'Copied, ' + (text.length / 1024).toFixed(1) + ' KB');
+  });
+
+  document.getElementById('openWs').addEventListener('click', function () {
+    var btn = document.getElementById('openWs');
+    flash(btn, 'Opening tile-staleness');
+  });
+
+  /* ---------- modal semantics ----------
+     The revision drew the sheet without any: no dismiss, no trap, no
+     restore. All three matter more here than usual, because this
+     dialog sits over a room the reader was already working in. */
+  var scrim = document.getElementById('scrim');
+  var sheet = document.getElementById('sheet');
+  var reopen = document.getElementById('reopenBtn');
+  var lastFocus = null;
+
+  var FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+  function visibleFocusables() {
+    return Array.prototype.filter.call(sheet.querySelectorAll(FOCUSABLE), function (el) {
+      return el.offsetParent !== null;
+    });
+  }
+
+  function openSheet() {
+    lastFocus = document.activeElement;
+    scrim.hidden = false;
+    sheet.hidden = false;
+    reopen.hidden = true;
+    document.body.classList.remove('sheet-closed');
+    document.getElementById('sheetBody').scrollTop = 0;
+    var first = visibleFocusables()[0];
+    if (first) { first.focus(); }
+  }
+
+  function closeSheet() {
+    scrim.hidden = true;
+    sheet.hidden = true;
+    reopen.hidden = false;
+    document.body.classList.add('sheet-closed');
+    if (lastFocus && document.contains(lastFocus) && lastFocus.offsetParent !== null) {
+      lastFocus.focus();
+    } else {
+      reopen.focus();
+    }
+  }
+
+  document.getElementById('closeBtn').addEventListener('click', closeSheet);
+  reopen.addEventListener('click', openSheet);
+  scrim.addEventListener('mousedown', closeSheet);
+
+  document.addEventListener('keydown', function (e) {
+    if (sheet.hidden) { return; }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSheet();
+      return;
+    }
+    if (e.key !== 'Tab') { return; }
+    var items = visibleFocusables();
+    if (!items.length) { return; }
+    var first = items[0];
+    var last = items[items.length - 1];
+    var active = document.activeElement;
+    if (!sheet.contains(active)) {
+      e.preventDefault();
+      (e.shiftKey ? last : first).focus();
+      return;
+    }
+    if (e.shiftKey && active === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>

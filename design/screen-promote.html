@@ -1,0 +1,2418 @@
+<!-- @dsCard group="Screens" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Rooms &middot; Promote</title>
+<style>
+/* ============================================================
+   SCREEN · PROMOTE  (Signal Lab v2)
+
+   A proposal for the second door into promote. The first door is
+   the agent draft card in the sidebar, where a card fills
+   everything in and the modal is a confirmation. That one is
+   fine. This file redraws the other one: the room composer's
+   Promote button, which today opens a centered modal over the
+   whole app with an empty textarea labelled "Changes required"
+   and the placeholder "Paste the diff to publish".
+
+   Two things are wrong with that door, and this comp proposes one
+   change for each.
+
+   1. It asks for something the app already has. Every agent reply
+      is parsed into a draft (lib/agentDraft.ts: intent, changed
+      files, diff, remix-note bullets) and that is what feeds the
+      sidebar's promote card. So the sheet now opens on a picker
+      of recent drafts, and choosing one fills intent, changes and
+      the note in a click. Pasting is still there, because work
+      does arrive from outside the agent, but it is the fallback
+      rather than the default.
+
+   2. It covers the place you were copying from. The centered
+      modal sits over the agent column, which is the single most
+      likely source of a diff being pasted into it. So the sheet
+      is re-anchored to the LEFT of the agent column, and the
+      scrim stops at the agent column's edge. The agent column
+      stays visible, readable and clickable: you can scroll it,
+      select from it, copy out of it, with the sheet open. The
+      scrim still covers the feed and the rail, because promote is
+      a deliberate private-to-shared crossing and should not read
+      as an ambient side panel.
+
+   The room behind the sheet is the accepted comp,
+   design/screen-room.html, in its active state, carried over
+   rather than reinvented: same rail, same feed, same environment
+   panel and agent column, same token block. The composer chip
+   that opened this sheet is the one change to it, and it carries
+   aria-expanded because that is what it now is.
+
+   Nothing in the sheet is invented at the field layer. Every
+   field, its required-ness, the derived "pending" head commit,
+   the missing-fields line and the secret-scan block are what
+   app/src/components/PromoteModal.tsx actually does today.
+   Token values are the ones in design/ds/tokens-v2.css, inlined
+   so the comp opens as a single file.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- surfaces ---- */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --rail: #0d1119;
+  --panel: #171d2e;
+  --row: #141926;
+  --field: #1a2132;
+  --header-bg: rgba(16, 20, 29, 0.82);
+  --sidebar-bg: rgba(16, 20, 29, 0.88);
+  --panel-sunken: rgba(20, 25, 38, 0.5);
+  --composer-bg: rgba(23, 29, 44, 0.7);
+  --profile-bg: rgba(23, 29, 44, 0.72);
+  --draft-row: rgba(20, 25, 38, 0.55);
+  --inset-top: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+  --avatar-ring: #10141d;
+
+  /* The scrim over the room, and the saturation the scrimmed part
+     loses. Both are the fork sheet's values; what differs here is
+     where they stop. */
+  --scrim: rgba(5, 7, 11, 0.68);
+  --backdrop-sat: 0.75;
+
+  /* ---- lines: dividers and controls only ---- */
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --line-field: rgba(148, 168, 205, 0.17);
+
+  /* ---- ink: two levels do the work, plus field labels ---- */
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #8b9ab6;
+  --dot-ancestor: #5f6c85;
+
+  /* ---- signal colors ---- */
+  --signal: #4ade80;
+  --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e;
+  --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0;
+  --cyan-bright: #7ad3f5;
+  --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5;
+  --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f;
+  --rose-dim: rgba(247, 124, 143, 0.14);
+  --selection: rgba(83, 197, 240, 0.26);
+  --neutral-emblem: #e6ebf5;
+  --emblem-ink: #0b0e14;
+  --agent-tile-fill: linear-gradient(140deg, rgba(83, 197, 240, 0.14), #141926);
+  --agent-tile-line: rgba(83, 197, 240, 0.2);
+
+  /* ---- action fills ---- */
+  --grad-cyan: linear-gradient(160deg, #7ad3f5, #53c5f0);
+  --grad-cyan-ink: #04121a;
+  --shadow-btn-cyan: 0 1px 0 rgba(0, 0, 0, 0.2), 0 4px 16px rgba(83, 197, 240, 0.22);
+  --invert-fill: #f6f9ff;
+  --invert-ink: #05070a;
+  --shadow-invert: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 22px rgba(11, 14, 20, 0.55);
+  --shadow-invert-hi: 0 2px 4px rgba(0, 0, 0, 0.28), 0 14px 32px rgba(11, 14, 20, 0.6);
+  --keycap-ink: rgba(5, 7, 10, 0.6);
+  --keycap-line: rgba(5, 7, 10, 0.24);
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+
+  /* ---- avatars ---- */
+  --avatar-pr: #8fd0a8;
+  --avatar-do: #86bfe8;
+  --avatar-mj: #d3aef0;
+  --avatar-tr: #f0c489;
+  --avatar-sq: #f0a3b1;
+  --avatar-ink: #0b0e14;
+
+  /* ---- elevation: three tiers, no panel borders ---- */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+  --shadow-2:
+    inset 0 1px 0 rgba(148, 168, 205, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(3, 6, 12, 0.36),
+    0 24px 52px rgba(3, 6, 12, 0.28);
+  --shadow-3:
+    0 1px 0 rgba(148, 168, 205, 0.07) inset,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 20px 48px rgba(2, 4, 9, 0.55),
+    0 44px 96px rgba(2, 4, 9, 0.42);
+  --glow-adopt: 0 0 34px rgba(74, 222, 128, 0.10);
+
+  /* ---- fields ---- */
+  --shadow-field: inset 0 1px 3px rgba(0, 0, 0, 0.26);
+  --focus-ring:
+    inset 0 1px 3px rgba(0, 0, 0, 0.26),
+    0 0 0 3px rgba(83, 197, 240, 0.16);
+  --focus-border: rgba(83, 197, 240, 0.4);
+  --glow-live: 0 0 8px rgba(74, 222, 128, 0.7);
+
+  /* ---- radii ---- */
+  --radius-keycap: 4px;
+  --radius-badge: 5px;
+  --radius-mark: 7px;
+  --radius-tile: 8px;
+  --radius-select: 9px;
+  --radius-row: 10px;
+  --radius-field: 11px;
+  --radius: 12px;
+  --radius-disclosure: 14px;
+  --radius-panel: 16px;
+  --radius-panel-lg: 18px;
+  --radius-panel-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ---- measure: pixel caps, not ch ---- */
+  --measure: 560px;
+  --measure-sub: 470px;
+  --measure-agent: 215px;
+
+  /* ---- layout ---- */
+  --rail-w: 216px;
+  --agent-w: 316px;
+  --header-h: 54px;
+  --feed-w: 716px;
+  --sheet-w: 484px;
+  --sheet-inset: 20px;
+  /* The whole proposal, in one number: the sheet's right edge stops
+     short of the agent column instead of covering it. */
+  --sheet-gap: 16px;
+}
+
+:root[data-theme="light"] {
+  /* Derived from the v1 light ramp in design/ds/tokens.css with the
+     v2 roles mapped onto it, matching screen-room.html and
+     screen-fork.html exactly. Panels stay borderless; the scrim goes
+     lighter, and the sheet keeps its lift by being the only pure
+     white surface on that side of the screen. */
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+  --rail: #ecede8;
+  --panel: #ffffff;
+  --row: #f0f1ec;
+  --field: #edeee8;
+  --header-bg: rgba(250, 250, 247, 0.86);
+  --sidebar-bg: rgba(248, 249, 245, 0.9);
+  --panel-sunken: rgba(236, 237, 232, 0.72);
+  --composer-bg: rgba(240, 241, 236, 0.8);
+  --profile-bg: rgba(240, 241, 236, 0.85);
+  --draft-row: rgba(240, 241, 236, 0.8);
+  --inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --avatar-ring: #ffffff;
+
+  --scrim: rgba(24, 30, 42, 0.42);
+  --backdrop-sat: 0.7;
+
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --line-field: rgba(48, 62, 88, 0.16);
+
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #6b7690;
+  --dot-ancestor: #8b96ab;
+
+  --signal: #14934e;
+  --signal-dim: rgba(20, 147, 78, 0.1);
+  --amber: #9a6106;
+  --amber-dim: rgba(154, 97, 6, 0.1);
+  --cyan: #0f7fb0;
+  --cyan-bright: #0b6a93;
+  --cyan-dim: rgba(15, 127, 176, 0.09);
+  --violet: #7048c8;
+  --violet-dim: rgba(112, 72, 200, 0.09);
+  --rose: #c94b60;
+  --rose-dim: rgba(201, 75, 96, 0.1);
+  --selection: rgba(15, 127, 176, 0.2);
+  --neutral-emblem: #55617a;
+  --emblem-ink: #ffffff;
+  --agent-tile-fill: linear-gradient(140deg, rgba(15, 127, 176, 0.1), #f0f1ec);
+  --agent-tile-line: rgba(15, 127, 176, 0.22);
+
+  --grad-cyan: linear-gradient(160deg, #1594c9, #0f7fb0);
+  --grad-cyan-ink: #ffffff;
+  --shadow-btn-cyan: 0 1px 0 rgba(28, 36, 51, 0.08), 0 4px 16px rgba(15, 127, 176, 0.2);
+  --invert-fill: #141b28;
+  --invert-ink: #ffffff;
+  --shadow-invert: 0 1px 2px rgba(28, 36, 51, 0.16), 0 8px 22px rgba(28, 36, 51, 0.18);
+  --shadow-invert-hi: 0 2px 4px rgba(28, 36, 51, 0.18), 0 14px 32px rgba(28, 36, 51, 0.2);
+  --keycap-ink: rgba(255, 255, 255, 0.72);
+  --keycap-line: rgba(255, 255, 255, 0.3);
+  --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+
+  --avatar-ink: #12181f;
+
+  --shadow-1:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 4px 12px rgba(28, 36, 51, 0.05);
+  --shadow-2:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 8px 20px rgba(28, 36, 51, 0.07),
+    0 22px 48px rgba(28, 36, 51, 0.05);
+  --shadow-3:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px rgba(28, 36, 51, 0.06),
+    0 16px 38px rgba(28, 36, 51, 0.13),
+    0 38px 80px rgba(28, 36, 51, 0.1);
+  --glow-adopt: 0 0 30px rgba(20, 147, 78, 0.09);
+
+  --shadow-field: inset 0 1px 3px rgba(28, 36, 51, 0.07);
+  --focus-ring:
+    inset 0 1px 3px rgba(28, 36, 51, 0.07),
+    0 0 0 3px rgba(15, 127, 176, 0.2);
+  --focus-border: rgba(15, 127, 176, 0.5);
+  --glow-live: 0 0 8px rgba(20, 147, 78, 0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: 0;
+}
+::selection { background: var(--selection); }
+button, input, textarea { font-family: inherit; color: inherit; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--cyan-bright); text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ================= FRAME =================
+   Carried from screen-room.html unchanged. The .app is positioned
+   but takes no z-index of its own, so the header and the agent
+   column can be lifted above the scrim by name below. */
+
+.app {
+  position: relative;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--agent-w);
+  grid-template-rows: var(--header-h) minmax(0, 1fr);
+}
+
+/* ================= STATE SWITCHING (comp only) =================
+   Four states of one sheet share one markup tree.
+
+   picker   the sheet as it opens: recent drafts listed, none picked
+   chosen   a draft picked, so the form is filled and promote is live
+   paste    the fallback: drafts folded away, an empty diff field
+   blocked  a picked draft the secret scanner refuses to publish
+
+   Two of these differ only in whether the form carries content, so
+   .s-filled and .s-empty spare the markup from saying it four
+   times. Not part of the product. */
+.stage:not([data-state="picker"]) .s-picker { display: none; }
+.stage:not([data-state="chosen"]) .s-chosen { display: none; }
+.stage:not([data-state="paste"]) .s-paste { display: none; }
+.stage:not([data-state="blocked"]) .s-blocked { display: none; }
+.stage[data-state="picker"] .s-filled,
+.stage[data-state="paste"] .s-filled { display: none; }
+.stage[data-state="chosen"] .s-empty,
+.stage[data-state="blocked"] .s-empty { display: none; }
+.stage[data-state="blocked"] .s-not-blocked { display: none; }
+
+/* ================= RAIL ================= */
+
+.rail {
+  grid-row: 1 / span 2;
+  background: var(--rail);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px 10px 12px;
+  /* Scrimmed side: loses saturation with the feed. */
+  filter: saturate(var(--backdrop-sat));
+}
+
+.rail-brand { display: flex; align-items: center; gap: 9px; padding: 2px 8px 16px; }
+.rail-brand .mark {
+  width: 24px; height: 24px;
+  border-radius: var(--radius-mark);
+  background: var(--brand-mark-fill);
+  border: 1px solid var(--line-strong);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--signal);
+  flex-shrink: 0;
+}
+.rail-brand .word { font-size: 13px; font-weight: 600; }
+.rail-brand .spacer { flex: 1; }
+.rail-icon-btn {
+  width: 26px; height: 26px;
+  border-radius: var(--radius-mark);
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.rail-icon-btn:hover { color: var(--ink); background: var(--row); }
+.rail-icon-btn svg { width: 14px; height: 14px; }
+
+.rail-new {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--row);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-tile);
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.rail-new:hover { border-color: var(--line-strong); background: var(--panel); }
+.rail-new svg { width: 13px; height: 13px; opacity: 0.8; flex-shrink: 0; }
+
+.rail-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  margin: 0 -2px;
+  padding: 0 2px;
+}
+.rail-section { font-size: 11.5px; color: var(--ink-2); padding: 18px 9px 6px; }
+
+.rail-item {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-row);
+  font-size: 14px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.rail-item:hover { background: var(--row); color: var(--ink); }
+.rail-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.8; }
+.rail-item .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.rail-item[aria-current="page"] {
+  background: var(--row);
+  color: var(--ink);
+  font-weight: 600;
+}
+.rail-item .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+.rail-item .unread {
+  margin-left: auto;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  flex-shrink: 0;
+}
+
+.rail-foot { padding-top: 10px; }
+.rail-profile {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--profile-bg);
+  box-shadow: var(--inset-top);
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.rail-profile:hover { background: var(--panel); }
+.rail-profile .who { flex: 1; min-width: 0; line-height: 1.3; }
+.rail-profile .who .nm { display: block; font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.rail-profile .who .sub { display: block; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+.rail-profile .gear { color: var(--ink-2); display: grid; place-items: center; flex-shrink: 0; }
+.rail-profile .gear svg { width: 13px; height: 13px; }
+
+/* ================= AVATARS ================= */
+
+.avatar {
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 700;
+  color: var(--avatar-ink);
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  font-size: 8.5px;
+}
+.avatar.a-pr { background: var(--avatar-pr); }
+.avatar.a-do { background: var(--avatar-do); }
+.avatar.a-mj { background: var(--avatar-mj); }
+.avatar.a-tr { background: var(--avatar-tr); }
+.avatar.a-sq { background: var(--avatar-sq); }
+.avatar.big { width: 30px; height: 30px; font-size: 10.5px; }
+
+.stack { display: flex; flex-shrink: 0; }
+.stack .avatar { width: 24px; height: 24px; font-size: 9px; border: 2px solid var(--avatar-ring); }
+.stack .avatar + .avatar { margin-left: -8px; }
+.stack.small .avatar { width: 20px; height: 20px; font-size: 8px; }
+
+/* ================= HEADER =================
+   The header is chrome, not conversation, and it carries the
+   comp-only state switch, so it sits above the scrim rather than
+   under it. The scrim's job is the feed and the rail. */
+
+.head {
+  position: relative;
+  z-index: 60;
+  grid-column: 2 / span 2;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--header-bg);
+  min-width: 0;
+}
+.head .room { min-width: 0; line-height: 1.3; display: flex; flex-direction: column; }
+.head .room .t { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.head .room .t .kind { color: var(--ink-2); font-weight: 500; font-size: 12px; margin-left: 7px; }
+.head .room .sub { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+.head .spacer { flex: 1; }
+.head .in-lab { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+
+/* Comp-only controls, same pattern and same voice as the other
+   screen comps: a mono "preview" label, a pill group, then the
+   theme toggle. Not part of the product. */
+.state-switch { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.state-switch .sw-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.sw-group {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--row);
+}
+.sw-btn {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4.5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.sw-btn:hover { color: var(--ink); }
+.sw-btn[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+}
+
+.theme-toggle {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+/* ================= FEED =================
+   The room stream, carried from screen-room.html. Scrimmed, so it
+   is inert to the pointer and to assistive tech while the sheet
+   is open. */
+
+.feed {
+  min-width: 0; min-height: 0;
+  display: flex;
+  flex-direction: column;
+  filter: saturate(var(--backdrop-sat));
+}
+.feed-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 26px 34px 10px;
+}
+.feed-col { width: 100%; max-width: var(--feed-w); margin: 0 auto; }
+
+.feed-head { display: flex; align-items: center; gap: 12px; margin-bottom: 5px; }
+.feed-head h2 { font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.feed-head .spacer { flex: 1; }
+.live {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--signal);
+  white-space: nowrap;
+}
+.live .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: var(--glow-live);
+}
+.feed-sub {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: var(--measure);
+  margin-bottom: 22px;
+}
+
+.stream {
+  position: relative;
+  display: flex; flex-direction: column; gap: 18px;
+  padding-left: 24px;
+}
+.stream::before {
+  content: "";
+  position: absolute;
+  left: 5px; top: 10px; bottom: 10px;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--line) 8%, var(--line) 92%, transparent);
+}
+.node {
+  position: absolute;
+  left: -24px;
+  top: 22px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 2px var(--dot-ancestor);
+  z-index: 2;
+}
+
+.chat { position: relative; padding: 2px 2px 2px 0; }
+.chat .node {
+  top: 7px;
+  width: 7px; height: 7px;
+  left: -22px;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.chat-head { display: flex; align-items: center; gap: 9px; margin-bottom: 3px; }
+.chat-head .who { font-size: 14px; font-weight: 600; color: var(--ink); }
+.chat-head .when { font-size: 12.5px; color: var(--ink-2); }
+.chat-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: var(--measure);
+  padding-left: 31px;
+  text-wrap: pretty;
+}
+.chat-text .mention { color: var(--cyan); }
+
+.card { position: relative; }
+.card-body {
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 17px 20px 15px;
+}
+.card.st-proposed .node { box-shadow: inset 0 0 0 2px var(--amber); }
+.card.st-fork .node { box-shadow: inset 0 0 0 2px var(--cyan); }
+.card.st-adopted .node { background: var(--signal); box-shadow: 0 0 10px color-mix(in srgb, var(--signal) 50%, transparent); }
+
+.card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.byline { font-size: 13.5px; color: var(--ink-2); min-width: 0; }
+.byline b { color: var(--ink); font-weight: 600; }
+.card-head .spacer { flex: 1; }
+.card-head .when { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: var(--radius-mark);
+  padding: 3.5px 9px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.badge.proposed { color: var(--amber);  background: var(--amber-dim);  border: 1px solid color-mix(in srgb, var(--amber) 25%, transparent); }
+.badge.forking  { color: var(--cyan);   background: var(--cyan-dim);   border: 1px solid color-mix(in srgb, var(--cyan) 25%, transparent); }
+.badge.adopted  { color: var(--signal); background: var(--signal-dim); border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent); }
+
+.intent {
+  font-size: 17.5px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin-bottom: 6px;
+  text-wrap: balance;
+}
+.summary {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: var(--measure);
+  text-wrap: pretty;
+  margin-bottom: 14px;
+}
+.card-foot {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 9px 16px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+.card-foot .spacer { flex: 1; }
+.fact { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.fact svg { width: 13px; height: 13px; flex-shrink: 0; }
+.fact.forks { color: var(--cyan); }
+.fact.adopted { color: var(--signal); }
+.path { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+
+.btn {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn.primary { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 32%, transparent); }
+
+.adopted-card .card-body { box-shadow: var(--shadow-1), var(--glow-adopt); }
+.ribbon {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--signal);
+  margin-bottom: 9px;
+}
+.ribbon::after { content: ""; height: 1px; flex: 1; background: currentColor; opacity: 0.28; }
+.ribbon .flare { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.ribbon .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+/* ---- room composer: the door this sheet came through ---- */
+.feed-composer { flex-shrink: 0; padding: 8px 34px 20px; }
+.rc-box {
+  max-width: var(--feed-w);
+  margin: 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--composer-bg);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  box-shadow: var(--shadow-2);
+  padding: 11px 12px 11px 14px;
+}
+.rc-box input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14.5px;
+  color: var(--ink);
+}
+.rc-box input::placeholder { color: var(--ink-2); }
+.icon-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.icon-btn:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.icon-btn svg { width: 14px; height: 14px; }
+.chip-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chip-btn svg { width: 12px; height: 12px; opacity: 0.85; }
+/* Held open, because it is: this chip is what opened the sheet. */
+.chip-btn[aria-expanded="true"] {
+  color: var(--cyan);
+  border-color: color-mix(in srgb, var(--cyan) 32%, transparent);
+  background: var(--cyan-dim);
+}
+.send-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--invert-fill);
+  color: var(--invert-ink);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.send-btn svg { width: 14px; height: 14px; }
+
+/* ================= AGENT COLUMN =================
+   Unscrimmed, full saturation, and above the scrim in the stacking
+   order so it stays clickable. This is the point of the proposal:
+   the diff you might paste lives here, and the sheet no longer
+   sits on top of it. */
+
+.agent {
+  position: relative;
+  z-index: 60;
+  border-left: 1px solid var(--line);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.env-wrap { padding: 14px 14px 0; flex-shrink: 0; }
+.env {
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 14px 16px 12px;
+}
+.env-head {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0 0 4px;
+  cursor: pointer;
+}
+.env-head .h { font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.env-head .spacer { flex: 1; }
+.env-head .chev { color: var(--ink-2); display: grid; place-items: center; transition: transform 0.22s ease; }
+.env-head .chev svg { width: 12px; height: 12px; display: block; }
+.env[data-open="false"] .env-head .chev { transform: rotate(-90deg); }
+
+.env-rows { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.28s ease; }
+.env[data-open="false"] .env-rows { grid-template-rows: 0fr; }
+.env-rows-inner { overflow: hidden; min-height: 0; }
+
+.status-row {
+  display: flex; align-items: center; gap: 13px;
+  padding: 7px 0;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  min-width: 0;
+}
+.status-row .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-row a.label { color: var(--ink); }
+.status-row a.label:hover { color: var(--cyan); text-decoration: none; }
+.status-row .val {
+  margin-left: auto;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--ink-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-row .val.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.status-row .val.on { color: var(--signal); font-weight: 500; }
+.status-row .val.fork { color: var(--cyan); font-weight: 500; }
+.status-row .stack { margin-left: auto; }
+
+.emblem {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: var(--emblem-ink);
+  background: var(--tone);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(3, 6, 12, 0.45);
+}
+.emblem svg { width: 13px; height: 13px; }
+.emblem.e-room {
+  --tone: var(--amber);
+}
+.emblem.e-room svg { width: 14px; height: 14px; }
+.emblem.e-repo {
+  --tone: var(--neutral-emblem);
+}
+.emblem.e-repo svg { width: 14px; height: 14px; }
+.emblem.e-build { --tone: var(--signal); }
+.emblem.e-fork  { --tone: var(--cyan); }
+.emblem.e-adopt { --tone: var(--violet); }
+
+.agent-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 18px 12px;
+  flex-shrink: 0;
+}
+.agent-tile {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-tile);
+  background: var(--agent-tile-fill);
+  border: 1px solid var(--agent-tile-line);
+  display: grid; place-items: center;
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+.agent-tile svg { width: 14px; height: 14px; }
+.agent-head .id { flex: 1; min-width: 0; line-height: 1.3; display: flex; flex-direction: column; }
+.agent-head .id .nm { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.agent-head .id .st { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.private-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-badge);
+  padding: 3px 7px;
+  flex-shrink: 0;
+}
+.private-badge svg { width: 9px; height: 9px; }
+
+.agent-chat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 18px 10px;
+  display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.msg { max-width: 94%; }
+.msg.you {
+  align-self: flex-end;
+  background: var(--row);
+  border-radius: var(--radius) var(--radius) var(--radius-keycap) var(--radius);
+  padding: 10px 13px;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.msg.bot { align-self: flex-start; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.msg.bot p + p { margin-top: 9px; }
+.msg .worked { font-size: 13px; color: var(--ink-2); margin-bottom: 8px; }
+.code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--row);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+  color: var(--ink-2);
+}
+
+.out {
+  align-self: stretch;
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 14px 16px;
+}
+.out .lead {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px;
+  color: var(--amber);
+  margin-bottom: 7px;
+}
+.out .lead .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+.out .t { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.out .d { font-size: 13px; line-height: 1.55; color: var(--ink-2); margin-bottom: 11px; }
+.out .files {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 13px;
+}
+.out .files .add { color: var(--signal); }
+.out .files .mod { color: var(--amber); }
+
+.promote {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--grad-cyan-ink);
+  background: var(--grad-cyan);
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn-cyan);
+  transition: transform 0.15s ease, filter 0.18s ease;
+}
+.promote:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.promote:active { transform: translateY(0); }
+.promote svg { width: 14px; height: 14px; }
+
+.composer-wrap { padding: 0 14px 16px; flex-shrink: 0; }
+.composer {
+  background: var(--composer-bg);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  box-shadow: var(--shadow-1);
+  padding: 13px 13px 10px 16px;
+  transition: box-shadow 0.18s ease;
+}
+.composer:focus-within { box-shadow: var(--shadow-1), 0 0 0 3px var(--cyan-dim); }
+.composer textarea {
+  width: 100%;
+  height: 38px;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.composer textarea::placeholder { color: var(--ink-2); }
+.composer .tools { display: flex; align-items: center; gap: 9px; margin-top: 8px; }
+.composer .tools .model { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+.composer .tools .spacer { flex: 1; }
+.composer .icon-btn { width: 27px; height: 27px; }
+.composer .icon-btn svg { width: 13px; height: 13px; }
+.composer .send-btn { width: 28px; height: 28px; }
+.composer .send-btn svg { width: 12px; height: 12px; }
+
+/* ================================================================
+   SCRIM · stops at the agent column
+   ================================================================ */
+
+.scrim {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  right: var(--agent-w);
+  z-index: 40;
+  background: var(--scrim);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  animation: scrim-in 0.3s ease both;
+}
+.scrim[hidden] { display: none; }
+@keyframes scrim-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* The seam. Without it the scrim's right edge is a hard vertical
+   cut through the middle of the screen; with it the room fades
+   into the column that is still live. */
+.scrim::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 40px;
+  background: linear-gradient(to right, transparent, var(--scrim));
+  opacity: 0.55;
+}
+
+/* ================================================================
+   SHEET · anchored to the left of the agent column
+   ================================================================ */
+
+.sheet {
+  position: fixed;
+  /* Clears the room header rather than sliding under it: the header
+     is the one piece of room chrome that stays fully legible, so
+     the sheet must not clip it or be clipped by it. */
+  top: calc(var(--header-h) + var(--sheet-inset));
+  bottom: var(--sheet-inset);
+  right: calc(var(--agent-w) + var(--sheet-gap));
+  z-index: 50;
+  width: var(--sheet-w);
+  max-width: calc(100vw - var(--agent-w) - var(--sheet-gap) - var(--sheet-inset));
+  background: var(--panel);
+  border: none;
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: sheet-in 0.42s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+.sheet[hidden] { display: none; }
+/* It arrives from the private side, because that is where the work
+   it carries came from. */
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------------- sheet header ---------------- */
+
+.sheet-head {
+  flex-shrink: 0;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.head-top { display: flex; align-items: flex-start; gap: 12px; }
+.head-glyph {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-select);
+  background: color-mix(in srgb, var(--cyan) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan) 28%, transparent);
+  display: grid; place-items: center;
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+.head-glyph svg { width: 15px; height: 15px; }
+.head-txt { flex: 1; min-width: 0; }
+.head-txt h1 {
+  font-size: 17.5px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin-bottom: 4px;
+}
+.head-txt p { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+.head-txt p code { font-family: var(--font-mono); font-size: 11.5px; }
+.sheet-close {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+.sheet-close:hover { color: var(--ink); background: var(--row); border-color: var(--line-strong); }
+.sheet-close svg { width: 11px; height: 11px; }
+
+/* ---------------- sheet body ---------------- */
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  padding: 16px 22px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.sheet-body::-webkit-scrollbar { width: 9px; }
+.sheet-body::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* ---- the drafts picker: the change this comp is arguing for ----
+   The app already parses every agent reply into a draft. Listing
+   them here turns the first field of the form into a choice
+   instead of a transcription. */
+
+.drafts { flex-shrink: 0; }
+.drafts-head {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0 0 9px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.drafts-head .h { font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.drafts-head .spacer { flex: 1; }
+.drafts-head .n { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+.drafts-head .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: transform 0.22s ease, color 0.16s ease;
+}
+.drafts-head .chev svg { width: 11px; height: 11px; display: block; }
+.drafts-head[aria-expanded="false"] .chev { transform: rotate(-90deg); }
+.drafts-head:hover .h, .drafts-head:hover .chev { color: var(--ink); }
+
+.drafts-list { display: flex; flex-direction: column; gap: 8px; }
+.drafts-list[hidden] { display: none; }
+
+.draft {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--draft-row);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-disclosure);
+  padding: 11px 13px 12px;
+  cursor: pointer;
+  color: inherit;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.2s ease;
+}
+.draft:hover { border-color: var(--line-strong); background: var(--panel); }
+.draft-top { display: flex; align-items: center; gap: 9px; margin-bottom: 5px; }
+.draft-top .t {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.draft-top .spacer { flex: 1; }
+.draft-top .when { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; flex-shrink: 0; }
+.draft-meta {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 2px 10px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.draft-files {
+  margin-top: 7px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  display: flex; flex-direction: column;
+}
+.draft-files .add { color: var(--signal); }
+.draft-files .mod { color: var(--amber); }
+.draft-files .del { color: var(--rose); }
+/* Once one is picked the others fold back to a title and a count.
+   The list stays, because changing your mind is one click, but it
+   stops competing with the form it just filled in. */
+.drafts-list[data-picked="yes"] .draft[aria-pressed="false"] .draft-files { display: none; }
+
+/* The chosen one. Cyan, matching the promote action: green is
+   adoption and passing builds only. */
+.draft .tick {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  color: var(--grad-cyan-ink);
+  background: var(--grad-cyan);
+  visibility: hidden;
+}
+.draft .tick svg { width: 10px; height: 10px; }
+.draft[aria-pressed="true"] {
+  background: var(--panel);
+  border-color: color-mix(in srgb, var(--cyan) 42%, transparent);
+  box-shadow: var(--shadow-1), 0 0 0 1px color-mix(in srgb, var(--cyan) 22%, transparent);
+}
+.draft[aria-pressed="true"] .tick { visibility: visible; }
+
+/* Pasting is still here. It is a line under the list, not the
+   first thing the sheet asks of you. */
+.drafts-fallback {
+  margin-top: 10px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.link-btn {
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--cyan);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.link-btn:hover { color: var(--cyan-bright); }
+
+/* ---- fields, straight off PromoteModal ---- */
+
+.field { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.field > label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.field-req {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-badge);
+  padding: 2px 6px;
+}
+.field textarea,
+.field input {
+  width: 100%;
+  background: var(--field);
+  border: 1px solid var(--line-field);
+  border-radius: var(--radius-field);
+  box-shadow: var(--shadow-field);
+  padding: 10px 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.16s ease, box-shadow 0.18s ease;
+}
+.field textarea { min-height: 62px; }
+.field textarea.mono, .field input.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.field textarea::placeholder, .field input::placeholder { color: var(--ink-2); }
+.field textarea:focus, .field input:focus {
+  border-color: var(--focus-border);
+  box-shadow: var(--focus-ring);
+}
+.field-hint { font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+.field-pair { display: flex; gap: 12px; flex-shrink: 0; }
+.field-pair .field { flex: 1; min-width: 0; }
+
+.derived-value {
+  background: var(--panel-sunken);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-field);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* Filled from a draft: a summary and a way in, not a wall of diff. */
+.prefilled-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--panel-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  padding: 11px 12px 11px 14px;
+}
+.prefilled-summary { flex: 1; min-width: 0; font-size: 13.5px; color: var(--ink); }
+.prefilled-paths {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.btn-secondary {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+  padding: 7px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.btn-secondary:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.btn-secondary:disabled { cursor: default; opacity: 0.5; }
+
+/* Nothing chosen and nothing pasted is a designed state, not a
+   blank textarea sitting there demanding work. */
+.changes-empty {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-field);
+  padding: 15px 16px 16px;
+}
+.changes-empty p { font-size: 13px; line-height: 1.55; color: var(--ink-2); max-width: var(--measure-sub); }
+.changes-empty .ce-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+
+.bullet-row { display: flex; align-items: center; gap: 8px; }
+.bullet-row input { flex: 1; min-width: 0; }
+.bullet-remove {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.bullet-remove:hover { color: var(--ink); border-color: var(--line-strong); }
+.bullet-remove svg { width: 10px; height: 10px; }
+.bullets { display: flex; flex-direction: column; gap: 8px; }
+.bullet-tools { display: flex; gap: 8px; }
+
+/* ---- the publish preview, and the two ways it can be stopped ---- */
+
+.preview {
+  flex-shrink: 0;
+  background: var(--panel-sunken);
+  border-radius: var(--radius-disclosure);
+  padding: 13px 15px 14px;
+}
+.preview h2 { font-size: 14px; font-weight: 400; color: var(--ink-2); margin-bottom: 6px; }
+.preview .echo { font-size: 13px; line-height: 1.55; color: var(--ink); margin-bottom: 10px; }
+.preview .echo.unset { color: var(--ink-2); }
+
+.scan-clean {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px;
+  color: var(--signal);
+}
+.scan-clean svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+/* A blocked promote is not an incomplete one, and it should never
+   look like one. Rose, its own panel, the shapes named. */
+.scan-dirty {
+  display: flex; flex-direction: column; gap: 9px;
+  border-left: 2px solid var(--rose);
+  border-radius: 0 var(--radius-field) var(--radius-field) 0;
+  background: var(--rose-dim);
+  padding: 12px 14px 13px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.scan-dirty strong { color: var(--rose); font-weight: 600; }
+.scan-dirty .found { display: flex; flex-wrap: wrap; gap: 6px; }
+.code-inline {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--rose);
+  background: color-mix(in srgb, var(--rose) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rose) 30%, transparent);
+  border-radius: var(--radius-badge);
+  padding: 2px 7px;
+}
+.scan-dirty .where { color: var(--ink-2); }
+
+/* Naming what is missing, rather than leaving a dead button to be
+   guessed at. Kept apart from the scan block so the two blocking
+   reasons never share a line. */
+.blocked-hint {
+  flex-shrink: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  border-left: 2px solid var(--line-strong);
+  padding-left: 11px;
+}
+
+.fine {
+  flex-shrink: 0;
+  padding-bottom: 16px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.fine code { font-family: var(--font-mono); color: var(--ink-2); }
+
+/* ---------------- sheet footer ---------------- */
+
+.sheet-foot {
+  flex-shrink: 0;
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--line);
+  display: flex; align-items: center; gap: 10px;
+}
+.sheet-foot .spacer { flex: 1; }
+.btn-quiet {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 11px 17px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.btn-quiet:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--invert-ink);
+  background: var(--invert-fill);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow-invert);
+  transition: transform 0.15s ease, filter 0.16s ease, box-shadow 0.2s ease;
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); box-shadow: var(--shadow-invert-hi); }
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-primary:disabled {
+  cursor: default;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+.btn-primary svg { width: 14px; height: 14px; flex-shrink: 0; }
+.btn-primary:disabled svg { opacity: 0.6; }
+.keycap {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--keycap-ink);
+  border: 1px solid var(--keycap-line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+}
+.btn-primary:disabled .keycap { display: none; }
+
+/* ================= RESPONSIVE =================
+   The sheet keeps its anchor as long as the agent column is there
+   to be anchored to. Once the column drops, the proposal has
+   nothing left to protect and the sheet takes the fork sheet's
+   right-hand position instead. */
+@media (max-width: 1180px) {
+  .app { grid-template-columns: var(--rail-w) minmax(0, 1fr); }
+  .head { grid-column: 2 / span 1; }
+  .agent { display: none; }
+  .feed-scroll { padding: 22px 26px 8px; }
+  .feed-composer { padding: 8px 26px 18px; }
+  .scrim { right: 0; }
+  .scrim::after { display: none; }
+  .sheet { right: var(--sheet-inset); max-width: calc(100vw - (var(--sheet-inset) * 2)); }
+}
+@media (max-width: 940px) {
+  .state-switch .sw-label { display: none; }
+  .sw-btn { font-size: 12px; padding: 4px 9px; }
+  .head .room .sub { display: none; }
+  .head .in-lab { display: none; }
+}
+@media (max-width: 620px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .rail { display: none; }
+  .head { grid-column: 1 / span 1; padding: 0 16px; gap: 10px; }
+  .head .members { display: none; }
+  .feed-scroll { padding: 18px 16px 6px; }
+  .feed-composer { padding: 6px 16px 16px; }
+  .stream { padding-left: 20px; }
+  .node { left: -20px; }
+  .chat .node { left: -18px; }
+  .chat-text { padding-left: 0; }
+  .rc-box .chip-btn { display: none; }
+}
+/* Below roughly 600px the sheet stops being a sheet and takes the
+   screen, exactly as the fork sheet does. */
+@media (max-width: 600px) {
+  :root { --sheet-inset: 0px; }
+  .sheet { width: auto; left: 0; right: 0; max-width: none; border-radius: 0; }
+  .sheet-head { padding: 18px 18px 15px; }
+  .sheet-body { padding: 16px 18px 0; }
+  .sheet-foot { padding-left: 18px; padding-right: 18px; }
+  .head-txt h1 { font-size: 16.5px; }
+  .field-pair { flex-direction: column; }
+}
+
+/* ================= REDUCED MOTION ================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="stage" id="stage" data-state="picker">
+
+<div class="app">
+
+  <!-- ================= RAIL ================= -->
+  <nav class="rail" aria-label="Rooms" aria-hidden="true">
+    <div class="rail-brand">
+      <span class="mark" aria-hidden="true">&#9630;&#9626;</span>
+      <span class="word">Agent Rooms</span>
+      <span class="spacer"></span>
+      <span class="rail-icon-btn" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+
+    <span class="rail-new">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 8h12M8 2v12"/></svg>
+      New room
+    </span>
+
+    <div class="rail-scroll">
+      <div class="rail-section">Rooms</div>
+      <span class="rail-item" aria-current="page">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+        <span class="nm">night-market</span>
+        <span class="count">17</span>
+      </span>
+      <span class="rail-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+        <span class="nm">trail-notes</span>
+        <span class="unread"></span>
+      </span>
+      <span class="rail-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+        <span class="nm">split-bill-bot</span>
+      </span>
+      <span class="rail-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M2 6.5h12"/></svg>
+        <span class="nm">drift-journal</span>
+      </span>
+
+      <div class="rail-section">This room</div>
+      <span class="rail-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 6h5M5.5 9h3.5"/></svg>
+        <span class="nm">Proposals</span>
+        <span class="count">6</span>
+      </span>
+      <span class="rail-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+        <span class="nm">Canonical build</span>
+      </span>
+      <span class="rail-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3" stroke-linecap="round"/></svg>
+        <span class="nm">Timeline</span>
+      </span>
+      <span class="rail-item">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="5.5" cy="6" r="2.2"/><circle cx="10.5" cy="6" r="2.2"/><path d="M2 13c0-1.9 1.6-3.2 3.5-3.2S9 11.1 9 13M9.5 9.9c1.8.1 3.5 1.3 3.5 3.1"/></svg>
+        <span class="nm">Members</span>
+        <span class="count">5</span>
+      </span>
+    </div>
+
+    <div class="rail-foot">
+      <span class="rail-profile">
+        <span class="avatar a-pr big" aria-hidden="true">PR</span>
+        <span class="who">
+          <span class="nm">Priya Raman</span>
+          <span class="sub">workbench 03</span>
+        </span>
+        <span class="gear" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.1"/><path d="M8 2.2v1.6M8 12.2v1.6M2.2 8h1.6M12.2 8h1.6M3.9 3.9l1.1 1.1M11 11l1.1 1.1M12.1 3.9L11 5M5 11l-1.1 1.1"/></svg>
+        </span>
+      </span>
+    </div>
+  </nav>
+
+  <!-- ================= HEADER ================= -->
+  <header class="head">
+    <span class="room">
+      <span class="t">Night Market <span class="kind">room &middot; 5 builders</span></span>
+      <span class="sub">a map of every night market worth walking to</span>
+    </span>
+    <span class="spacer"></span>
+
+    <div class="state-switch">
+      <span class="sw-label">preview</span>
+      <div class="sw-group" role="group" aria-label="Preview which promote state">
+        <button class="sw-btn" type="button" id="swPicker" aria-pressed="true">Picker</button>
+        <button class="sw-btn" type="button" id="swChosen" aria-pressed="false">Chosen</button>
+        <button class="sw-btn" type="button" id="swPaste" aria-pressed="false">Paste</button>
+        <button class="sw-btn" type="button" id="swBlocked" aria-pressed="false">Blocked</button>
+      </div>
+    </div>
+
+    <span class="in-lab">4 in the lab</span>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle light and dark" aria-label="Toggle color theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </header>
+
+  <!-- ================= FEED =================
+       The room from screen-room.html in its active state, trimmed
+       to what shows behind a sheet this size. Inert while the
+       sheet is open. -->
+  <main class="feed" aria-hidden="true">
+    <div class="feed-scroll">
+      <div class="feed-col">
+
+        <div class="feed-head">
+          <h2>#night-market</h2>
+          <span class="live"><span class="dot"></span>2 signals live</span>
+          <span class="spacer"></span>
+        </div>
+        <p class="feed-sub">The room talks here. Promoted work lands in the same stream: fork what interests you, remix what you can improve, and the room adopts the winners into the build.</p>
+
+        <div class="stream">
+
+          <div class="chat">
+            <span class="node" aria-hidden="true"></span>
+            <div class="chat-head">
+              <span class="avatar a-do" aria-hidden="true">DO</span>
+              <span class="who">Dele Okafor</span>
+              <span class="when">2m</span>
+            </div>
+            <p class="chat-text">watching Tom&aacute;s fork the geo flow live, the neighborhood picker fallback is the right call. safari deniers are like 30% of my test group</p>
+          </div>
+
+          <article class="card st-fork">
+            <span class="node" aria-hidden="true"></span>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-tr" aria-hidden="true">TR</span>
+                <span class="byline"><b>Tom&aacute;s Rivera</b> is forking Sana&rsquo;s proposal</span>
+                <span class="spacer"></span>
+                <span class="badge forking">fork live</span>
+                <span class="when">now</span>
+              </div>
+              <h3 class="intent">Geolocation onboarding flow</h3>
+              <p class="summary">Tom&aacute;s pulled Sana&rsquo;s location permission flow into his workbench. His agent is rewriting the fallback path for browsers that deny geolocation, using a neighborhood picker seeded from the markets index.</p>
+              <div class="card-foot">
+                <span class="fact forks">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+                  fork in progress
+                </span>
+                <span class="path">from sq/geo-onboard</span>
+                <span class="spacer"></span>
+                <span class="btn">Watch</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card st-adopted adopted-card">
+            <span class="node" aria-hidden="true"></span>
+            <div class="ribbon"><span class="flare"><span class="dot"></span>Adopted into the build</span></div>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-mj" aria-hidden="true">MJ</span>
+                <span class="byline"><b>Mara Jensen&rsquo;s</b> remix won the round</span>
+                <span class="spacer"></span>
+                <span class="badge adopted">adopted</span>
+                <span class="when">18m</span>
+              </div>
+              <h3 class="intent">Stall map with pin clustering</h3>
+              <p class="summary">Clusters stall pins at low zoom so dense night markets stay readable, and expands to individual stalls past zoom 15. Ships with viewport-based loading so the map holds 60fps on mid-range phones.</p>
+              <div class="card-foot">
+                <span class="fact adopted">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M2.8 8.4l3 3 7.4-8"/></svg>
+                  adopted, 4 cheers
+                </span>
+                <span class="path">merged @ e41f8c2</span>
+                <span class="spacer"></span>
+                <span class="btn">View in repo</span>
+              </div>
+            </div>
+          </article>
+
+          <div class="chat">
+            <span class="node" aria-hidden="true"></span>
+            <div class="chat-head">
+              <span class="avatar a-pr" aria-hidden="true">PR</span>
+              <span class="who">Priya Raman</span>
+              <span class="when">15m</span>
+            </div>
+            <p class="chat-text">3.1s to 0.9s on Taipei is wild. <span class="mention">@Mara</span> I am wiring my open-hours model into your cluster tooltips right now, should hit the feed tonight</p>
+          </div>
+
+          <article class="card st-proposed">
+            <span class="node" aria-hidden="true"></span>
+            <div class="card-body">
+              <div class="card-head">
+                <span class="avatar a-pr" aria-hidden="true">PR</span>
+                <span class="byline"><b>Priya Raman</b> promoted from her agent</span>
+                <span class="spacer"></span>
+                <span class="badge proposed">proposed</span>
+                <span class="when">1h</span>
+              </div>
+              <h3 class="intent">Open-hours model for vendors</h3>
+              <p class="summary">A schedule schema that handles the messy reality of night markets: seasonal openings, weather closures, and vendors who set up at 6pm &ldquo;ish&rdquo;.</p>
+              <div class="card-foot">
+                <span class="fact forks">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+                  2 forks
+                </span>
+                <span class="path">pr/open-hours</span>
+                <span class="spacer"></span>
+                <span class="btn primary">Fork</span>
+                <span class="btn">Remix</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- The composer whose Promote chip opened this sheet. -->
+    <div class="feed-composer">
+      <div class="rc-box">
+        <span class="icon-btn" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
+        <input type="text" tabindex="-1" aria-label="Message the room" placeholder="Message #night-market">
+        <!-- Drawn held open, because it is. In the product this is a
+             real button carrying aria-expanded and aria-controls; here
+             it sits inside the inert backdrop, so it claims neither. -->
+        <span class="chip-btn" aria-expanded="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          Promote
+        </span>
+        <span class="send-btn" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </span>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= AGENT COLUMN =================
+       Live. Not scrimmed, not dimmed, not inert. Scroll it, read
+       it, select out of it, promote straight from it, all with the
+       sheet open beside it. -->
+  <aside class="agent" aria-label="Environment and your private agent">
+
+    <div class="env-wrap">
+      <section class="env" id="env" data-open="true">
+        <button class="env-head" type="button" id="envHead" aria-expanded="true" aria-controls="envRows">
+          <span class="h">Environment</span>
+          <span class="spacer"></span>
+          <span class="live" aria-hidden="true"><span class="dot"></span></span>
+          <span class="chev" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+          </span>
+        </button>
+        <div class="env-rows" id="envRows">
+          <div class="env-rows-inner">
+
+            <div class="status-row">
+              <span class="emblem e-room" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="3.2" width="11.2" height="9.6" rx="2"/><path d="M2.4 6.5h11.2"/></svg>
+              </span>
+              <span class="label">night-market</span>
+              <span class="val">5 builders &middot; 4 here</span>
+            </div>
+
+            <div class="status-row">
+              <span class="emblem e-repo" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              </span>
+              <a class="label" href="#">nightmarket/app</a>
+              <span class="val mono">e41f8c2</span>
+            </div>
+
+            <div class="status-row">
+              <span class="emblem e-build" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3 3 7-7.6"/></svg>
+              </span>
+              <span class="label">Build</span>
+              <span class="val on">passing &middot; 47 checks</span>
+            </div>
+
+            <div class="status-row">
+              <span class="emblem e-fork" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.8v4.6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.6" r="1.5"/><circle cx="11.8" cy="12.4" r="1.5"/></svg>
+              </span>
+              <span class="label">Forks in flight</span>
+              <span class="val fork">2</span>
+            </div>
+
+            <div class="status-row">
+              <span class="emblem e-adopt" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.9l1.85 3.9 4.05.55-2.95 2.95.75 4.1L8 11.35 4.3 13.4l.75-4.1L2.1 6.35l4.05-.55z"/></svg>
+              </span>
+              <span class="label">Last adopted</span>
+              <span class="val">18m ago</span>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="agent-head">
+      <span class="agent-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M8 10h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"/><circle cx="9.5" cy="15" r="0.5" fill="currentColor"/><circle cx="14.5" cy="15" r="0.5" fill="currentColor"/></svg>
+      </span>
+      <span class="id">
+        <span class="nm">Your agent</span>
+        <span class="st">worked 41s ago</span>
+      </span>
+      <span class="private-badge">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+        private
+      </span>
+    </div>
+
+    <div class="agent-chat" id="agentChat">
+      <div class="msg you">Mara&rsquo;s clustering just got adopted. Can my open-hours model feed the cluster tooltips, so a cluster shows how many stalls are open right now?</div>
+
+      <div class="msg bot">
+        <div class="worked">worked 41s &middot; read 6 files</div>
+        <p>Yes, and it is a clean join. Her cluster index already carries stall ids, so I computed an <span class="code">openNow</span> count per cluster from your confidence field and exposed it as a tooltip aggregate.</p>
+        <p>One catch: clusters recompute on every zoom change, so I memoized the open-hours lookup per 5-minute window. Without that it ran the schedule resolver 400 times per pan.</p>
+      </div>
+
+      <div class="msg you">Nice. Package it up, I want the room to see it before Dele&rsquo;s sheet goes in.</div>
+
+      <div class="out">
+        <div class="lead"><span class="dot" aria-hidden="true"></span>Ready to promote</div>
+        <div class="t">Live &ldquo;open now&rdquo; counts on map clusters</div>
+        <div class="d">Joins the open-hours model to Mara&rsquo;s adopted clustering. Tooltips read &ldquo;12 stalls, 9 open now&rdquo; with the confidence hedge applied.</div>
+        <div class="files">
+          <span class="add">+ src/map/clusterOpenNow.ts</span>
+          <span class="add">+ src/hours/windowMemo.ts</span>
+          <span class="mod">~ src/map/ClusterTooltip.tsx</span>
+        </div>
+        <button class="promote" type="button" id="promoteBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <span class="lbl">Promote to room</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <textarea aria-label="Ask your agent" placeholder="Ask your agent, only you see this"></textarea>
+        <div class="tools">
+          <button class="icon-btn" type="button" aria-label="Add context">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <span class="model">forge-2 &middot; fast</span>
+          <span class="spacer"></span>
+          <button class="send-btn" type="button" aria-label="Send to your agent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ============ SCRIM: the feed and the rail only ============ -->
+<div class="scrim" id="scrim"></div>
+
+<!-- ============ THE PROMOTE SHEET ============ -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="promoteTitle">
+
+  <div class="sheet-head">
+    <div class="head-top">
+      <span class="head-glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </span>
+      <div class="head-txt">
+        <h1 id="promoteTitle">Promote to room</h1>
+        <p>Private to shared, in one deliberate step. This opens a pull request on <code>nightmarket/app</code>.</p>
+      </div>
+      <button class="sheet-close" id="closeBtn" aria-label="Close promote">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="sheet-body" id="sheetBody">
+
+    <!-- ---- change 1: the drafts picker ----
+         Three recent drafts, newest first. The app parses these
+         already; this is the first time the composer door gets to
+         see them. -->
+    <section class="drafts" aria-labelledby="draftsHead">
+      <button class="drafts-head" type="button" id="draftsHead" aria-expanded="true" aria-controls="draftsList">
+        <span class="h">From your agent</span>
+        <span class="spacer"></span>
+        <span class="n">3 recent</span>
+        <span class="chev" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+        </span>
+      </button>
+
+      <div class="drafts-list" id="draftsList">
+
+        <button class="draft" type="button" data-draft="1" aria-pressed="false">
+          <span class="draft-top">
+            <span class="t">Live &ldquo;open now&rdquo; counts on map clusters</span>
+            <span class="spacer"></span>
+            <span class="when">41s</span>
+            <span class="tick" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3 3 7-7.6"/></svg>
+            </span>
+          </span>
+          <span class="draft-meta">
+            <span>3 files</span>
+            <span>2 note bullets</span>
+            <span>structured</span>
+          </span>
+          <span class="draft-files">
+            <span class="add">+ src/map/clusterOpenNow.ts</span>
+            <span class="add">+ src/hours/windowMemo.ts</span>
+            <span class="mod">~ src/map/ClusterTooltip.tsx</span>
+          </span>
+        </button>
+
+        <button class="draft" type="button" data-draft="2" aria-pressed="false">
+          <span class="draft-top">
+            <span class="t">Confidence hedge in the open-hours copy</span>
+            <span class="spacer"></span>
+            <span class="when">14m</span>
+            <span class="tick" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3 3 7-7.6"/></svg>
+            </span>
+          </span>
+          <span class="draft-meta">
+            <span>2 files</span>
+            <span>no note</span>
+            <span>unified diff</span>
+          </span>
+          <span class="draft-files">
+            <span class="mod">~ src/hours/labels.ts</span>
+            <span class="mod">~ src/hours/OpenBadge.tsx</span>
+          </span>
+        </button>
+
+        <button class="draft" type="button" data-draft="3" aria-pressed="false">
+          <span class="draft-top">
+            <span class="t">Nightly refresh job for vendor hours</span>
+            <span class="spacer"></span>
+            <span class="when">1h</span>
+            <span class="tick" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3 3 7-7.6"/></svg>
+            </span>
+          </span>
+          <span class="draft-meta">
+            <span>4 files</span>
+            <span>3 note bullets</span>
+            <span>structured</span>
+          </span>
+          <span class="draft-files">
+            <span class="add">+ scripts/refreshHours.ts</span>
+            <span class="add">+ src/hours/notify.ts</span>
+            <span class="mod">~ src/hours/store.ts</span>
+            <span class="mod">~ .github/workflows/nightly.yml</span>
+          </span>
+        </button>
+
+        <p class="drafts-fallback">
+          Work that did not come from your agent?
+          <button class="link-btn" type="button" id="toPaste">Paste a diff instead</button>.
+        </p>
+      </div>
+    </section>
+
+    <!-- ---- intent: required, and the proposal card's headline ---- -->
+    <div class="field">
+      <label for="intent">Intent <span class="field-req" aria-hidden="true">required</span></label>
+      <textarea id="intent" aria-required="true" placeholder="What does this change do, and why?" class="s-empty"></textarea>
+      <textarea id="intentFilled" class="s-chosen" style="min-height: 88px;" aria-required="true" aria-label="Intent">Joins the open-hours model to Mara&rsquo;s adopted clustering, so a cluster tooltip reads "12 stalls, 9 open now" with the confidence hedge applied.</textarea>
+      <textarea class="s-blocked" style="min-height: 88px;" aria-required="true" aria-label="Intent">Nightly job that refreshes vendor hours from the city feeds, and posts a summary when a market changes its schedule.</textarea>
+      <span class="field-hint s-filled">Filled from your agent&rsquo;s draft. Edit it freely, this is what the room reads first.</span>
+    </div>
+
+    <!-- ---- changes: required. Three shapes, one field ---- -->
+    <div class="field">
+      <label for="diff">Changes <span class="field-req" aria-hidden="true">required</span></label>
+
+      <!-- picked: a summary and a way in, the same treatment the
+           agent-card door already uses -->
+      <div class="prefilled-row s-chosen">
+        <span class="prefilled-summary">
+          3 files from your agent
+          <span class="prefilled-paths">src/map/clusterOpenNow.ts, src/hours/windowMemo.ts, src/map/ClusterTooltip.tsx</span>
+        </span>
+        <button class="btn-secondary" type="button">Review and edit</button>
+      </div>
+      <div class="prefilled-row s-blocked">
+        <span class="prefilled-summary">
+          4 files from your agent
+          <span class="prefilled-paths">scripts/refreshHours.ts, src/hours/notify.ts, src/hours/store.ts, .github/workflows/nightly.yml</span>
+        </span>
+        <button class="btn-secondary" type="button">Review and edit</button>
+      </div>
+
+      <!-- nothing picked and nothing pasted -->
+      <div class="changes-empty s-picker">
+        <p>No change attached yet. Pick one of your agent&rsquo;s drafts above and this fills itself in, or paste a diff if the work came from somewhere else.</p>
+        <div class="ce-foot">
+          <button class="btn-secondary" type="button" id="toPaste2">Paste a diff</button>
+        </div>
+      </div>
+
+      <!-- the fallback, chosen deliberately -->
+      <textarea id="diff" class="mono s-paste" aria-required="true" placeholder="Paste the diff to publish" style="min-height: 132px;"></textarea>
+      <span class="field-hint s-paste">Unified diff or the structured file list. Your agent column is still open on the right, so you can copy straight out of it.</span>
+    </div>
+
+    <div class="field-pair">
+      <div class="field">
+        <label for="baseRef">Base branch <span class="field-req" aria-hidden="true">required</span></label>
+        <input id="baseRef" class="mono" aria-required="true" value="main">
+        <span class="field-hint">The branch this change is proposed against.</span>
+      </div>
+      <div class="field">
+        <label for="headCommit">Head commit</label>
+        <!-- Derived, not asked for. GitHub assigns it when promote
+             pushes the branch, so the field carries the same
+             sentinel the server does. -->
+        <div class="derived-value" id="headCommit">pending</div>
+        <span class="field-hint">
+          GitHub assigns this when the pull request opens.
+          <button class="link-btn" type="button">Set manually</button>
+        </span>
+      </div>
+    </div>
+
+    <!-- ---- remix note: optional, and prefilled when the draft
+             carried bullets ---- -->
+    <div class="field">
+      <label id="noteLabel">Remix note</label>
+      <button class="btn-secondary s-empty" type="button" style="align-self: flex-start;">Add a remix note (optional)</button>
+
+      <div class="bullets s-chosen">
+        <div class="bullet-row">
+          <input aria-labelledby="noteLabel" value="Memoized the open-hours lookup per 5-minute window; without it the resolver ran 400 times per pan.">
+          <button class="bullet-remove" type="button" aria-label="Remove bullet">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+          </button>
+        </div>
+        <div class="bullet-row">
+          <input aria-labelledby="noteLabel" value="Left Mara&rsquo;s cluster index untouched and joined on the stall ids it already carries.">
+          <button class="bullet-remove" type="button" aria-label="Remove bullet">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+          </button>
+        </div>
+        <div class="bullet-tools">
+          <button class="btn-secondary" type="button">Add bullet</button>
+          <button class="btn-secondary" type="button">Skip instead</button>
+        </div>
+        <span class="field-hint">Drafted by your agent, edited by you. Up to six.</span>
+      </div>
+
+      <div class="bullets s-blocked">
+        <div class="bullet-row">
+          <input aria-labelledby="noteLabel" value="Runs at 03:00 in each city&rsquo;s own timezone, because market hours are written in local time.">
+          <button class="bullet-remove" type="button" aria-label="Remove bullet">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+          </button>
+        </div>
+        <div class="bullet-row">
+          <input aria-labelledby="noteLabel" value="Writes through the existing store, so a failed run leaves last night&rsquo;s hours intact.">
+          <button class="bullet-remove" type="button" aria-label="Remove bullet">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+          </button>
+        </div>
+        <div class="bullet-row">
+          <input aria-labelledby="noteLabel" value="Posts a summary only when a schedule actually changed, not on every run.">
+          <button class="bullet-remove" type="button" aria-label="Remove bullet">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+          </button>
+        </div>
+        <div class="bullet-tools">
+          <button class="btn-secondary" type="button">Add bullet</button>
+          <button class="btn-secondary" type="button">Skip instead</button>
+        </div>
+        <span class="field-hint">Drafted by your agent, edited by you. Up to six.</span>
+      </div>
+    </div>
+
+    <!-- ---- the exact publish preview, and the secret scan ---- -->
+    <section class="preview" aria-live="polite">
+      <h2>Promote preview</h2>
+      <p class="echo unset s-empty">Intent not set yet.</p>
+      <p class="echo s-chosen">Joins the open-hours model to Mara&rsquo;s adopted clustering, so a cluster tooltip reads &ldquo;12 stalls, 9 open now&rdquo; with the confidence hedge applied.</p>
+      <p class="echo s-blocked">Nightly job that refreshes vendor hours from the city feeds, and posts a summary when a market changes its schedule.</p>
+
+      <span class="scan-clean s-not-blocked">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>
+        Secret scan clean
+      </span>
+
+      <!-- Blocked is not incomplete, and must never look like it. -->
+      <div class="scan-dirty s-blocked">
+        <span><strong>Promote blocked by the secret scan.</strong> This is not a missing field: the change carries 2 values that must not leave your workbench.</span>
+        <span class="found">
+          <span class="code-inline">slack-webhook</span>
+          <span class="code-inline">generic-credential-assignment</span>
+        </span>
+        <span class="where">Both are in <span class="code-inline">src/hours/notify.ts</span>. Remove them from the changes or the remix note, then promote.</span>
+      </div>
+    </section>
+
+    <!-- Why the button is off. Only when the scan is clean, so the
+         two blocking reasons never compete for one line. -->
+    <div class="blocked-hint s-empty" id="promoteBlocked">Still needed before you can promote: Intent, Changes.</div>
+
+    <p class="fine">Promoting pushes a branch and opens the pull request. The diff and the note are scanned first; nothing is published and then redacted.</p>
+  </div>
+
+  <div class="sheet-foot">
+    <button class="btn-quiet" type="button" id="cancelBtn">Cancel</button>
+    <span class="spacer"></span>
+
+    <button class="btn-primary s-empty" type="button" disabled aria-describedby="promoteBlocked">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      Promote to room
+    </button>
+    <button class="btn-primary s-blocked" type="button" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      Promote to room
+    </button>
+    <button class="btn-primary s-chosen" type="button" id="publishBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      <span class="lbl">Promote to room</span>
+      <span class="keycap" aria-hidden="true">&#9166;</span>
+    </button>
+  </div>
+</div>
+
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* ---------- theme: follow the OS until the person decides ---------- */
+  var media = window.matchMedia('(prefers-color-scheme: light)');
+  var manual = false;
+
+  function applyTheme(light) {
+    root.setAttribute('data-theme', light ? 'light' : 'dark');
+  }
+  applyTheme(media.matches);
+
+  function onSystemChange(e) { if (!manual) { applyTheme(e.matches); } }
+  if (media.addEventListener) { media.addEventListener('change', onSystemChange); }
+  else if (media.addListener) { media.addListener(onSystemChange); }
+
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    manual = true;
+    applyTheme(root.getAttribute('data-theme') !== 'light');
+  });
+
+  /* ---------- the four states of the sheet (comp only) ----------
+     Selecting a draft is the real gesture, so the draft buttons
+     drive the same switch the preview pills do. */
+  var stage = document.getElementById('stage');
+  var drafts = Array.prototype.slice.call(document.querySelectorAll('.draft'));
+  var draftsHead = document.getElementById('draftsHead');
+  var draftsList = document.getElementById('draftsList');
+  var sheetBody = document.getElementById('sheetBody');
+
+  var buttons = {
+    picker: document.getElementById('swPicker'),
+    chosen: document.getElementById('swChosen'),
+    paste: document.getElementById('swPaste'),
+    blocked: document.getElementById('swBlocked')
+  };
+
+  /* Which draft each state has picked. Draft 3 is the one carrying
+     a webhook URL and a credential assignment. */
+  var PICKED = { picker: null, chosen: '1', paste: null, blocked: '3' };
+
+  function showState(which) {
+    stage.setAttribute('data-state', which);
+
+    Object.keys(buttons).forEach(function (key) {
+      buttons[key].setAttribute('aria-pressed', key === which ? 'true' : 'false');
+    });
+
+    drafts.forEach(function (d) {
+      d.setAttribute('aria-pressed', d.dataset.draft === PICKED[which] ? 'true' : 'false');
+    });
+    draftsList.dataset.picked = PICKED[which] ? 'yes' : 'no';
+
+    /* The picker folds away on the paste path: it is still one
+       click from here, it is just no longer the thing being asked. */
+    var open = which !== 'paste';
+    draftsHead.setAttribute('aria-expanded', open ? 'true' : 'false');
+    draftsList.hidden = !open;
+
+    sheetBody.scrollTop = 0;
+  }
+
+  Object.keys(buttons).forEach(function (key) {
+    buttons[key].addEventListener('click', function () { showState(key); });
+  });
+
+  /* Draft 3 is the one the scanner refuses, so picking it lands on
+     the blocked state. The other two land on chosen; the form copy
+     drawn there is draft 1's, so picking draft 2 shows the shape of
+     the state rather than that draft's own content. */
+  drafts.forEach(function (d) {
+    d.addEventListener('click', function () {
+      showState(d.dataset.draft === '3' ? 'blocked' : 'chosen');
+      drafts.forEach(function (other) {
+        other.setAttribute('aria-pressed', other === d ? 'true' : 'false');
+      });
+    });
+  });
+
+  draftsHead.addEventListener('click', function () {
+    var open = draftsHead.getAttribute('aria-expanded') === 'true';
+    draftsHead.setAttribute('aria-expanded', open ? 'false' : 'true');
+    draftsList.hidden = open;
+  });
+
+  document.getElementById('toPaste').addEventListener('click', function (e) {
+    e.stopPropagation();
+    showState('paste');
+  });
+  document.getElementById('toPaste2').addEventListener('click', function () { showState('paste'); });
+
+  /* ---------- the environment panel collapses ---------- */
+  var env = document.getElementById('env');
+  var envHead = document.getElementById('envHead');
+  envHead.addEventListener('click', function () {
+    var open = env.getAttribute('data-open') !== 'false';
+    env.setAttribute('data-open', open ? 'false' : 'true');
+    envHead.setAttribute('aria-expanded', open ? 'false' : 'true');
+  });
+
+  /* ---------- the agent column opens on its newest thing ---------- */
+  var agentChat = document.getElementById('agentChat');
+  if (agentChat) { agentChat.scrollTop = agentChat.scrollHeight; }
+
+  /* ---------- promote, from either door ---------- */
+  function flashPromote(btn, label) {
+    if (btn.disabled) { return; }
+    var target = btn.querySelector('.lbl');
+    var was = target.textContent;
+    target.textContent = label;
+    btn.disabled = true;
+    setTimeout(function () {
+      target.textContent = was;
+      btn.disabled = false;
+    }, 2000);
+  }
+
+  var publishBtn = document.getElementById('publishBtn');
+  publishBtn.addEventListener('click', function () {
+    flashPromote(publishBtn, 'Opening the pull request');
+  });
+
+  var promoteBtn = document.getElementById('promoteBtn');
+  promoteBtn.addEventListener('click', function () {
+    flashPromote(promoteBtn, 'Promoted, now in the room');
+  });
+
+  /* ---------- modal semantics ----------
+     Esc, scrim dismiss, focus trap and focus restore, as the fork
+     sheet has them. One difference, and it is the proposal: the
+     agent column is deliberately outside the scrim, so it is
+     reachable by pointer while the sheet is open. Tab still cycles
+     inside the sheet, because a keyboard user who tabs out of a
+     dialog has almost always lost their place rather than chosen
+     to leave. */
+  var scrim = document.getElementById('scrim');
+  var sheet = document.getElementById('sheet');
+
+  var FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+  function visibleFocusables() {
+    return Array.prototype.filter.call(sheet.querySelectorAll(FOCUSABLE), function (el) {
+      return el.offsetParent !== null;
+    });
+  }
+
+  function closeSheet() {
+    scrim.hidden = true;
+    sheet.hidden = true;
+    promoteBtn.focus();
+  }
+
+  function reopenSheet() {
+    scrim.hidden = false;
+    sheet.hidden = false;
+    var first = visibleFocusables()[0];
+    if (first) { first.focus(); }
+  }
+
+  document.getElementById('closeBtn').addEventListener('click', closeSheet);
+  document.getElementById('cancelBtn').addEventListener('click', closeSheet);
+  scrim.addEventListener('mousedown', closeSheet);
+
+  /* Comp affordance: the composer chip is the door, so clicking it
+     brings the sheet back rather than leaving the comp empty. */
+  document.querySelector('.chip-btn').addEventListener('click', reopenSheet);
+
+  document.addEventListener('keydown', function (e) {
+    if (sheet.hidden) {
+      if (e.key === 'Enter' && document.activeElement === document.body) { reopenSheet(); }
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSheet();
+      return;
+    }
+    if (e.key !== 'Tab') { return; }
+    var items = visibleFocusables();
+    if (!items.length) { return; }
+    var first = items[0];
+    var last = items[items.length - 1];
+    var active = document.activeElement;
+    if (!sheet.contains(active)) {
+      e.preventDefault();
+      (e.shiftKey ? last : first).focus();
+      return;
+    }
+    if (e.shiftKey && active === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>

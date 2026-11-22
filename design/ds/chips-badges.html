@@ -1,0 +1,330 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signal Lab - Chips &amp; Badges</title>
+<style>
+.theme-dark, .theme-light {
+  --font-ui: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+.theme-dark {
+  --bg: #0b0e14; --panel: #10141d; --panel-2: #141926; --card: #131826;
+  --line: rgba(148, 168, 205, 0.13); --line-strong: rgba(148, 168, 205, 0.22);
+  --ink: #e6ebf5; --ink-2: #9aa7bf; --ink-3: #5f6c85;
+  --signal: #4ade80; --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e; --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0; --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5; --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f; --rose-dim: rgba(247, 124, 143, 0.14);
+}
+.theme-light {
+  --bg: #f3f4f0; --panel: #fafaf7; --panel-2: #f0f1ec; --card: #ffffff;
+  --line: rgba(48, 62, 88, 0.13); --line-strong: rgba(48, 62, 88, 0.24);
+  --ink: #1c2433; --ink-2: #55617a; --ink-3: #8b96ab;
+  --signal: #14934e; --signal-dim: rgba(20, 147, 78, 0.1);
+  --amber: #b0700a; --amber-dim: rgba(176, 112, 10, 0.1);
+  --cyan: #0f7fb0; --cyan-dim: rgba(15, 127, 176, 0.09);
+  --violet: #7048c8; --violet-dim: rgba(112, 72, 200, 0.09);
+  --rose: #c94b60; --rose-dim: rgba(201, 75, 96, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-ui); background: #05070a; color: #cbd2e0; padding: 24px; font-size: 14px; }
+h1.doc-title { font-size: 18px; font-weight: 700; color: #f2f4f9; margin-bottom: 4px; }
+p.doc-sub { font-size: 12.5px; color: #7d879c; margin-bottom: 22px; max-width: 74ch; }
+.compare-wrap { display: flex; flex-wrap: wrap; gap: 20px; }
+.panel { flex: 1 1 420px; min-width: 340px; border-radius: 14px; background: var(--bg); color: var(--ink); padding: 22px; display: flex; flex-direction: column; gap: 20px; }
+.panel-tag { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-3); }
+.section-label { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-3); border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* state chips */
+.state-chip {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2.5px 8px; border-radius: 5px; border: 1px solid transparent;
+}
+.state-chip.proposed { color: var(--amber); background: var(--amber-dim); border-color: color-mix(in srgb, var(--amber) 25%, transparent); }
+.state-chip.forking  { color: var(--cyan);  background: var(--cyan-dim);  border-color: color-mix(in srgb, var(--cyan) 25%, transparent); }
+.state-chip.review   { color: var(--violet); background: var(--violet-dim); border-color: color-mix(in srgb, var(--violet) 25%, transparent); }
+.state-chip.adopted  { color: var(--signal); background: var(--signal-dim); border-color: color-mix(in srgb, var(--signal) 30%, transparent); }
+.state-chip.rejected { color: var(--rose); background: var(--rose-dim); border-color: color-mix(in srgb, var(--rose) 25%, transparent); }
+
+/* fork count / meta-item */
+.meta-item { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.meta-item svg { width: 12px; height: 12px; }
+.meta-item.hot { color: var(--cyan); }
+
+/* build status chip */
+.build-chip {
+  display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px;
+  color: var(--signal); background: var(--signal-dim); border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent);
+  padding: 3px 9px 3px 7px; border-radius: 999px;
+}
+.build-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--signal); animation: pulse-soft 2.6s ease-in-out infinite; }
+.build-chip.failing { color: var(--rose); background: var(--rose-dim); border-color: color-mix(in srgb, var(--rose) 30%, transparent); }
+.build-chip.failing .dot { background: var(--rose); animation: none; }
+
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 45%, transparent); }
+  55% { box-shadow: 0 0 0 5px transparent; }
+}
+
+/* avatars */
+.avatar {
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--panel);
+  display: grid; place-items: center; font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+  color: #0b0e14; margin-left: -7px; position: relative;
+}
+.avatar:first-child { margin-left: 0; }
+.avatar.a-priya { background: #8fd0a8; }
+.avatar.a-dele  { background: #86bfe8; }
+.avatar.a-mara  { background: #d3aef0; }
+.avatar.a-tomas { background: #f0c489; }
+.avatar.a-sana  { background: #f0a3b1; }
+.avatar .presence { position: absolute; right: -1px; bottom: -1px; width: 8px; height: 8px; border-radius: 50%; background: var(--signal); border: 2px solid var(--panel); }
+.avatar .presence.away { background: var(--ink-3); }
+.members-count { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); margin-left: 10px; }
+
+/* live indicators */
+.live-tag { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10.5px; color: var(--cyan); }
+.live-tag .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); animation: pulse-soft 2s ease-in-out infinite; }
+.node { width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2px solid var(--ink-3); display: inline-block; }
+.node.fork { border-color: var(--cyan); animation: node-blink 1.8s ease-in-out infinite; }
+.node.adopted { border-color: var(--signal); background: var(--signal); box-shadow: 0 0 10px color-mix(in srgb, var(--signal) 50%, transparent); }
+@keyframes node-blink { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cyan) 40%, transparent); } 50% { box-shadow: 0 0 0 5px transparent; } }
+
+.oc-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); animation: pulse-soft 2.4s ease-in-out infinite; display: inline-block; }
+
+/* environment rail rows: label quiet, value strong; icon chips softly
+   raised with a hairline ring; consistent 2px rhythm between rows */
+.env-row {
+  display: flex; align-items: center; gap: 10px; padding: 4px 8px; margin: 0 -8px;
+  border-radius: 8px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-2);
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+.env-row:hover { background: color-mix(in srgb, var(--panel-2) 75%, transparent); }
+.env-row + .env-row { margin-top: 2px; }
+.env-row .env-ico {
+  width: 22px; height: 22px; border-radius: 7px; border: 1px solid var(--line);
+  background: linear-gradient(to bottom, var(--panel-2), var(--panel));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent),
+    0 1px 2px color-mix(in srgb, var(--bg) 50%, transparent);
+  display: grid; place-items: center; color: var(--ink-2); flex-shrink: 0;
+}
+.env-row .env-ico svg { width: 11px; height: 11px; }
+.env-row .env-ico.ok { color: var(--signal); border-color: color-mix(in srgb, var(--signal) 26%, var(--line)); }
+.env-row .env-ico.fork { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 26%, var(--line)); }
+.env-row .env-ico.adopt { color: var(--signal); border-color: color-mix(in srgb, var(--signal) 26%, var(--line)); }
+.env-row a { color: var(--ink-2); text-decoration: none; }
+.env-row .env-val { margin-left: auto; min-width: 0; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.env-row .env-val.ok { color: var(--signal); }
+.env-row .env-val.hot { color: var(--cyan); }
+.env-row .mini-avs { display: flex; margin-left: auto; }
+.env-row .mini-avs .avatar { width: 16px; height: 16px; font-size: 6.5px; margin-left: -4px; border-width: 1.5px; }
+.env-row .mini-avs .avatar:first-child { margin-left: 0; }
+.env-rows-frame {
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--panel-2) 62%, transparent),
+    color-mix(in srgb, var(--panel-2) 30%, transparent));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent),
+    0 2px 6px color-mix(in srgb, var(--bg) 40%, transparent);
+}
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">Components - Chips, badges, avatars, live indicators</h1>
+<p class="doc-sub">A "failing" build-chip variant is added by inverting the same structure onto <code>--rose</code>, since direction-c2.html only shows the passing state; the shape (dot + pill) is unchanged. <code>--rose</code> is defined in the source root but never applied anywhere in direction-c2.html, so its use here for the failing state and for the rejected state chip is a reasonable but unverified extension (see README).</p>
+
+<div class="compare-wrap">
+  <div class="panel theme-dark">
+    <div class="panel-tag">● dark</div>
+
+    <div>
+      <div class="section-label">State badges</div>
+      <div class="row" style="margin-top:10px">
+        <span class="state-chip proposed">proposed</span>
+        <span class="state-chip forking">fork live</span>
+        <span class="state-chip review">in review</span>
+        <span class="state-chip adopted">adopted</span>
+        <span class="state-chip rejected">rejected</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Fork count / meta items</div>
+      <div class="row" style="margin-top:10px">
+        <span class="meta-item hot">fork in progress</span>
+        <span class="meta-item">2 forks</span>
+        <span class="meta-item">5 notes</span>
+        <span class="meta-item">2 / 3 adopt votes</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Build status chip</div>
+      <div class="row" style="margin-top:10px">
+        <span class="build-chip"><span class="dot"></span>build passing · 47 checks</span>
+        <span class="build-chip failing"><span class="dot"></span>build failing · 3 checks</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Member avatars</div>
+      <div class="row" style="margin-top:10px">
+        <div style="display:flex;align-items:center">
+          <div class="avatar a-priya">PR<span class="presence"></span></div>
+          <div class="avatar a-dele">DO<span class="presence"></span></div>
+          <div class="avatar a-mara">MJ<span class="presence"></span></div>
+          <div class="avatar a-tomas">TR<span class="presence"></span></div>
+          <div class="avatar a-sana">SQ<span class="presence away"></span></div>
+        </div>
+        <span class="members-count">4 in the lab</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Pulsing live indicators</div>
+      <div class="row" style="margin-top:10px">
+        <span class="live-tag"><span class="dot"></span>2 signals live</span>
+        <span class="node fork"></span>
+        <span class="node adopted"></span>
+        <span class="oc-dot"></span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Environment rail rows</div>
+      <div class="env-rows-frame" style="margin-top:10px">
+        <div class="env-row">
+          <span class="env-ico"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></span>
+          <a href="#">nightmarket/app</a>
+          <span class="env-val">main @ e41f8c2</span>
+        </div>
+        <div class="env-row">
+          <span class="env-ico ok"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8.5l3.5 3.5 7.5-8"/></svg></span>
+          <span>build</span>
+          <span class="env-val ok">passing · 47 checks</span>
+        </div>
+        <div class="env-row">
+          <span class="env-ico fork"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></span>
+          <span>forks in flight</span>
+          <span class="env-val hot">1 · sq/geo-onboard</span>
+        </div>
+        <div class="env-row">
+          <span class="env-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M6 8h6a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2z"/><circle cx="7.2" cy="11.5" r="0.5" fill="currentColor"/><circle cx="10.8" cy="11.5" r="0.5" fill="currentColor"/></svg></span>
+          <span>agents working</span>
+          <span class="mini-avs">
+            <span class="avatar a-tomas">TR</span>
+            <span class="avatar a-sana">SQ</span>
+          </span>
+        </div>
+        <div class="env-row">
+          <span class="env-ico adopt"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2l1.6 3.6L13 6.4l-2.5 2.6.6 3.8L8 11l-3.1 1.8.6-3.8L3 6.4l3.4-.8z"/></svg></span>
+          <span>last adopted</span>
+          <span class="env-val">stall map clustering · 18m</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel theme-light">
+    <div class="panel-tag">● light</div>
+
+    <div>
+      <div class="section-label">State badges</div>
+      <div class="row" style="margin-top:10px">
+        <span class="state-chip proposed">proposed</span>
+        <span class="state-chip forking">fork live</span>
+        <span class="state-chip review">in review</span>
+        <span class="state-chip adopted">adopted</span>
+        <span class="state-chip rejected">rejected</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Fork count / meta items</div>
+      <div class="row" style="margin-top:10px">
+        <span class="meta-item hot">fork in progress</span>
+        <span class="meta-item">2 forks</span>
+        <span class="meta-item">5 notes</span>
+        <span class="meta-item">2 / 3 adopt votes</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Build status chip</div>
+      <div class="row" style="margin-top:10px">
+        <span class="build-chip"><span class="dot"></span>build passing · 47 checks</span>
+        <span class="build-chip failing"><span class="dot"></span>build failing · 3 checks</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Member avatars</div>
+      <div class="row" style="margin-top:10px">
+        <div style="display:flex;align-items:center">
+          <div class="avatar a-priya">PR<span class="presence"></span></div>
+          <div class="avatar a-dele">DO<span class="presence"></span></div>
+          <div class="avatar a-mara">MJ<span class="presence"></span></div>
+          <div class="avatar a-tomas">TR<span class="presence"></span></div>
+          <div class="avatar a-sana">SQ<span class="presence away"></span></div>
+        </div>
+        <span class="members-count">4 in the lab</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Pulsing live indicators</div>
+      <div class="row" style="margin-top:10px">
+        <span class="live-tag"><span class="dot"></span>2 signals live</span>
+        <span class="node fork"></span>
+        <span class="node adopted"></span>
+        <span class="oc-dot"></span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Environment rail rows</div>
+      <div class="env-rows-frame" style="margin-top:10px">
+        <div class="env-row">
+          <span class="env-ico"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></span>
+          <a href="#">nightmarket/app</a>
+          <span class="env-val">main @ e41f8c2</span>
+        </div>
+        <div class="env-row">
+          <span class="env-ico ok"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8.5l3.5 3.5 7.5-8"/></svg></span>
+          <span>build</span>
+          <span class="env-val ok">passing · 47 checks</span>
+        </div>
+        <div class="env-row">
+          <span class="env-ico fork"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v6a3 3 0 0 0 3 3h3"/><circle cx="5" cy="2.5" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></span>
+          <span>forks in flight</span>
+          <span class="env-val hot">1 · sq/geo-onboard</span>
+        </div>
+        <div class="env-row">
+          <span class="env-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M6 8h6a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2z"/><circle cx="7.2" cy="11.5" r="0.5" fill="currentColor"/><circle cx="10.8" cy="11.5" r="0.5" fill="currentColor"/></svg></span>
+          <span>agents working</span>
+          <span class="mini-avs">
+            <span class="avatar a-tomas">TR</span>
+            <span class="avatar a-sana">SQ</span>
+          </span>
+        </div>
+        <div class="env-row">
+          <span class="env-ico adopt"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2l1.6 3.6L13 6.4l-2.5 2.6.6 3.8L8 11l-3.1 1.8.6-3.8L3 6.4l3.4-.8z"/></svg></span>
+          <span>last adopted</span>
+          <span class="env-val">stall map clustering · 18m</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

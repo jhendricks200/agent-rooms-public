@@ -1,0 +1,3404 @@
+/* ============================================================
+   Agent Rooms - Signal Lab v2 design tokens + base styles.
+
+   Ported from design/ds/tokens-v2.css (the measured token source)
+   and the five accepted v2 screen comps in design/. screen-room.html
+   is the primary reference for the room; screen-signin.html is the
+   source for the light theme, which the v2 revision did not draw and
+   which is derived there from the v1 light ramp with the v2 roles
+   mapped onto it.
+
+   The system in one line: panels carry no border and separate from
+   the page by fill plus one of three shadow tiers; body copy is
+   near-white and metadata is gray, two ink levels only; section
+   headings are quieter than the content beneath them; line measure
+   is capped in pixels, not ch.
+
+   Dark is the native theme; light applies via [data-theme="light"]
+   on the root element, set before paint by the inline script in
+   layout.tsx. Names the app already depended on are kept and
+   re-pointed at their v2 values so components keep working.
+   ============================================================ */
+
+:root {
+  /* ---------- Type families ----------
+     Do not reorder: leading with Manrope makes Apple machines render
+     SF anyway and hides the type adjustments. Manrope is not yet
+     self-hosted, so it acts as the cross-platform fallback only. */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Manrope, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ---------- Surfaces ----------
+     --panel is the app chrome base (header, agent column, gradients);
+     --panel-card is the v2 panel fill that cards and modals sit on. */
+  --bg: #0b0e14;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(84, 118, 168, 0.10), transparent 68%);
+  --rail: #0d1119;
+  --panel: #10141d;
+  --panel-card: #171d2e;
+  --row: #141926;
+  --field: #1a2132;
+  --panel-sunken: rgba(20, 25, 38, 0.5);
+  --composer-bg: rgba(23, 29, 44, 0.7);
+  --profile-bg: rgba(23, 29, 44, 0.72);
+  --inset-top: inset 0 1px 0 rgba(148, 168, 205, 0.06);
+  --avatar-ring: #10141d;
+  --avatar-ink: #0b0e14;
+  /* Glyph punched out of a solid emblem. Dark theme tones are bright,
+     so the glyph is near-black; the light theme flips it below. */
+  --emblem-ink: #0b0e14;
+  --scrim: rgba(0, 0, 0, 0.62);
+
+  /* Legacy names, re-pointed at the v2 surfaces */
+  --panel-2: var(--row);
+  --card: var(--panel-card);
+  --card-hover: var(--panel-card);
+  --panel-raised: var(--panel-card);
+  --modal-bg: var(--panel-card);
+  --input-bg: var(--field);
+
+  /* ---------- Lines ----------
+     Hairlines survive only on true structural dividers, inputs,
+     badges, and quiet buttons. Panels carry no border. */
+  --line: rgba(148, 168, 205, 0.13);
+  --line-strong: rgba(148, 168, 205, 0.22);
+  --line-field: rgba(148, 168, 205, 0.17);
+  --hairline: var(--line);
+  --field-border: var(--line-field);
+
+  /* ---------- Ink ----------
+     Two levels do the work: near-white body copy against gray
+     metadata, never gray on gray. --ink-3 is folded into --ink-2 so
+     every existing third-gray consumer lands on the metadata gray.
+     #8b9ab6 survives on field labels only; #5f6c85 survives only as
+     the fill of an ancestor lineage dot. */
+  --ink: #e6ebf5;
+  --ink-2: #9aa7bf;
+  --ink-3: #9aa7bf;
+  --label-ink: #8b9ab6;
+  --dot-ancestor: #5f6c85;
+
+  /* ---------- Signal colors ---------- */
+  --signal: #4ade80;
+  --signal-dim: rgba(74, 222, 128, 0.14);
+  --amber: #fbbf5e;
+  --amber-dim: rgba(251, 191, 94, 0.13);
+  --cyan: #53c5f0;
+  --cyan-bright: #7ad3f5;
+  --cyan-dim: rgba(83, 197, 240, 0.13);
+  --violet: #b18cf5;
+  --violet-dim: rgba(177, 140, 245, 0.14);
+  --rose: #f77c8f;
+  --rose-dim: rgba(247, 124, 143, 0.14);
+  --selection: rgba(83, 197, 240, 0.26);
+  --neutral-emblem: #e6ebf5;
+
+  /* ---------- Inverted + gradient action fills ---------- */
+  --invert-fill: #f6f9ff;
+  --invert-ink: #05070a;
+  --grad-cyan: linear-gradient(160deg, #7ad3f5, #53c5f0);
+  --grad-cyan-ink: #04121a;
+  --grad-signal: linear-gradient(160deg, #5fe693, #4ade80);
+  --grad-signal-ink: #08110b;
+  --brand-mark-fill: linear-gradient(140deg, #1d2b3f, #101724);
+  --brand-keystone: #e7e9ee;
+  --agent-tile-fill: linear-gradient(140deg, rgba(83, 197, 240, 0.14), #141926);
+  --agent-tile-line: rgba(83, 197, 240, 0.2);
+  --btn-punch-fill: var(--invert-fill);
+  --btn-punch-ink: var(--invert-ink);
+  --send-fill: var(--invert-fill);
+  --send-ink: var(--invert-ink);
+  --bubble-own-bg: #1d2437;
+  --bubble-own-border: transparent;
+  --bubble-own-ink: #eef2fa;
+
+  /* ---------- Elevation: three tiers, no panel borders ----------
+     tier 1  resting panels (cards, notes, the environment panel)
+     tier 2  raised panels (hovered card, sidebars, composers)
+     tier 3  floating (modals) */
+  --shadow-1:
+    inset 0 1px 0 rgba(148, 168, 205, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 6px 18px rgba(3, 6, 12, 0.28);
+  --shadow-2:
+    inset 0 1px 0 rgba(148, 168, 205, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(3, 6, 12, 0.36),
+    0 24px 52px rgba(3, 6, 12, 0.28);
+  --shadow-3:
+    0 1px 0 rgba(148, 168, 205, 0.07) inset,
+    0 2px 4px rgba(0, 0, 0, 0.28),
+    0 20px 48px rgba(2, 4, 9, 0.55),
+    0 44px 96px rgba(2, 4, 9, 0.42);
+  --shadow-card: var(--shadow-1);
+  --shadow-chat: var(--shadow-1);
+  --shadow-float: var(--shadow-3);
+  --glow-adopt: 0 0 34px rgba(74, 222, 128, 0.10);
+  --glow-live: 0 0 8px rgba(74, 222, 128, 0.7);
+
+  /* ---------- Fields ---------- */
+  --shadow-field: inset 0 1px 3px rgba(0, 0, 0, 0.26);
+  --shadow-input: var(--shadow-field);
+  --focus-ring: 0 0 0 3px rgba(83, 197, 240, 0.24);
+  --focus-border: rgba(83, 197, 240, 0.4);
+
+  /* ---------- Buttons ---------- */
+  --shadow-invert: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 22px rgba(11, 14, 20, 0.55);
+  --shadow-btn-cyan: 0 1px 0 rgba(0, 0, 0, 0.2), 0 4px 16px rgba(83, 197, 240, 0.22);
+  --shadow-btn-signal: 0 1px 0 rgba(0, 0, 0, 0.2), 0 4px 16px rgba(74, 222, 128, 0.22);
+
+  /* ---------- Emblem recipe ---------- */
+  --emblem-size: 26px;
+
+  /* ---------- Radii: 14-20px on surfaces, 10-12px on rows ---------- */
+  --radius-keycap: 4px;
+  --radius-badge: 5px;
+  --radius-mark: 7px;
+  --radius-tile: 8px;
+  --radius-select: 9px;
+  --radius-row: 10px;
+  --radius-field: 11px;
+  --radius: 12px;
+  --radius-disclosure: 14px;
+  --radius-panel: 16px;
+  --radius-panel-lg: 18px;
+  --radius-panel-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ---------- Line measure: pixel caps, not ch ---------- */
+  --measure: 560px;
+  --measure-sub: 470px;
+  --measure-card: 500px;
+  --measure-agent: 215px;
+
+  /* ---------- Layout ---------- */
+  --feed-w: 716px;
+  --rail-w: 216px;
+  --agent-w: 316px;
+  --header-h: 54px;
+
+  color-scheme: dark;
+}
+
+/* Light theme. Derived in design/screen-signin.html and
+   design/screen-room.html from the v1 light ramp with the v2 roles
+   mapped onto it. Panels stay borderless: in light the separation
+   comes from a white fill on a warm gray page plus a much shallower
+   shadow, since a dark halo reads as dirt here. */
+:root[data-theme="light"] {
+  --bg: #f3f4f0;
+  --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+  --rail: #ecede8;
+  --panel: #fafaf7;
+  --panel-card: #ffffff;
+  --row: #f0f1ec;
+  --field: #edeee8;
+  --panel-sunken: rgba(236, 237, 232, 0.72);
+  --composer-bg: rgba(240, 241, 236, 0.8);
+  --profile-bg: rgba(240, 241, 236, 0.85);
+  --inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --avatar-ring: #ffffff;
+  --avatar-ink: #12181f;
+  --emblem-ink: #ffffff;
+  --scrim: rgba(12, 16, 24, 0.55);
+
+  --line: rgba(48, 62, 88, 0.13);
+  --line-strong: rgba(48, 62, 88, 0.24);
+  --line-field: rgba(48, 62, 88, 0.16);
+
+  --ink: #1c2433;
+  --ink-2: #55617a;
+  --ink-3: #55617a;
+  --label-ink: #6b7690;
+  --dot-ancestor: #8b96ab;
+
+  --signal: #14934e;
+  --signal-dim: rgba(20, 147, 78, 0.1);
+  --amber: #9a6106;
+  --amber-dim: rgba(154, 97, 6, 0.1);
+  --cyan: #0f7fb0;
+  --cyan-bright: #0b6a93;
+  --cyan-dim: rgba(15, 127, 176, 0.09);
+  --violet: #7048c8;
+  --violet-dim: rgba(112, 72, 200, 0.09);
+  --rose: #c94b60;
+  --rose-dim: rgba(201, 75, 96, 0.1);
+  --selection: rgba(15, 127, 176, 0.2);
+  --neutral-emblem: #55617a;
+
+  --invert-fill: #141b28;
+  --invert-ink: #ffffff;
+  --grad-cyan: linear-gradient(160deg, #1594c9, #0f7fb0);
+  --grad-cyan-ink: #ffffff;
+  --grad-signal: linear-gradient(160deg, #17a758, #14934e);
+  --grad-signal-ink: #ffffff;
+  --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+  --brand-keystone: #14161b;
+  --agent-tile-fill: linear-gradient(140deg, rgba(15, 127, 176, 0.1), #f0f1ec);
+  --agent-tile-line: rgba(15, 127, 176, 0.22);
+  --bubble-own-bg: #1c2433;
+  --bubble-own-ink: #f6f7f4;
+
+  --shadow-1:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 4px 12px rgba(28, 36, 51, 0.05);
+  --shadow-2:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(28, 36, 51, 0.05),
+    0 8px 20px rgba(28, 36, 51, 0.07),
+    0 22px 48px rgba(28, 36, 51, 0.05);
+  --shadow-3:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px rgba(28, 36, 51, 0.06),
+    0 16px 38px rgba(28, 36, 51, 0.1),
+    0 34px 70px rgba(28, 36, 51, 0.07);
+  --glow-adopt: 0 0 30px rgba(20, 147, 78, 0.09);
+  --glow-live: 0 0 8px rgba(20, 147, 78, 0.4);
+
+  --shadow-field: inset 0 1px 3px rgba(28, 36, 51, 0.07);
+  --focus-ring: 0 0 0 3px rgba(15, 127, 176, 0.2);
+  --focus-border: rgba(15, 127, 176, 0.5);
+
+  --shadow-invert: 0 1px 2px rgba(28, 36, 51, 0.16), 0 8px 24px rgba(28, 36, 51, 0.18);
+  --shadow-btn-cyan: 0 1px 0 rgba(28, 36, 51, 0.08), 0 4px 16px rgba(15, 127, 176, 0.2);
+  --shadow-btn-signal: 0 1px 0 rgba(28, 36, 51, 0.08), 0 4px 16px rgba(20, 147, 78, 0.2);
+
+  color-scheme: light;
+}
+
+/* No-JS fallback. layout.tsx sets data-theme before paint, so this only
+   applies when that script has not run. Values mirror the block above. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]):not([data-theme="light"]) {
+    --bg: #f3f4f0;
+    --bg-glow: radial-gradient(1100px 520px at 34% -10%, rgba(70, 96, 138, 0.06), transparent 68%);
+    --rail: #ecede8;
+    --panel: #fafaf7;
+    --panel-card: #ffffff;
+    --row: #f0f1ec;
+    --field: #edeee8;
+    --panel-sunken: rgba(236, 237, 232, 0.72);
+    --composer-bg: rgba(240, 241, 236, 0.8);
+    --profile-bg: rgba(240, 241, 236, 0.85);
+    --inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    --avatar-ring: #ffffff;
+    --avatar-ink: #12181f;
+    --emblem-ink: #ffffff;
+    --scrim: rgba(12, 16, 24, 0.55);
+    --line: rgba(48, 62, 88, 0.13);
+    --line-strong: rgba(48, 62, 88, 0.24);
+    --line-field: rgba(48, 62, 88, 0.16);
+    --ink: #1c2433;
+    --ink-2: #55617a;
+    --ink-3: #55617a;
+    --label-ink: #6b7690;
+    --dot-ancestor: #8b96ab;
+    --signal: #14934e;
+    --signal-dim: rgba(20, 147, 78, 0.1);
+    --amber: #9a6106;
+    --amber-dim: rgba(154, 97, 6, 0.1);
+    --cyan: #0f7fb0;
+    --cyan-bright: #0b6a93;
+    --cyan-dim: rgba(15, 127, 176, 0.09);
+    --violet: #7048c8;
+    --violet-dim: rgba(112, 72, 200, 0.09);
+    --rose: #c94b60;
+    --rose-dim: rgba(201, 75, 96, 0.1);
+    --selection: rgba(15, 127, 176, 0.2);
+    --neutral-emblem: #55617a;
+    --invert-fill: #141b28;
+    --invert-ink: #ffffff;
+    --grad-cyan: linear-gradient(160deg, #1594c9, #0f7fb0);
+    --grad-cyan-ink: #ffffff;
+    --grad-signal: linear-gradient(160deg, #17a758, #14934e);
+    --grad-signal-ink: #ffffff;
+    --brand-mark-fill: linear-gradient(140deg, #e8ecf2, #f6f7f4);
+    --brand-keystone: #14161b;
+    --agent-tile-fill: linear-gradient(140deg, rgba(15, 127, 176, 0.1), #f0f1ec);
+    --agent-tile-line: rgba(15, 127, 176, 0.22);
+    --bubble-own-bg: #1c2433;
+    --bubble-own-ink: #f6f7f4;
+    --shadow-1:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      0 1px 2px rgba(28, 36, 51, 0.05),
+      0 4px 12px rgba(28, 36, 51, 0.05);
+    --shadow-2:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      0 1px 2px rgba(28, 36, 51, 0.05),
+      0 8px 20px rgba(28, 36, 51, 0.07),
+      0 22px 48px rgba(28, 36, 51, 0.05);
+    --shadow-3:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 2px 4px rgba(28, 36, 51, 0.06),
+      0 16px 38px rgba(28, 36, 51, 0.1),
+      0 34px 70px rgba(28, 36, 51, 0.07);
+    --glow-adopt: 0 0 30px rgba(20, 147, 78, 0.09);
+    --glow-live: 0 0 8px rgba(20, 147, 78, 0.4);
+    --shadow-field: inset 0 1px 3px rgba(28, 36, 51, 0.07);
+    --focus-ring: 0 0 0 3px rgba(15, 127, 176, 0.2);
+    --focus-border: rgba(15, 127, 176, 0.5);
+    --shadow-invert: 0 1px 2px rgba(28, 36, 51, 0.16), 0 8px 24px rgba(28, 36, 51, 0.18);
+    --shadow-btn-cyan: 0 1px 0 rgba(28, 36, 51, 0.08), 0 4px 16px rgba(15, 127, 176, 0.2);
+    --shadow-btn-signal: 0 1px 0 rgba(28, 36, 51, 0.08), 0 4px 16px rgba(20, 147, 78, 0.2);
+    color-scheme: light;
+  }
+}
+
+/* ================= BASE ================= */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* The room shell is viewport-height-locked: html/body never scroll, and
+   .app fills exactly one dvh so the composer is always on screen without
+   the page itself scrolling. Each column below manages its own overflow. */
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+button, input, textarea, select {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--selection); }
+
+:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: 0;
+}
+
+/* ================= EMBLEM ================= */
+/* 26px circle, SOLID fill, dark glyph. Color is assigned by meaning:
+   green for a passing build and adoption, amber for room identity, cyan
+   for forks and actions, violet for lineage, rose for a failing build,
+   neutral for an identity row carrying no state.
+
+   These used to be a low-alpha tint of the tone over the panel, with a
+   ring and a glow doing the work. Stacked in a column that read as
+   glass: four half-lit discs the panel showed through, none of them
+   quite an object. They are objects now. The fill is the tone at full
+   strength and opaque, the glyph is punched out of it in the app's
+   near-black ink, and a soft top-light plus a hairline bottom shadow
+   give the disc a direction so it sits on the panel rather than
+   floating in it. Nothing here is transparent.
+
+   There is no outer glow, on any row, in any state. It was tried twice:
+   once on every disc, then reserved for the rows carrying live values.
+   Both read as light leaking out of the shape and softening the edge
+   the solid fill exists to give it. Liveness is carried by the value
+   instead, where the reader is already looking: green "passing", the
+   avatar stack on a working row, the pulsing dot in the panel header. */
+
+.emblem {
+  --tone: var(--neutral-emblem);
+  width: var(--emblem-size); height: var(--emblem-size);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: var(--emblem-ink, #0b0e14);
+  background: var(--tone);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(3, 6, 12, 0.45);
+}
+.emblem svg { width: 13px; height: 13px; }
+.emblem svg path,
+.emblem svg circle { vector-effect: non-scaling-stroke; }
+
+.emblem.e-build,
+.emblem.e-adopted { --tone: var(--signal); }
+.emblem.e-fail { --tone: var(--rose); }
+.emblem.e-fork,
+.emblem.e-action { --tone: var(--cyan); }
+.emblem.e-lineage { --tone: var(--violet); }
+.emblem.e-room { --tone: var(--amber); }
+.emblem.e-room svg { width: 14px; height: 14px; }
+
+/* Identity rows carry no state. Still solid, still an object, but in a
+   muted slate rather than a signal color, so the colored discs keep
+   their meaning. */
+.emblem.e-repo,
+.emblem.e-none { --tone: #5f6c85; }
+.emblem.e-repo svg { width: 14px; height: 14px; }
+
+/* ================= APP SHELL ================= */
+
+.app {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  /* minmax(0, 1fr), not a bare 1fr: a grid row's implicit min size is
+     "auto" (based on content), which lets the row grow past the viewport
+     and push the composer off-screen. minmax(0, ...) is the grid
+     equivalent of min-height: 0 on a flex child. */
+  grid-template-rows: var(--header-h) minmax(0, 1fr);
+  /* --agent-col-w is the user's dragged width, written on the root element
+     by the pre-paint script in layout.tsx and by AgentPaneResizer. It falls
+     back to the design default, and the narrow breakpoints below simply
+     re-declare the columns, so a stored width never applies there. */
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--agent-col-w, var(--agent-w));
+  grid-template-areas:
+    "rail header header"
+    "rail feed   agent";
+  height: 100dvh;
+  max-width: 1680px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* ================= LEFT NAV RAIL ================= */
+
+.rail {
+  grid-area: rail;
+  background: var(--rail);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px 10px 12px;
+  transition: background 0.35s ease;
+}
+
+.rail-brand {
+  display: flex; align-items: center; gap: 9px;
+  padding: 2px 8px 16px;
+}
+.rail-brand .mark {
+  width: 24px; height: 24px;
+  display: block;
+  flex-shrink: 0;
+}
+.rail-brand .word {
+  font-size: 13px;
+  font-weight: 600;
+}
+.rail-brand .spacer { flex: 1; }
+.rail-search-btn {
+  width: 26px; height: 26px;
+  border-radius: var(--radius-mark);
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.rail-search-btn:hover:not(:disabled) { color: var(--ink); background: var(--row); }
+.rail-search-btn svg { width: 14px; height: 14px; }
+
+.rail-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radius-row);
+  font-size: 14px;
+  color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, color 0.15s ease;
+  position: relative;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+.rail-item:hover:not(:disabled) { background: var(--row); color: var(--ink); }
+.rail-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.8; }
+/* Selected room. The green edge marker from v1 is gone: green means
+   adoption and passing builds, not "you are here". */
+.rail-item.active {
+  background: var(--row);
+  color: var(--ink);
+  font-weight: 600;
+}
+.rail-item .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+.rail-item .unread {
+  margin-left: auto;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+}
+
+/* The new-room row is the one solid-edged control in the rail. Its hover
+   carries no green: green means adoption and passing builds. */
+.rail-new {
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--row);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-tile);
+}
+.rail-new:hover:not(:disabled) { background: var(--panel-card); color: var(--ink); }
+.rail-new svg { width: 13px; height: 13px; }
+
+/* A control the build does not implement yet is drawn as deliberately
+   inert: the same row, dimmed, with no hover and no pointer. It is a real
+   disabled button, so it cannot be clicked or focused - the dimming is the
+   visible half of a fact the DOM already states. Matches .mini-btn:disabled. */
+.rail-item:disabled,
+.rail-search-btn:disabled,
+.rc-icon-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Section headings are quieter than the rows beneath them. */
+.rail-section {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  padding: 18px 9px 6px;
+}
+
+.rail-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  margin: 0 -2px;
+  padding: 0 2px;
+}
+
+.rail-foot { padding-top: 10px; }
+.rail-profile {
+  display: flex; align-items: center; gap: 11px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--profile-bg);
+  box-shadow: var(--inset-top);
+  transition: background 0.16s ease;
+}
+.rail-profile:hover { background: var(--panel-card); }
+.rail-profile .avatar { margin-left: 0; border-width: 0; width: 30px; height: 30px; font-size: 10.5px; }
+.rail-profile .who { flex: 1; min-width: 0; line-height: 1.3; }
+.rail-profile .who .nm {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.rail-profile .who .plan {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.16s ease;
+}
+.rail-profile .who .plan:hover { color: var(--ink); }
+
+.theme-toggle {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+/* ================= ROOM HEADER ================= */
+
+.room-header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  backdrop-filter: blur(10px);
+  min-width: 0;
+}
+
+.room-title {
+  display: flex; flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+.room-title h1 {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.room-title h1 .room-kind {
+  color: var(--ink-2);
+  font-weight: 500;
+  margin-left: 7px;
+  font-size: 12px;
+}
+.room-title .room-line {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+.header-spacer { flex: 1; }
+
+.members {
+  display: flex; align-items: center;
+  flex-shrink: 0;
+}
+/* The header stack is the comp's small stack: 20px discs, 2px ring in
+   the surface color, overlapping by 8px. */
+.members .avatar {
+  width: 20px; height: 20px;
+  font-size: 8px;
+  margin-left: -8px;
+}
+.members .avatar:first-child { margin-left: 0; }
+.members .avatar .presence {
+  width: 7px; height: 7px;
+  border-width: 1.5px;
+}
+.avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--avatar-ring);
+  display: grid; place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--avatar-ink);
+  margin-left: -7px;
+  position: relative;
+  transition: transform 0.18s ease;
+}
+.avatar:first-child { margin-left: 0; }
+.members:hover .avatar { transform: translateY(-1px); }
+.avatar.a-priya { background: #8fd0a8; }
+.avatar.a-dele  { background: #86bfe8; }
+.avatar.a-mara  { background: #d3aef0; }
+.avatar.a-tomas { background: #f0c489; }
+.avatar.a-sana  { background: #f0a3b1; }
+.avatar.a-default { background: #b7c2d6; }
+.avatar .presence {
+  position: absolute; right: -1px; bottom: -1px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--signal);
+  border: 2px solid var(--avatar-ring);
+}
+.avatar .presence.away { background: var(--ink-2); }
+
+.members-count {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-left: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ================= FEED ================= */
+
+.feed-pane {
+  grid-area: feed;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.feed-scroll-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.feed-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 26px 34px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.jump-latest-pill {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--composer-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-float);
+  animation: jump-pill-in 0.2s ease both;
+  z-index: 3;
+}
+.jump-latest-pill:hover { background: var(--row); border-color: var(--cyan); color: var(--cyan); }
+.jump-latest-pill svg { width: 13px; height: 13px; }
+@keyframes jump-pill-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.feed-inner { max-width: 720px; margin: 0 auto; }
+
+.feed-top {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 6px;
+}
+/* Deliberately quieter than the stream under it. */
+.feed-top h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+.live-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--cyan);
+}
+/* --cyan text at 13.5px measures 4.06:1 on the light --bg, below AA's
+   4.5:1. --cyan-bright is already the next-darker step in the light ramp
+   (5.4:1 here); the dot stays on --cyan since it is decorative, not text,
+   and the dark theme is untouched. */
+:root[data-theme="light"] .live-tag { color: var(--cyan-bright); }
+.live-tag .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan);
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 45%, transparent); }
+  55% { box-shadow: 0 0 0 5px transparent; }
+}
+.feed-top .spacer { flex: 1; }
+.feed-sub {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: var(--measure);
+  margin-bottom: 22px;
+}
+
+/* Timeline spine */
+.feed-stream {
+  position: relative;
+  display: flex; flex-direction: column; gap: 18px;
+  padding-left: 24px;
+}
+.feed-stream::before {
+  content: "";
+  position: absolute;
+  left: 5px; top: 10px; bottom: 10px;
+  width: 1px;
+  background: linear-gradient(to bottom,
+    transparent,
+    var(--line) 8%,
+    var(--line) 92%,
+    transparent);
+}
+
+.node {
+  position: absolute;
+  left: -24px;
+  top: 22px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--dot-ancestor);
+  z-index: 2;
+}
+.card { position: relative; display: block; }
+.card-body-link { display: block; cursor: pointer; }
+/* Timeline semantic: a filled dot is an event (proposed, fork, review,
+   rejection, adoption); a smaller hollow dot (used on .chat-msg) is a
+   plain chat message. */
+.card .node { background: var(--dot-ancestor); }
+.card.state-proposed .node { border-color: var(--amber); background: var(--amber); }
+.card.state-fork .node { border-color: var(--cyan); background: var(--cyan); animation: node-blink 1.8s ease-in-out infinite; }
+.card.state-review .node { border-color: var(--violet); background: var(--violet); }
+.card.state-rejected .node { border-color: var(--rose); background: var(--rose); }
+.card.state-adopted .node {
+  border-color: var(--signal);
+  background: var(--signal);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--signal) 50%, transparent);
+}
+@keyframes node-blink {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cyan) 40%, transparent); }
+  50% { box-shadow: 0 0 0 5px transparent; }
+}
+
+/* A panel carries no border. It separates from the page by fill plus a
+   shadow tier, and from a sibling panel by whitespace. Hover raises the
+   tier rather than lighting up an outline. */
+.card-body {
+  background: var(--panel-card);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 17px 20px 15px;
+  transition: transform 0.18s ease, box-shadow 0.2s ease;
+}
+.card:hover .card-body {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-1px);
+}
+
+.card-head {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 8px;
+}
+.card-head .avatar {
+  width: 22px; height: 22px; margin-left: 0;
+  border-width: 0;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+.byline { font-size: 13.5px; color: var(--ink-2); min-width: 0; }
+.byline b { color: var(--ink); font-weight: 600; }
+.card-head .spacer { flex: 1; }
+.timestamp {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+/* State badge. A hairline survives here: this is a badge, not a panel. */
+.state-chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3.5px 9px;
+  border-radius: var(--radius-mark);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.state-chip.proposed { color: var(--amber); background: var(--amber-dim); border-color: color-mix(in srgb, var(--amber) 25%, transparent); }
+.state-chip.forking  { color: var(--cyan);  background: var(--cyan-dim);  border-color: color-mix(in srgb, var(--cyan) 25%, transparent); }
+.state-chip.review   { color: var(--violet); background: var(--violet-dim); border-color: color-mix(in srgb, var(--violet) 25%, transparent); }
+.state-chip.adopted  { color: var(--signal); background: var(--signal-dim); border-color: color-mix(in srgb, var(--signal) 30%, transparent); }
+.state-chip.rejected { color: var(--rose); background: var(--rose-dim); border-color: color-mix(in srgb, var(--rose) 25%, transparent); }
+.state-chip.superseded { color: var(--ink-2); background: var(--row); border-color: var(--line); }
+
+.intent {
+  font-size: 17.5px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin-bottom: 6px;
+  text-wrap: balance;
+}
+.summary {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 14px;
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+
+/* Edged note, the v2 treatment: a left edge in the token color, a quiet
+   lead line, near-white body. No mono uppercase micro-label. */
+.remix-note,
+.rejection-note {
+  border-left: 2px solid var(--violet);
+  background: var(--panel-sunken);
+  border-radius: 0 var(--radius-field) var(--radius-field) 0;
+  padding: 12px 16px 13px;
+  margin-bottom: 14px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.rejection-note { border-left-color: var(--rose); }
+.remix-note .rn-label,
+.rejection-note .rn-label {
+  font-size: 13px;
+  color: var(--ink-2);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.card-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 9px 16px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+.meta-item { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+a.meta-item { cursor: pointer; transition: color 0.15s ease; }
+a.meta-item:hover { color: var(--ink); }
+.meta-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+.meta-item.hot { color: var(--cyan); }
+/* Green here is the adoption fact itself, not decoration. */
+.meta-item.adopted { color: var(--signal); }
+.card-meta .spacer { flex: 1; }
+
+/* Quiet button: a hairline survives here, because this is a control. */
+.mini-btn {
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  padding: 6px 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.mini-btn:hover:not(:disabled) { border-color: var(--line-strong); color: var(--ink); background: var(--row); }
+.mini-btn:disabled { opacity: 0.55; cursor: default; }
+.mini-btn.primary { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 32%, transparent); }
+.mini-btn.primary:hover:not(:disabled) { background: var(--cyan-dim); color: var(--cyan-bright); }
+
+/* A SHA is a fact in the metadata line, not a chip. The comps set it in
+   mono at the metadata gray with no box around it. */
+.hash {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+/* ============ CHAT MESSAGES: ON THE SPINE ============
+
+   screen-room.html draws chat as talk on the room's chronological axis,
+   not as a messaging app: a small hollow node on the spine, an avatar +
+   name + time header once per consecutive run, and the body indented to
+   the text column beneath it. No bubble, and no color-coded "mine" -
+   proposal cards are the panels in this feed, chat is the connective
+   tissue between them. */
+
+.chat-msg {
+  position: relative;
+  padding: 2px 2px 2px 0;
+}
+.chat-msg .node {
+  top: 7px;
+  left: -24px;
+  width: 7px; height: 7px;
+  background: var(--bg);
+  border: 1.5px solid var(--line-strong);
+}
+.chat-msg.grouped { margin-top: -12px; }
+
+.chat-head {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 3px;
+}
+.chat-head .avatar {
+  width: 22px; height: 22px; margin-left: 0;
+  border-width: 0;
+  font-size: 8.5px;
+}
+.chat-head .who { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+.chat-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: var(--measure);
+  padding-left: 31px;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+.chat-text .mention { color: var(--cyan); }
+
+/* ---- optimistic sends ----
+   A message the user just sent renders here immediately, dimmed while the
+   POST is in flight and marked in the rose failure tone if it never
+   landed, with the text still on screen and a retry beside it. Matches
+   the agent composer's "working…" line and its red network-error line, so
+   the two composers behave alike. */
+.chat-msg.outbox.sending { opacity: 0.55; }
+.chat-msg.outbox .timestamp { font-style: italic; }
+.chat-msg.outbox.failed .timestamp { color: var(--rose); font-style: normal; }
+.chat-msg.outbox.failed .chat-text { color: var(--ink-2); }
+.chat-failed {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 6px;
+  padding-left: 31px;
+}
+.chat-failed-msg {
+  font-size: 13px;
+  color: var(--rose);
+}
+.chat-retry {
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--rose) 40%, var(--line));
+  border-radius: var(--radius-pill);
+  padding: 3.5px 11px;
+  cursor: pointer;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+.chat-retry:hover { background: var(--rose-dim); border-color: var(--rose); }
+.chat-retry.ghost { color: var(--ink-2); border-color: var(--line); }
+.chat-retry.ghost:hover { color: var(--ink); background: var(--row); border-color: var(--line-strong); }
+
+/* ============ ROOM COMPOSER (group chat input) ============ */
+
+.room-composer {
+  flex-shrink: 0;
+  padding: 8px 34px 20px;
+}
+.room-composer .rc-box {
+  max-width: var(--feed-w);
+  margin: 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--composer-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  padding: 11px 12px 11px 14px;
+  box-shadow: var(--shadow-2);
+  transition: box-shadow 0.18s ease;
+}
+.room-composer .rc-box:focus-within {
+  box-shadow: var(--shadow-2), 0 0 0 3px var(--cyan-dim);
+}
+.room-composer input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-ui);
+  font-size: 14.5px;
+  color: var(--ink);
+  min-width: 0;
+}
+.room-composer input::placeholder {
+  color: var(--ink-2);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+.rc-icon-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+.rc-icon-btn:hover:not(:disabled) { color: var(--ink); background: var(--row); border-color: var(--line-strong); }
+.rc-icon-btn svg { width: 15px; height: 15px; }
+
+.rc-cluster {
+  display: flex; align-items: center; gap: 7px;
+  flex-shrink: 0;
+}
+.rc-chip {
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+.rc-chip:hover { color: var(--ink); background: var(--row); border-color: var(--line-strong); }
+.rc-chip svg { width: 11px; height: 11px; opacity: 0.8; }
+
+.rc-send {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--invert-fill);
+  color: var(--invert-ink);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, filter 0.16s ease;
+}
+.rc-send:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.rc-send:active { transform: translateY(0); }
+.rc-send:disabled { opacity: 0.5; cursor: default; transform: none; }
+.rc-send svg { width: 14px; height: 14px; }
+
+/* ============ ADOPTION EVENT (signature moment) ============
+
+   v2 quiets the ceremony down to one line: a dot, a phrase, and a rule
+   that runs out to the edge of the card. No sparkles, no sweep. The
+   halo on the panel does the rest, and green stays reserved for it. */
+
+.adoption-event { margin: 4px 0; }
+.adoption-event .node { top: 30px; }
+
+.adoption-banner {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--signal);
+  margin-bottom: 9px;
+}
+.adoption-banner::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: currentColor;
+  opacity: 0.28;
+}
+.adoption-banner .flare {
+  display: inline-flex; align-items: center; gap: 8px;
+  white-space: nowrap;
+}
+.adoption-banner .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* The adoption moment. No green outline: the halo does the work, and
+   panels carry no border. */
+.adoption-event .card-body {
+  box-shadow: var(--shadow-1), var(--glow-adopt);
+}
+.adoption-event .card:hover .card-body,
+.adoption-event.card:hover .card-body {
+  box-shadow: var(--shadow-2), var(--glow-adopt);
+}
+
+.lineage-broken {
+  margin: 0 0 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-field);
+  font-size: 13.5px;
+  color: var(--rose);
+  border: 1px solid color-mix(in srgb, var(--rose) 40%, transparent);
+  background: color-mix(in srgb, var(--rose) 10%, transparent);
+}
+/* Credit lineage: a sunken block inside the card, rows at the metadata
+   weight, the SHA plain on the right. No connector rail - the dots read
+   as a sequence without one, and a rail competes with the feed spine. */
+.lineage {
+  margin: 0 0 14px;
+  border: none;
+  border-radius: var(--radius-field);
+  padding: 13px 16px;
+  background: var(--panel-sunken);
+  display: flex; flex-direction: column; gap: 9px;
+}
+.lineage-title {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.lineage-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px;
+  color: var(--ink-2);
+  min-width: 0;
+}
+.lineage-row .l-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--dot-ancestor);
+}
+.lineage-row .l-dot.origin { background: var(--dot-ancestor); }
+.lineage-row .l-dot.remix { background: var(--violet); }
+.lineage-row .l-dot.final { background: var(--signal); box-shadow: 0 0 8px color-mix(in srgb, var(--signal) 55%, transparent); }
+.lineage-row b { color: var(--ink); font-weight: 600; }
+.lineage-row .txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* An ancestor row that is a link says so on hover only: the resting state
+   has to stay identical to the rows that are not links (the author's own
+   row, and the room's merge row), or the block stops reading as one list. */
+a.txt { transition: color 0.15s ease; }
+a.txt:hover { color: var(--ink); }
+.lineage-row .spacer { flex: 1; }
+.lineage-row .hash { flex-shrink: 0; }
+
+.lineage-foot {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.lineage-foot b { color: var(--ink); font-weight: 600; }
+
+/* ================= AGENT SIDEBAR ================= */
+
+.agent-pane {
+  grid-area: agent;
+  position: relative;
+  border-left: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Collapsed is an explicit state, set by the header toggle or its shortcut;
+   dragging clamps at 300px and can never reach it. */
+:root[data-agent-collapsed="true"] .app {
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  grid-template-areas:
+    "rail header"
+    "rail feed";
+}
+:root[data-agent-collapsed="true"] .agent-pane { display: none; }
+
+/* ---- resize handle ----
+   A thin invisible hit area straddling the column's left edge. The
+   affordance is a 2px rule in the existing line tokens, brightening on
+   hover and going solid while dragging; no new color enters the system. */
+/* The hit area is wide and sits above the column's own edge. An 8px
+   target with an invisible affordance was findable only by accident;
+   this one announces itself with a grip at the vertical centre. */
+.agent-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 16px;
+  z-index: 30;
+  cursor: col-resize;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.agent-resizer-line {
+  width: 2px;
+  height: 34px;
+  border-radius: 2px;
+  background: var(--line-strong);
+  transition: background 0.16s ease, height 0.16s ease;
+}
+.agent-resizer:hover .agent-resizer-line,
+.agent-resizer:focus-visible .agent-resizer-line {
+  background: var(--ink-2);
+  height: 64px;
+}
+.agent-resizer[data-dragging="true"] .agent-resizer-line {
+  background: var(--cyan);
+  height: 100%;
+  border-radius: 0;
+}
+.agent-resizer:focus-visible { outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) {
+  .agent-resizer-line,
+  .agent-toggle { transition: none; }
+}
+/* While a drag is live, nothing else should select or take the cursor. */
+body.is-col-resizing { cursor: col-resize; user-select: none; }
+
+.agent-toggle {
+  height: 30px;
+  padding: 0 8px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.agent-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.agent-toggle svg { width: 14px; height: 14px; }
+.agent-toggle-key {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+
+/* ---- environment panel ----
+   A borderless tier-1 panel floating inside the agent column, built on
+   the status-row vocabulary from the sign-in aside: 26px circular
+   emblems with a tinted fill, an inset ring and an outer glow;
+   sentence-case labels in near-white at the body size; values
+   right-aligned in the metadata gray, mono for SHAs and counts. Color
+   carries meaning: green passing, rose failing, cyan in flight, violet
+   lineage. A row with no state of its own takes the neutral emblem. */
+.env-wrap { padding: 14px 14px 0; flex-shrink: 0; }
+.env {
+  background: var(--panel-card);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 14px 16px 12px;
+}
+.env-head {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0 0 4px;
+  cursor: pointer;
+  user-select: none;
+}
+.env-head .h {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+.env-head .spacer { flex: 1; }
+.env-head .env-live {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--signal);
+  box-shadow: var(--glow-live);
+  animation: pulse-soft 3s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.env-head .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  transition: transform 0.22s ease;
+}
+.env-head .chev svg { width: 12px; height: 12px; display: block; }
+.env[data-open="false"] .env-head .chev { transform: rotate(-90deg); }
+
+.env-rows {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.28s ease;
+}
+.env[data-open="false"] .env-rows { grid-template-rows: 0fr; }
+.env-rows-inner { overflow: hidden; min-height: 0; }
+
+.status-row {
+  display: flex; align-items: center; gap: 13px;
+  padding: 7px 0;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  min-width: 0;
+}
+/* The label holds its width and the value gives way: a truncated
+   "Bu…" is useless, a truncated tail on the value still reads. */
+.status-row .label {
+  flex-shrink: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.status-row a.label { color: var(--ink); flex-shrink: 1; min-width: 0; }
+.status-row a.label:hover { color: var(--cyan); }
+.status-row .val {
+  margin-left: auto;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.status-row .val.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.status-row .val.on { color: var(--signal); font-weight: 500; }
+.status-row .val.fork { color: var(--cyan); font-weight: 500; }
+.status-row .val.bad { color: var(--rose); font-weight: 500; }
+.status-row .stack { display: flex; margin-left: auto; flex-shrink: 0; }
+.status-row .stack .avatar {
+  width: 20px; height: 20px; font-size: 8px;
+  margin-left: -8px;
+  border: 2px solid var(--avatar-ring);
+}
+.status-row .stack .avatar:first-child { margin-left: 0; }
+
+.agent-head {
+  padding: 18px 18px 12px;
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.agent-glyph {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-tile);
+  background: var(--agent-tile-fill);
+  border: 1px solid var(--agent-tile-line);
+  display: grid; place-items: center;
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+.agent-glyph svg { width: 14px; height: 14px; }
+.agent-id { flex: 1; min-width: 0; }
+.agent-id .name { font-size: 13px; font-weight: 600; }
+.agent-id .scope {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.private-chip {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-badge);
+  padding: 2.5px 7px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.private-chip svg { width: 9px; height: 9px; }
+
+.agent-chat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 18px 10px;
+  display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.msg { max-width: 94%; }
+.msg.user {
+  align-self: flex-end;
+  background: var(--row);
+  border: none;
+  border-radius: var(--radius) var(--radius) var(--radius-keycap) var(--radius);
+  padding: 10px 13px;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.msg.agent { align-self: flex-start; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.msg.agent p { margin-bottom: 8px; }
+.msg.agent p:last-child { margin-bottom: 0; }
+.msg .worked {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+/* ---- failed agent turn ----
+   Same rose failure tone the room composer uses for a send that never
+   landed (.chat-failed-msg above), so both composers report a failure the
+   same way. The line itself is one human sentence; the provider's raw
+   body lives in the collapsed disclosure below it, dimmed to ink-2 so it
+   reads as debugging residue rather than as the message. */
+.msg.agent.failed { color: var(--rose); }
+.msg.agent.failed .agent-error-detail { margin-top: 6px; }
+.msg.agent.failed .agent-error-detail summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.msg.agent.failed .agent-error-detail pre {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  padding: 8px 10px;
+  margin: 6px 0 0;
+}
+
+.code-inline {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--row);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-keycap);
+  padding: 1px 5px;
+  color: var(--ink-2);
+}
+
+.output-card {
+  align-self: stretch;
+  border: none;
+  border-left: 2px solid var(--amber);
+  background: var(--panel-card);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  padding: 13px 16px;
+  box-shadow: var(--shadow-1);
+}
+.output-card .oc-label {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 7px;
+}
+.output-card .oc-label .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--amber);
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+.output-card .oc-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.output-card .oc-desc { font-size: 13.5px; line-height: 1.5; color: var(--ink); margin-bottom: 10px; }
+.output-card .oc-files {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  margin-bottom: 11px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.output-card .oc-files .add { color: var(--signal); }
+.output-card .oc-files .mod { color: var(--amber); }
+.output-card .oc-files .del { color: var(--rose); }
+
+/* The promote button uses the cyan action fill, not the green one: green
+   is reserved for adoption and passing builds, and promoting is neither. */
+.promote-btn {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--grad-cyan-ink);
+  background: var(--grad-cyan);
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform 0.15s ease, filter 0.18s ease;
+  box-shadow: var(--shadow-btn-cyan);
+}
+.promote-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+.promote-btn:active { transform: translateY(0); }
+.promote-btn svg { width: 14px; height: 14px; }
+
+.agent-composer {
+  padding: 0 14px 16px;
+  flex-shrink: 0;
+}
+.composer-box {
+  background: var(--composer-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  padding: 13px 13px 10px 16px;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.18s ease;
+}
+.composer-box:focus-within { box-shadow: var(--shadow-1), 0 0 0 3px var(--cyan-dim); }
+.composer-box textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  height: 38px;
+}
+.composer-box textarea::placeholder {
+  color: var(--ink-2);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+
+/* Agent composer: not wired up yet, so it renders as clearly inert
+   rather than looking like the live room composer. */
+.composer-box-disabled { opacity: 0.55; }
+.composer-box-disabled:focus-within { box-shadow: var(--shadow-1); }
+.composer-box-disabled textarea,
+.composer-box-disabled .send-btn {
+  cursor: not-allowed;
+}
+.composer-box-disabled textarea::placeholder { color: var(--ink-3); }
+.composer-box-disabled .send-btn:hover {
+  color: inherit;
+  background: inherit;
+  border-color: inherit;
+  transform: none;
+  filter: none;
+}
+.composer-row {
+  display: flex; align-items: center; gap: 9px;
+  margin-top: 8px;
+}
+.composer-row .model {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+}
+.composer-row .spacer { flex: 1; }
+.send-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--invert-fill);
+  color: var(--invert-ink);
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.16s ease;
+}
+.send-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.send-btn:active { transform: translateY(0); }
+.send-btn svg { width: 12px; height: 12px; }
+
+/* Load-in choreography */
+.card, .adoption-event, .chat-msg { animation: rise 0.5s ease both; }
+.feed-stream > :nth-child(1) { animation-delay: 0.03s; }
+.feed-stream > :nth-child(2) { animation-delay: 0.05s; }
+.feed-stream > :nth-child(3) { animation-delay: 0.07s; }
+.feed-stream > :nth-child(4) { animation-delay: 0.09s; }
+.feed-stream > :nth-child(5) { animation-delay: 0.11s; }
+.feed-stream > :nth-child(6) { animation-delay: 0.13s; }
+.feed-stream > :nth-child(7) { animation-delay: 0.15s; }
+.feed-stream > :nth-child(8) { animation-delay: 0.17s; }
+.feed-stream > :nth-child(9) { animation-delay: 0.19s; }
+.feed-stream > :nth-child(10) { animation-delay: 0.21s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- overlay drawers ----
+   Below each breakpoint the column in question stops being a column and
+   becomes an overlay drawer over the feed. Neither one is ever removed
+   without the control that brings it back staying on screen: the agent
+   toggle in the header below 1180px, the rail toggle below 620px. Both
+   are driven by an attribute on the root element, the same mechanism the
+   theme and the collapsed flag already use (src/lib/shellDrawers.ts). */
+
+.drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: var(--scrim, rgba(6, 9, 15, 0.55));
+  backdrop-filter: blur(2px);
+  animation: scrim-in 0.18s ease both;
+}
+@keyframes scrim-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* The hamburger only exists below the rail breakpoint. */
+.rail-toggle {
+  display: none;
+  width: 30px; height: 30px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: var(--row);
+  color: var(--ink-2);
+  cursor: pointer;
+  place-items: center;
+  flex-shrink: 0;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.rail-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+.rail-toggle svg { width: 16px; height: 16px; }
+
+/* The agent column drops first, the rail second, as the comp draws it. */
+@media (max-width: 1180px) {
+  .app {
+    grid-template-columns: var(--rail-w) minmax(0, 1fr);
+    grid-template-areas:
+      "rail header"
+      "rail feed";
+  }
+  /* An overlay, not a column. Opaque, because it now sits over content. */
+  .agent-pane,
+  :root[data-agent-collapsed="true"] .agent-pane {
+    display: flex;
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(var(--agent-col-w, var(--agent-w)), 90vw);
+    z-index: 60;
+    background: var(--panel);
+    backdrop-filter: none;
+    box-shadow: var(--shadow-2);
+    transform: translateX(101%);
+    visibility: hidden;
+    transition: transform 0.24s ease, visibility 0.24s;
+  }
+  :root[data-agent-drawer="open"] .agent-pane {
+    transform: none;
+    visibility: visible;
+  }
+  /* Dragging an overlay's edge resizes nothing useful. */
+  .agent-resizer { display: none; }
+  /* The toggle stays: it is the only way back to the panel at this width. */
+  .agent-toggle { display: flex; }
+  .room-composer { padding: 8px 26px 18px; }
+}
+@media (max-width: 620px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "header"
+      "feed";
+  }
+  .rail {
+    display: flex;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: min(var(--rail-w), 84vw);
+    z-index: 60;
+    box-shadow: var(--shadow-2);
+    transform: translateX(-101%);
+    visibility: hidden;
+    transition: transform 0.24s ease, visibility 0.24s;
+  }
+  :root[data-rail-drawer="open"] .rail {
+    transform: none;
+    visibility: visible;
+  }
+  .rail-toggle { display: grid; }
+  .room-header { padding: 0 16px; gap: 10px; }
+  /* The avatar cluster stays; the "N in the lab" text is what collides
+     with the room title/subtitle at this width. */
+  .members-count { display: none; }
+  .room-composer { padding: 6px 16px 16px; }
+}
+/* After both breakpoint blocks, so it wins over the slide transitions
+   they declare. A drawer still opens and closes, it just arrives. */
+@media (prefers-reduced-motion: reduce) {
+  .agent-pane, .rail, .drawer-scrim { transition: none; animation: none; }
+}
+
+/* ================= PROPOSAL PAGE ================= */
+
+/* The page is its own scroll container. It used to be a min-height:100vh
+   block inside a body pinned at overflow:hidden for the room shell, so
+   anything past the first viewport was simply unreachable. Scrolling the
+   element instead of the document fixes that at every width without
+   touching the room's height lock. */
+.proposal-page {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  scroll-behavior: smooth;
+}
+.proposal-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  height: var(--header-h);
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.proposal-topbar .spacer { flex: 1; }
+.crumb {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.pr-tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.back-link:hover { color: var(--ink); }
+.back-link svg { width: 13px; height: 13px; }
+
+/* The reading column carries the change; the decision sits beside it and
+   stays in view, which is the point of putting the action there. */
+.proposal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--agent-w);
+  gap: 30px;
+  align-items: start;
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 30px 48px;
+}
+.proposal-read {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.proposal-side {
+  min-width: 0;
+  position: sticky;
+  top: calc(var(--header-h) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.proposal-detail-head { display: flex; flex-direction: column; }
+/* min-width: 0 on both, or the h1's automatic minimum size is its
+   min-content width - which, for an agent-written title containing a file
+   path or a URL, is the width of that unbreakable token. That blew the
+   grid column out past its minmax and ran the title underneath the
+   decision panel, clipped mid-word with nothing to signal the loss. */
+.head-row { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; margin-bottom: 9px; min-width: 0; }
+.proposal-detail-head h1 {
+  font-size: 25px; font-weight: 600; letter-spacing: -0.022em; line-height: 1.2;
+  text-wrap: balance;
+  min-width: 0;
+  /* `anywhere` rather than `break-word`: only `anywhere` also shrinks the
+     intrinsic min-content size, which is what the grid measures. */
+  overflow-wrap: anywhere;
+}
+
+/* The state ribbon for the two terminal states. A badge is enough while
+   a proposal is live; it is not enough once one is closed. */
+.ribbon {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.ribbon::after { content: ""; height: 1px; flex: 1; background: currentColor; opacity: 0.28; }
+.ribbon .flare { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.ribbon .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.ribbon.r-rejected { color: var(--rose); }
+.ribbon.r-super { color: var(--ink-2); }
+
+.meta-row {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 7px 16px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+.meta-row .who {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.meta-row .who .avatar { width: 20px; height: 20px; font-size: 8px; margin-left: 0; border-width: 0; }
+.meta-row span { white-space: nowrap; }
+.meta-row .forks { color: var(--cyan); }
+
+.sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+/* Section headings are deliberately quieter than the content beneath
+   them: no rule, no badge, no mono uppercase micro-label. */
+.sec-head h2 { font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.sec-head .spacer { flex: 1; }
+.sec-head .aside { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+
+.detail-section {
+  background: var(--panel-card);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 18px 20px;
+}
+.detail-section h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+
+/* Edged note card, the one place a colored border survives. */
+.panel-note {
+  background: var(--panel-card);
+  border: none;
+  border-left: 2px solid var(--violet);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  box-shadow: var(--shadow-1);
+  padding: 16px 20px 17px;
+}
+.panel-note.rose { border-left-color: var(--rose); }
+.panel-note.quiet { border-left-color: var(--line-strong); }
+.panel-note ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.panel-note li, .panel-note p {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+
+/* The decision panel: the raised tier, because it is the one thing on
+   this page the reader can act on. */
+.decide {
+  background: var(--panel-card);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-2);
+  padding: 20px;
+}
+/* The fork is the decision this panel exists for, so it takes the cyan
+   action fill at full width and the secondary actions pair beneath it.
+   On a rejected proposal nothing celebrates: the same control drops to
+   the quiet hairline treatment. */
+.decide .detail-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.decide .detail-actions > :first-child {
+  grid-column: 1 / -1;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--grad-cyan-ink);
+  background: var(--grad-cyan);
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-btn-cyan);
+  text-align: center;
+  transition: transform 0.15s ease, filter 0.18s ease;
+}
+.decide .detail-actions > :first-child:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  background: var(--grad-cyan);
+  color: var(--grad-cyan-ink);
+}
+.proposal-page[data-state="rejected"] .decide .detail-actions > :first-child {
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+.proposal-page[data-state="rejected"] .decide .detail-actions > :first-child:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--row);
+  border-color: var(--line-strong);
+}
+/* Adopt is the only control in this product that changes the room's code,
+   and green is reserved for exactly this. Maintainers only: the control is
+   not rendered at all for anyone else (see AdoptButton's header note), so
+   there is no disabled state to style. */
+.decide .detail-actions > .adopt-btn {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--grad-signal-ink);
+  background: var(--grad-signal);
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn-signal);
+  transition: transform 0.15s ease, filter 0.18s ease;
+}
+.decide .detail-actions > .adopt-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.06); }
+.decide .detail-actions > .adopt-btn:disabled { opacity: 0.6; cursor: default; }
+.decide .detail-actions > .adopt-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* With adopt present the fork control is no longer the first child, so it
+   loses the full-width primary treatment above and pairs with Remix. */
+.decide .detail-actions > .adopt-btn ~ * { font-size: 12.5px; }
+
+.decide .rule { height: 1px; background: var(--line); margin: 18px 0 14px; }
+.act-note { margin-top: 12px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+.act-note .mono { font-family: var(--font-mono); }
+.side-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.side-head .h { font-size: 14px; color: var(--ink-2); }
+.side-head .spacer { flex: 1; }
+.side-head .n { font-size: 13px; color: var(--ink-2); }
+
+.forks { display: flex; flex-direction: column; gap: 11px; }
+.fork-row { display: flex; align-items: flex-start; gap: 10px; }
+.fork-row .avatar { width: 22px; height: 22px; font-size: 8.5px; margin-left: 0; border-width: 0; }
+.fork-row .f-main { min-width: 0; flex: 1; }
+.fork-row .f-who { font-size: 14px; font-weight: 600; color: var(--ink); }
+.fork-row .f-what { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.fork-row .f-when { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); flex-shrink: 0; }
+
+/* Provenance ledger: the record, folded away until it is wanted. */
+.prov { border: none; }
+.prov-toggle {
+  width: 100%;
+  display: flex; align-items: center; gap: 9px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  list-style: none;
+}
+.prov-toggle::-webkit-details-marker { display: none; }
+.prov-toggle .t { font-size: 14px; color: var(--ink); white-space: nowrap; }
+.prov-toggle .spacer { flex: 1; }
+.prov-toggle .tag { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.prov-toggle .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+}
+.prov[open] > .prov-toggle .chev { transform: none; }
+.prov-toggle .chev svg { width: 11px; height: 11px; display: block; }
+
+.ledger {
+  margin-top: 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.ledger .lrow { display: flex; gap: 10px; }
+.ledger dt { width: 66px; color: var(--ink-2); flex-shrink: 0; }
+.ledger dd { color: var(--ink-2); min-width: 0; overflow-wrap: anywhere; }
+.ledger dd.ok { color: var(--signal); }
+
+/* The lineage chain under the change, opened from the metadata row. */
+.chain-disclosure > summary {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13.5px;
+  color: var(--cyan);
+  cursor: pointer;
+  list-style: none;
+  width: fit-content;
+}
+.chain-disclosure > summary::-webkit-details-marker { display: none; }
+.chain-disclosure > summary .chev {
+  display: grid; place-items: center;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+}
+.chain-disclosure[open] > summary .chev { transform: none; }
+.chain-disclosure > summary .chev svg { width: 11px; height: 11px; display: block; }
+.chain-disclosure .lineage { margin-top: 12px; margin-bottom: 0; }
+
+@media (max-width: 980px) {
+  .proposal-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; padding: 16px 22px 40px; }
+  .proposal-side { position: static; }
+}
+@media (max-width: 620px) {
+  .proposal-grid { padding: 14px 16px 36px; }
+  .proposal-topbar { padding: 0 16px; }
+  .crumb, .pr-tag { display: none; }
+  .proposal-detail-head h1 { font-size: 22px; }
+}
+
+/* ---- diff: one disclosure per file, collapsed by default ----
+   screen-proposal.html folds every file away and lets the reader open
+   the ones they care about, so the diff arrives as a readable list of
+   what moved rather than a wall of code. Built on <details> so the
+   disclosure survives without JavaScript and the view stays server
+   rendered. */
+
+.diff {
+  background: var(--panel-card);
+  border: none;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+.dfile + .dfile > .dfile-head { border-top: 1px solid var(--line); }
+.dfile-head {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--panel-sunken);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  list-style: none;
+  transition: background 0.15s ease;
+}
+.dfile-head::-webkit-details-marker { display: none; }
+.dfile-head:hover { background: var(--row); }
+.dfile[open] > .dfile-head { background: var(--row); }
+.dfile-head .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+}
+.dfile[open] > .dfile-head .chev { transform: none; }
+.dfile-head .chev svg { width: 11px; height: 11px; display: block; }
+.dfile-head .mk { font-family: var(--font-mono); font-size: 11.5px; flex-shrink: 0; }
+.dfile-head .mk.add { color: var(--signal); }
+.dfile-head .mk.mod { color: var(--amber); }
+.dfile-head .mk.del { color: var(--rose); }
+.dfile-head .path {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dfile[open] > .dfile-head .path { color: var(--ink); }
+.dfile-head .spacer { flex: 1; }
+.dfile-head .n { font-family: var(--font-mono); font-size: 11px; flex-shrink: 0; }
+.dfile-head .n.plus { color: var(--signal); }
+.dfile-head .n.minus { color: var(--rose); }
+.dbar {
+  display: flex; gap: 1.5px;
+  width: 46px; height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.dbar i { display: block; height: 100%; }
+.dbar i.p { background: var(--signal); }
+.dbar i.m { background: var(--rose); }
+
+.dfile-body { background: var(--row); }
+.dhunk {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  padding: 4px 14px 4px 52px;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dlines {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.62;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  counter-reset: dl var(--start, 0);
+  padding: 6px 0;
+}
+.dline {
+  display: flex;
+  white-space: pre;
+  min-width: max-content;
+  counter-increment: dl;
+}
+.dline .dnum {
+  width: 40px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 10px;
+  color: var(--ink-2);
+  opacity: 0.6;
+  user-select: none;
+  font-size: 10.5px;
+}
+.dline .dnum::before { content: counter(dl); }
+.dline .dsign { width: 12px; flex-shrink: 0; text-align: center; user-select: none; opacity: 0.85; }
+.dline .dtext { padding-right: 18px; }
+.dline.add { background: color-mix(in srgb, var(--signal) 10%, transparent); color: var(--signal); }
+.dline.remove { background: color-mix(in srgb, var(--rose) 10%, transparent); color: var(--rose); }
+.dline.context { color: var(--ink-2); }
+.dline.add .dnum, .dline.remove .dnum { color: currentColor; opacity: 0.5; }
+/* A hunk-based diff renders its own real line numbers, so the running
+   counter is suppressed rather than printing a second, wrong one. */
+.dline.numbered .dnum::before { content: none; }
+.dfile-head .n.warn { color: var(--amber); }
+/* Honest-degrade banner: this file is whole content, not a delta. */
+.dnote {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  background: var(--amber-dim, var(--panel-sunken));
+  border-bottom: 1px solid var(--line);
+  padding: 9px 14px;
+}
+.dnote b { color: var(--amber); font-weight: 600; }
+
+/* ---- questions ---- */
+.qa-item { display: flex; gap: 12px; }
+.qa-item + .qa-item { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.qa-item .qa-main { min-width: 0; }
+.qa-q { font-size: 15px; line-height: 1.5; color: var(--ink); margin-bottom: 6px; max-width: var(--measure); }
+.qa-q b { color: var(--ink); font-weight: 600; }
+.qa-a { font-size: 14.5px; line-height: 1.5; color: var(--ink-2); max-width: var(--measure); }
+.qa-empty { font-size: 14px; color: var(--ink-2); max-width: var(--measure); }
+
+.detail-actions { display: flex; align-items: center; gap: 10px; }
+
+/* ================= MODAL ================= */
+
+/* Codex-style form surfaces: three reusable tiers built from tokens.
+   .surface-input - gently inset field surface with a luminous focus ring
+   .surface-panel - a layer floating above the modal background
+   .modal-box     - the deepest tier, floating on a blurred scrim */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6vh 20px;
+  overflow-y: auto;
+  z-index: 50;
+}
+.modal-box {
+  background: var(--modal-bg);
+  border: none;
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-3);
+  width: 100%;
+  max-width: 560px;
+  padding: 22px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal-head { display: flex; align-items: center; gap: 10px; }
+.modal-head h2 { font-size: 17.5px; font-weight: 600; letter-spacing: -0.018em; flex: 1; }
+.modal-close {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.modal-close:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+
+.surface-panel,
+.modal-box .detail-section {
+  background: var(--panel-sunken);
+  border: none;
+  border-radius: var(--radius-field);
+  box-shadow: none;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: 12px;
+  color: var(--label-ink);
+}
+.modal-box .detail-section h2 { color: var(--ink-2); }
+.surface-input,
+.field input, .field textarea {
+  background: var(--field);
+  border: 1px solid var(--line-field);
+  border-radius: var(--radius);
+  padding: 11px 14px;
+  font-size: 14.5px;
+  color: var(--ink);
+  outline: none;
+  box-shadow: var(--shadow-field);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  font-family: var(--font-ui);
+}
+.field input::placeholder, .field textarea::placeholder, .surface-input::placeholder { color: var(--ink-2); }
+.field textarea.mono, .field input.mono { font-family: var(--font-mono); font-size: 13px; }
+.surface-input:focus, .surface-input:focus-within,
+.field input:focus, .field textarea:focus {
+  border-color: var(--focus-border);
+  box-shadow: var(--shadow-field), var(--focus-ring);
+}
+.field textarea { resize: vertical; min-height: 70px; }
+
+.bullet-row { display: flex; align-items: center; gap: 8px; }
+.bullet-row input { flex: 1; }
+.bullet-remove {
+  width: 26px; height: 26px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.bullet-remove:hover { color: var(--rose); border-color: color-mix(in srgb, var(--rose) 30%, var(--line)); }
+
+.modal-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+/* Buttons speak the composer cluster language: quiet hairline pills,
+   with the primary as a confident filled pill on the send inversion. */
+.btn-secondary {
+  font-family: var(--font-ui);
+  font-size: 13.5px; font-weight: 600; color: var(--ink-2);
+  background: transparent; border: 1px solid var(--line); border-radius: var(--radius-pill);
+  padding: 8px 16px; cursor: pointer;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+.btn-secondary:hover { color: var(--ink); background: var(--row); border-color: var(--line-strong); }
+.btn-primary {
+  font-family: var(--font-ui);
+  font-size: 13.5px; font-weight: 600; color: var(--invert-ink);
+  background: var(--invert-fill);
+  border: none; border-radius: var(--radius-pill); padding: 9px 18px; cursor: pointer;
+  box-shadow: var(--shadow-invert);
+  transition: transform 0.15s ease, filter 0.16s ease;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.55; cursor: default; }
+
+.scan-clean { color: var(--signal); font-size: 13.5px; display: flex; align-items: center; gap: 6px; }
+.scan-dirty { color: var(--rose); font-size: 13.5px; display: flex; flex-direction: column; gap: 4px; }
+
+/* ---- promote modal: saying what is missing, and what is not a value ----
+
+   Four required fields with no required markers, two placeholders that
+   read as filled values, and a disabled button with no explanation is how
+   the promote gesture became unperformable. These are the corrections. */
+
+.modal-lede {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin-top: -6px;
+}
+.field-req {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 1px 6px;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+.field-hint { font-size: 11.5px; line-height: 1.5; color: var(--ink-2); }
+/* A derived value is not an input: it must not look like an empty field
+   waiting for a value, nor like a value the user typed. */
+.derived-value {
+  background: var(--panel-sunken);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--cyan);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.blocked-hint {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--amber);
+  background: var(--panel-sunken);
+  border-radius: var(--radius-field);
+  padding: 10px 14px;
+}
+.prefilled-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel-sunken);
+  border-radius: var(--radius-field);
+  padding: 11px 14px;
+}
+.prefilled-summary { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; color: var(--ink); }
+.prefilled-paths { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); }
+.discard-guard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--panel-sunken);
+  border-radius: var(--radius-field);
+  padding: 13px 15px;
+}
+.btn-danger {
+  font-family: var(--font-ui);
+  font-size: 13.5px; font-weight: 600;
+  color: var(--rose);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--rose) 40%, var(--line));
+  border-radius: var(--radius-pill);
+  padding: 8px 16px; cursor: pointer;
+}
+.btn-danger:hover { background: color-mix(in srgb, var(--rose) 12%, transparent); }
+.step-tabs { display: flex; gap: 6px; }
+.step-tab {
+  font-size: 12.5px; font-weight: 500;
+  color: var(--ink-2); padding: 4.5px 12px; border-radius: var(--radius-pill); border: 1px solid var(--line);
+}
+.step-tab.active { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 35%, transparent); background: var(--cyan-dim); }
+
+/* ================= PROMOTE SHEET =================
+
+   design/screen-promote.html. Two changes to the composer door, and they
+   only make sense together.
+
+   The sheet is re-anchored to the LEFT of the agent column rather than
+   centered over the app, and the scrim stops at that column's left edge.
+   The private agent column is the single most likely source of the change
+   being promoted, so it stays visible, unscrimmed, and clickable with the
+   sheet open. The scrim still covers the feed and the rail, because
+   promote is a deliberate private-to-shared crossing and must not read as
+   an ambient side panel. `inert` follows the same line: the agent column
+   is exempted (components/useDialogPortal.ts) while Tab stays trapped in
+   the sheet.
+
+   The anchor reads --agent-col-w, the width the user dragged the column
+   to, so it tracks the resizer rather than the token default. When the
+   column is collapsed or dropped by a breakpoint there is nothing left to
+   protect, and the sheet takes the right-hand anchor instead. */
+
+.promote-scrim {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  right: var(--agent-col-w, var(--agent-w));
+  z-index: 50;
+  background: var(--scrim);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: scrim-in 0.3s ease both;
+}
+/* The seam. Without it the scrim's right edge is a hard vertical cut
+   through the middle of the screen. */
+.promote-scrim::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 40px;
+  background: linear-gradient(to right, transparent, var(--scrim));
+  opacity: 0.55;
+}
+
+.promote-sheet {
+  --promote-inset: 20px;
+  position: fixed;
+  /* Clears the room header rather than sliding under it. */
+  top: calc(var(--header-h) + var(--promote-inset));
+  bottom: var(--promote-inset);
+  right: calc(var(--agent-col-w, var(--agent-w)) + 16px);
+  z-index: 51;
+  width: 484px;
+  max-width: calc(100vw - var(--agent-col-w, var(--agent-w)) - 16px - var(--promote-inset));
+  background: var(--modal-bg);
+  border: none;
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* It arrives from the private side, because that is where the work it
+     carries came from. */
+  animation: promote-sheet-in 0.42s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+@keyframes promote-sheet-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+.promote-sheet .sheet-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.promote-sheet .head-txt h2 { font-size: 17.5px; font-weight: 600; letter-spacing: -0.018em; margin-bottom: 4px; }
+.promote-sheet .head-txt p { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+.promote-sheet .head-txt p code { font-family: var(--font-mono); font-size: 11.5px; }
+
+.promote-sheet .sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  padding: 16px 22px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.promote-sheet .sheet-body > * { flex-shrink: 0; }
+
+.promote-sheet .sheet-foot {
+  flex-shrink: 0;
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.promote-sheet .sheet-foot .spacer { flex: 1; }
+.promote-sheet .sheet-foot.discard { display: block; }
+.btn-quiet {
+  font-family: var(--font-ui);
+  font-size: 12.5px; font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 11px 17px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.btn-quiet:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.promote-sheet .btn-primary { display: inline-flex; align-items: center; gap: 9px; padding: 12px 20px; }
+.promote-sheet .btn-primary svg { width: 14px; height: 14px; flex-shrink: 0; }
+/* A disabled promote is a quiet outline, not a dimmed solid: the filled
+   pill is the thing you are trying to earn. */
+.promote-sheet .btn-primary:disabled {
+  opacity: 1;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+.promote-sheet .btn-primary:disabled svg { opacity: 0.6; }
+
+/* ---- the drafts picker ----
+   The app already parses every agent reply into a draft. Listing them here
+   turns the first field of the form into a choice instead of a
+   transcription. */
+
+.promote-sheet .drafts-head {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0 0 9px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.promote-sheet .drafts-head .h { font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.promote-sheet .drafts-head .spacer { flex: 1; }
+.promote-sheet .drafts-head .n { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+.promote-sheet .drafts-head .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: transform 0.22s ease, color 0.16s ease;
+}
+.promote-sheet .drafts-head .chev svg { width: 11px; height: 11px; display: block; }
+.promote-sheet .drafts-head[aria-expanded="false"] .chev { transform: rotate(-90deg); }
+.promote-sheet .drafts-head:hover .h,
+.promote-sheet .drafts-head:hover .chev { color: var(--ink); }
+
+.promote-sheet .drafts-list { display: flex; flex-direction: column; gap: 8px; }
+.promote-sheet .drafts-empty { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); max-width: var(--measure-sub); }
+
+.promote-sheet .draft {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--panel-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-disclosure);
+  padding: 11px 13px 12px;
+  cursor: pointer;
+  color: inherit;
+  font-family: var(--font-ui);
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.2s ease;
+}
+.promote-sheet .draft:hover { border-color: var(--line-strong); background: var(--row); }
+.promote-sheet .draft-top { display: flex; align-items: center; gap: 9px; margin-bottom: 5px; }
+.promote-sheet .draft-top .t {
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.promote-sheet .draft-top .spacer { flex: 1; }
+.promote-sheet .draft-top .when { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; flex-shrink: 0; }
+.promote-sheet .draft-meta {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 2px 10px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.promote-sheet .draft-files {
+  margin-top: 7px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  display: flex; flex-direction: column;
+}
+.promote-sheet .draft-files .add { color: var(--signal); }
+.promote-sheet .draft-files .mod { color: var(--amber); }
+.promote-sheet .draft-files .del { color: var(--rose); }
+/* Once one is picked the others fold back to a title and a count. The list
+   stays, because changing your mind is one click, but it stops competing
+   with the form it just filled in. */
+.promote-sheet .drafts-list[data-picked="yes"] .draft[aria-pressed="false"] .draft-files { display: none; }
+
+/* The chosen one. Cyan, matching the promote action: green is adoption and
+   passing builds only. */
+.promote-sheet .draft .tick {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  color: var(--grad-cyan-ink, var(--invert-ink));
+  background: var(--grad-cyan, var(--cyan));
+  visibility: hidden;
+}
+.promote-sheet .draft .tick svg { width: 10px; height: 10px; }
+.promote-sheet .draft[aria-pressed="true"] {
+  background: var(--row);
+  border-color: color-mix(in srgb, var(--cyan) 42%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 22%, transparent);
+}
+.promote-sheet .draft[aria-pressed="true"] .tick { visibility: visible; }
+
+/* Pasting is still here. It is a line under the list, not the first thing
+   the sheet asks of you. */
+.promote-sheet .drafts-fallback {
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* Nothing chosen and nothing pasted is a designed state, not a blank
+   textarea sitting there demanding work. */
+.promote-sheet .changes-empty {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-field);
+  padding: 15px 16px 16px;
+}
+.promote-sheet .changes-empty p { font-size: 13px; line-height: 1.55; color: var(--ink-2); max-width: var(--measure-sub); }
+.promote-sheet .changes-empty .ce-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+
+.promote-sheet .bullets { display: flex; flex-direction: column; gap: 8px; }
+.promote-sheet .bullet-tools { display: flex; gap: 8px; }
+.promote-sheet .field-pair { display: flex; gap: 12px; }
+.promote-sheet .field-pair .field { flex: 1; min-width: 0; }
+
+/* ---- credited against ----
+   The parent picker. Violet is the remix tone everywhere else in this
+   product (lineage dots, the remix note's edge), so the chosen parent
+   carries it here too. Green stays reserved for adoption. */
+.promote-sheet .promote-parent {
+  background: var(--panel-sunken);
+  border-radius: var(--radius-disclosure);
+  padding: 13px 15px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.promote-sheet .pp-head { display: flex; align-items: center; gap: 8px; }
+.promote-sheet .pp-head .h { font-size: 14px; color: var(--ink-2); }
+.promote-sheet .pp-head .spacer { flex: 1; }
+.promote-sheet .pp-head .n { font-size: 12px; color: var(--ink-2); font-family: var(--font-mono); }
+.promote-sheet .pp-empty,
+.promote-sheet .pp-why {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: var(--measure-sub);
+}
+.promote-sheet .pp-list { display: flex; flex-direction: column; gap: 6px; }
+.promote-sheet .pp-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.promote-sheet .pp-opt:hover { border-color: var(--line-strong); background: var(--row); }
+.promote-sheet .pp-opt[aria-checked='true'] {
+  border-color: color-mix(in srgb, var(--violet) 45%, transparent);
+  background: color-mix(in srgb, var(--violet) 10%, transparent);
+}
+.promote-sheet .pp-mark {
+  width: 11px;
+  height: 11px;
+  margin-top: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1.5px var(--ink-2);
+}
+.promote-sheet .pp-opt[aria-checked='true'] .pp-mark {
+  background: var(--violet);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--violet) 45%, transparent);
+}
+.promote-sheet .pp-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.promote-sheet .pp-t { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.promote-sheet .pp-m { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); }
+.promote-sheet .pp-m .mono { font-family: var(--font-mono); }
+
+.promote-sheet .promote-preview {
+  background: var(--panel-sunken);
+  border-radius: var(--radius-disclosure);
+  padding: 13px 15px 14px;
+}
+.promote-sheet .promote-preview h3 { font-size: 14px; font-weight: 400; color: var(--ink-2); margin-bottom: 6px; }
+.promote-sheet .promote-preview .echo { font-size: 13px; line-height: 1.55; color: var(--ink); margin-bottom: 10px; }
+.promote-sheet .promote-preview .echo.unset { color: var(--ink-2); }
+.promote-sheet .promote-preview .echo-credit { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); margin-bottom: 10px; }
+
+/* A blocked promote is not an incomplete one, and it must never look like
+   one. Rose, its own panel, the shapes named. */
+.promote-sheet .scan-dirty {
+  display: flex; flex-direction: column; gap: 9px;
+  border-left: 2px solid var(--rose);
+  border-radius: 0 var(--radius-field) var(--radius-field) 0;
+  background: var(--rose-dim);
+  padding: 12px 14px 13px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.promote-sheet .scan-dirty strong { color: var(--rose); font-weight: 600; }
+.promote-sheet .scan-dirty .found { display: flex; flex-wrap: wrap; gap: 6px; }
+.promote-sheet .scan-dirty .code-inline {
+  color: var(--rose);
+  background: color-mix(in srgb, var(--rose) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rose) 30%, transparent);
+}
+.promote-sheet .scan-dirty .where { color: var(--ink-2); }
+
+.promote-sheet .fine {
+  padding-bottom: 16px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* The agent column is gone, so there is nothing left to anchor beside.
+   Same fallback for a collapsed column and for the 1180px breakpoint. */
+:root[data-agent-collapsed="true"] .promote-scrim { right: 0; }
+:root[data-agent-collapsed="true"] .promote-scrim::after { display: none; }
+:root[data-agent-collapsed="true"] .promote-sheet {
+  right: var(--promote-inset);
+  max-width: calc(100vw - (var(--promote-inset) * 2));
+}
+@media (max-width: 1180px) {
+  .promote-scrim { right: 0; }
+  .promote-scrim::after { display: none; }
+  .promote-sheet {
+    right: var(--promote-inset);
+    max-width: calc(100vw - (var(--promote-inset) * 2));
+  }
+}
+/* Below roughly 600px the sheet stops being a sheet and takes the screen,
+   exactly as the fork sheet does. */
+@media (max-width: 600px) {
+  .promote-sheet {
+    --promote-inset: 0px;
+    top: 0; bottom: 0; left: 0; right: 0;
+    width: auto;
+    max-width: none;
+    border-radius: 0;
+  }
+  .promote-sheet .sheet-head { padding: 18px 18px 15px; }
+  .promote-sheet .sheet-body { padding: 16px 18px 0; }
+  .promote-sheet .sheet-foot { padding-left: 18px; padding-right: 18px; }
+  .promote-sheet .head-txt h2 { font-size: 16.5px; }
+  .promote-sheet .field-pair { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promote-sheet, .promote-scrim { animation: none; }
+}
+
+/* ================= FORK BUNDLE SHEET =================
+
+   screen-fork.html leads with the one actionable fact, gives the note
+   the author wrote for the reader its own edged panel, and folds the
+   evidence (the diff, the credit chain) away behind disclosures that
+   are closed on arrival. */
+
+.fork-sheet .modal-head { align-items: flex-start; }
+.head-glyph {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-select);
+  background: color-mix(in srgb, var(--cyan) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan) 28%, transparent);
+  display: grid; place-items: center;
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+.head-glyph svg { width: 15px; height: 15px; }
+.head-txt { flex: 1; min-width: 0; }
+.head-txt h2 { font-size: 17.5px; font-weight: 600; letter-spacing: -0.018em; margin-bottom: 4px; }
+.head-txt p { font-size: 13px; line-height: 1.5; color: var(--ink-2); max-width: var(--measure); }
+
+.lands-label { font-size: 11.5px; color: var(--ink-2); margin-bottom: 7px; }
+.path-field {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--field);
+  border: 1px solid var(--line-field);
+  border-radius: var(--radius-field);
+  box-shadow: var(--shadow-field);
+  padding: 11px 13px;
+}
+.path-field code {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.path-field code .dir { color: var(--ink-2); }
+.worktree-note {
+  margin-top: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.worktree-note b { color: var(--ink); font-weight: 600; }
+
+/* ---- the adopt sheets ----
+   Green here and nowhere else: this is the adoption gesture and its
+   receipt. A refusal is never green. When the refusal is a guard firing
+   (the SHA pin held, the maintainer gate held) it is amber, because the
+   product worked; only a genuine fault gets rose. */
+.adopt-sheet .head-glyph.adopt {
+  background: color-mix(in srgb, var(--signal) 14%, transparent);
+  border-color: color-mix(in srgb, var(--signal) 30%, transparent);
+  color: var(--signal);
+}
+.adopt-sheet .btn-primary.adopt {
+  color: var(--grad-signal-ink);
+  background: var(--grad-signal);
+  box-shadow: var(--shadow-btn-signal);
+}
+.adopt-sheet .fork-facts .mono { font-family: var(--font-mono); }
+.adopt-sheet.refusal.guard .head-glyph {
+  background: color-mix(in srgb, var(--amber) 14%, transparent);
+  border-color: color-mix(in srgb, var(--amber) 30%, transparent);
+  color: var(--amber);
+}
+.adopt-sheet.refusal.fault .head-glyph {
+  background: color-mix(in srgb, var(--rose) 12%, transparent);
+  border-color: color-mix(in srgb, var(--rose) 28%, transparent);
+  color: var(--rose);
+}
+.adopt-sheet .refusal-guard-note {
+  border-left: 2px solid var(--amber);
+  border-radius: 0 var(--radius-field) var(--radius-field) 0;
+  background: color-mix(in srgb, var(--amber) 9%, transparent);
+  padding: 11px 14px 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+
+.fork-note {
+  background: var(--panel-card);
+  border: none;
+  border-left: 2px solid var(--violet);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  box-shadow: var(--shadow-1);
+  padding: 15px 18px 16px;
+}
+.fork-note .note-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+.fork-note .note-head .who { font-size: 14px; color: var(--violet); }
+.fork-note .note-head .spacer { flex: 1; }
+.fork-note .note-head .tag { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.fork-note ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.fork-note li { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+
+/* Empty is a recorded choice, not a blank. Same slot, quieter register. */
+.no-note {
+  border-left: 2px solid var(--line-strong);
+  background: var(--panel-sunken);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 13px 15px 14px;
+}
+.no-note .nn-head { font-size: 14px; color: var(--ink-2); }
+
+.disclosure {
+  border: none;
+  border-radius: var(--radius-disclosure);
+  overflow: hidden;
+  background: var(--panel-sunken);
+}
+.disc-head {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--row);
+  border: none;
+  padding: 11px 14px;
+  cursor: pointer;
+  text-align: left;
+  list-style: none;
+  transition: background 0.16s ease;
+}
+.disc-head::-webkit-details-marker { display: none; }
+.disc-head:hover { background: var(--panel-card); }
+.disc-emblem {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: var(--emblem-ink, #0b0e14);
+  background: var(--tone, var(--cyan));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(3, 6, 12, 0.45);
+}
+.disc-emblem svg { width: 13px; height: 13px; }
+.disc-emblem.e-change { --tone: var(--cyan); }
+.disc-emblem.e-chain { --tone: var(--violet); }
+.disc-emblem.e-intent { --tone: var(--amber); }
+.disc-head .disc-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+.disc-head .spacer { flex: 1; }
+.disc-head .stat { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
+.disc-head .chev {
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform 0.22s ease, color 0.16s ease;
+}
+.disc-head .chev svg { width: 11px; height: 11px; display: block; }
+.disclosure[open] > .disc-head .chev { transform: none; }
+.disc-panel { border-top: 1px solid var(--line); padding: 12px 14px; }
+.disc-panel pre {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink-2);
+  max-height: 260px;
+  overflow-y: auto;
+}
+.file-list { display: flex; flex-direction: column; gap: 5px; }
+.file-row { display: flex; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 12px; }
+.file-row .mk { flex-shrink: 0; }
+.file-row .mk.add { color: var(--signal); }
+.file-row .mk.mod { color: var(--amber); }
+.file-row .mk.del { color: var(--rose); }
+.file-row .fp { color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.chain-list { display: flex; flex-direction: column; gap: 8px; }
+.chain-list .chain-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); }
+.chain-list .cdot { width: 7px; height: 7px; border-radius: 50%; background: var(--dot-ancestor); flex-shrink: 0; }
+.chain-list .cdot.remix { background: var(--violet); }
+.chain-list .sha { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); }
+
+/* A credit chain is a list of people and what they did. Ids are the
+   database's business, not the reader's: the name and the title carry the
+   row, and the short hash is the only machine value left on it. */
+.chain-list .cwho { color: var(--ink); font-weight: 500; white-space: nowrap; }
+.chain-list .cwhat { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chain-list .cwho.broken { color: var(--rose); font-weight: 400; }
+.chain-list .chain-row .spacer { flex: 1; }
+.chain-list .cdot.you { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-2); }
+.chain-list .chain-row.pending .cwho,
+.chain-list .chain-row.pending .cwhat { color: var(--ink-2); font-weight: 400; font-style: italic; }
+.disc-head .stat { overflow: hidden; text-overflow: ellipsis; }
+
+/* The confirm panel: four claims about what the request does, two things it
+   does and two it does not. The marks are the only signal carriers, and
+   neither is green - nothing here was adopted or passed. */
+.fork-facts { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.fork-facts li { display: flex; gap: 11px; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+.fork-facts li b { color: var(--ink); font-weight: 600; }
+.fork-facts .ff-mark {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 7px;
+}
+.fork-facts .ff-yes { background: var(--cyan); box-shadow: 0 0 10px color-mix(in srgb, var(--cyan) 30%, transparent); }
+.fork-facts .ff-no { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-2); }
+
+/* The receipt's one instruction. Nothing landed on disk, so the reader
+   carrying the bundle somewhere is the whole of the next step. */
+.fork-next {
+  background: var(--panel-sunken);
+  border-radius: var(--radius-disclosure);
+  padding: 13px 15px 14px;
+}
+.fork-next .fn-head { font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 7px; }
+.fork-next p { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); max-width: var(--measure); }
+.fork-next .mono { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); }
+
+.copy-said { flex: 1; font-size: 12.5px; color: var(--ink-2); }
+.copy-said.fail { color: var(--amber); }
+
+/* ================= NOT FOUND ================= */
+/* A mistyped room or proposal id used to land on the stock Next.js 404:
+   a black page with no header, no rail and no route back into the app.
+   This is the same panel vocabulary the sign-in aside and the environment
+   card use, on the app background, with the way back as the primary
+   action. No green anywhere - nothing here was adopted or passed. */
+
+.notfound-page {
+  position: relative;
+  z-index: 1;
+  height: 100dvh;
+  overflow-y: auto;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+}
+.notfound-panel {
+  width: 100%;
+  max-width: 520px;
+  background: var(--panel-card);
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-2);
+  padding: 30px 30px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.notfound-brand {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 4px;
+}
+.notfound-brand .mark {
+  width: 24px; height: 24px;
+  display: block;
+  flex-shrink: 0;
+}
+.notfound-brand .word { font-size: 13px; font-weight: 600; }
+
+.notfound-code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+}
+.notfound-panel h1 {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.notfound-panel p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 44ch;
+}
+.notfound-actions { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+.notfound-actions .btn-primary { display: inline-flex; align-items: center; }
+
+.notfound-rooms {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.notfound-rooms-head {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.notfound-room {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px;
+  border-radius: var(--radius-tile);
+  font-size: 13px;
+  color: var(--ink-2);
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.notfound-room:hover { color: var(--ink); background: var(--row); }
+.notfound-room svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.8; }
+
+/* ================= SIGN IN =================
+
+   design/screen-signin.html, ported onto the app's own tokens rather than
+   the mock's inlined copies. Reuses .btn-primary / .btn-quiet (the
+   composer cluster's button language) and .emblem (the same recipe the
+   environment rail uses) instead of inventing parallel button and badge
+   styles. Two states share one card shell: the ordinary door, and the
+   access-denied hand-off, chosen by the page from the session/error
+   state rather than by a client toggle. */
+
+/* Its own scroll container, same reasoning as .proposal-page: body carries
+   overflow:hidden for the room shell's fixed-viewport layout, which would
+   otherwise clip this page whenever the stacked mobile layout or a long
+   aside runs past one screen. */
+.signin-shell {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  align-items: start;
+}
+.signin-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  z-index: -1;
+}
+
+.signin-door {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100%;
+}
+
+.signin-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 26px 20px 0 40px;
+}
+.signin-top .brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.signin-top .mark {
+  width: 26px; height: 26px;
+  display: block;
+  flex-shrink: 0;
+}
+.signin-top .word { font-size: 13.5px; font-weight: 600; letter-spacing: 0.01em; }
+.signin-top .spacer { flex: 1; }
+
+.signin-body {
+  flex: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 0 40px 48px;
+  min-width: 0;
+}
+
+.signin-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--panel-card);
+  border: none;
+  border-radius: var(--radius-panel-xl);
+  box-shadow: var(--shadow-3);
+  padding: 36px 36px 28px;
+  animation: rise 0.4s ease both;
+}
+.signin-eyebrow { font-size: 12.5px; color: var(--ink-2); margin-bottom: 20px; }
+.signin-card h1 {
+  font-size: 27px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 11px;
+  text-wrap: balance;
+}
+.signin-sub {
+  font-size: 14.5px;
+  line-height: 1.58;
+  color: var(--ink-2);
+  max-width: 340px;
+  margin-bottom: 26px;
+}
+.signin-card .btn-primary.gh-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 14px;
+  padding: 14px 22px;
+}
+.signin-card .btn-primary.gh-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.signin-card .btn-primary.gh-btn:disabled { cursor: default; }
+.pending-dot {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 2px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse-soft 1.2s ease-in-out infinite;
+}
+.signin-fineprint {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 390px;
+}
+.signin-rule { height: 1px; background: var(--line); margin: 22px 0 14px; }
+.signin-foot { font-size: 12px; color: var(--ink-2); }
+
+/* ---- access denied ---- */
+.signin-who {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+  box-shadow: var(--inset-top);
+  margin-bottom: 20px;
+}
+.signin-who .avatar { width: 26px; height: 26px; font-size: 9px; margin-left: 0; }
+.signin-who .who-txt { min-width: 0; line-height: 1.3; }
+.signin-who .who-txt .nm { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
+.signin-who .who-txt .hd { display: block; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); }
+.signin-who .verified {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px;
+  color: var(--signal);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.signin-who .verified svg { width: 12px; height: 12px; }
+
+.signin-handoff {
+  margin-top: 18px;
+  padding: 13px 14px 12px;
+  border-radius: var(--radius-field);
+  background: var(--panel-sunken);
+  box-shadow: var(--inset-top);
+}
+.signin-handoff h2 { font-size: 14px; font-weight: 400; color: var(--ink-2); margin-bottom: 8px; }
+.signin-copy-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.signin-copy-row + .signin-copy-row { border-top: 1px solid var(--line); }
+.signin-copy-row .cr-key { font-size: 12.5px; color: var(--ink-2); width: 92px; flex-shrink: 0; }
+.signin-copy-row .cr-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.signin-copy-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.signin-copy-btn:hover { color: var(--ink); border-color: var(--line-strong); background: var(--row); }
+.signin-copy-btn.done { color: var(--signal); border-color: color-mix(in srgb, var(--signal) 40%, transparent); }
+.signin-handoff .hint { margin-top: 9px; font-size: 12px; line-height: 1.55; color: var(--ink-2); }
+
+.signin-deny-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+.signin-card .btn-primary.gh-btn.compact { width: auto; padding: 11px 20px; font-size: 13.5px; }
+
+/* ---- right column: what sign-in unlocks ----
+   No live per-room numbers: a signed-out visitor has no room context the
+   server can safely resolve (callbackUrl is an opaque path, and the room
+   itself is not public - see room/[id]/page.tsx), so this states the
+   mechanic rather than simulating a live feed it cannot honestly show. */
+.signin-aside {
+  margin: 22px 22px 22px 0;
+  background: var(--panel-card);
+  border: none;
+  border-radius: var(--radius-panel-lg);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding: 24px 24px 22px;
+  animation: rise 0.4s ease 0.08s both;
+}
+.signin-aside-head { font-size: 14px; color: var(--ink-2); padding: 0 2px; margin-bottom: 14px; }
+.signin-status-list { display: flex; flex-direction: column; }
+.signin-status-row {
+  display: flex; align-items: center; gap: 13px;
+  padding: 9px 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+}
+.signin-status-row:first-child { border-top: none; }
+.signin-status-row .emblem { width: 26px; height: 26px; }
+.signin-status-row .emblem svg { width: 13px; height: 13px; }
+.signin-status-row .label { min-width: 0; }
+.signin-status-row .sub { display: block; font-size: 12.5px; font-weight: 400; color: var(--ink-2); margin-top: 1px; }
+.signin-aside-note {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+@media (max-width: 900px) {
+  .signin-shell { grid-template-columns: minmax(0, 1fr); }
+  .signin-top { padding: 22px 20px 0; }
+  .signin-body { padding: 32px 20px 28px; }
+  .signin-aside { margin: 0 20px 28px; }
+}
+@media (max-width: 480px) {
+  .signin-card { padding: 26px 22px 22px; border-radius: var(--radius-panel); }
+  .signin-card h1 { font-size: 23px; }
+  .signin-aside { margin: 0 16px 22px; padding: 20px 18px 18px; }
+  .signin-deny-actions .btn-primary.gh-btn.compact,
+  .signin-deny-actions .btn-quiet { flex: 1 1 auto; justify-content: center; }
+}
